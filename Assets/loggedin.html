@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lift Ascend</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap" rel="stylesheet">
+
+
+    <style>
+         #mobileWarning {
+            display: none; /* Initially hidden */
+            background-color: yellow;
+            color: red;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body class="font-montserrat bg-gray-100">
+    <div id="mobileWarning">Enhance your experience by running the app on pc!</div>
+    <script>
+        function checkDevice() {
+            // Check if screen width is less than 768px (considered mobile)
+            if (window.innerWidth < 768) {
+                // Display the message for mobile users
+                document.getElementById("mobileWarning").style.display = "block";
+            }
+        }
+
+        // Run the check when the page loads
+        window.onload = checkDevice;
+    </script>
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="logo">
+                <a href="loggedin.html">
+                    <img src="Logo.PNG" alt="Lift Ascend logo" class="h-26">
+                </a>
+            </div>
+
+            <div id="percentile-content-container" class="hidden md:block">
+                <h2 class="text-xl font-bold mb-2">Your Percentiles</h2>
+                <div class="flex space-x-4">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-2">🏋️‍♂️</span>
+                        <p>Your squat is <span id="squat-percentile" class="font-bold"></span></p>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-2">🏋️‍♀️</span>
+                        <p>Your bench is <span id="bench-percentile" class="font-bold"></span></p>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-2">🏋️‍♂️</span>
+                        <p>Your deadlift is <span id="deadlift-percentile" class="font-bold"></span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="profile-header-container" class="flex items-center">
+                <div class="rank-container mr-4" id="rankContainer">
+                    <h2 class="text-lg font-bold">Your Rank:</h2>
+                    <img src="https://ryuaus26.github.io/WebsiteLiftAscend/Images/Rank/.png" style="visibility: hidden;" class="rank-image w-24 h-24" id="rankImage" alt="Rank Image">
+                </div>
+            
+                <div id="profile-content-container" class="bg-gray-100 p-4 rounded-lg">
+                    <h2 id="profile-header" class="text-xl font-bold mb-2">Profile</h2>
+                    <p><strong>Full Name:</strong> <span id="user-full-name"></span></p>
+                    <p><strong>Squat:</strong> <span id="user-squat"></span></p>
+                    <p><strong>Bench:</strong> <span id="user-bench"></span></p>
+                    <p><strong>Deadlift:</strong> <span id="user-deadlift"></span></p>
+                    
+                    <div id="button-container" class="mt-4">
+                        <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="additional-info" class="bg-gray-200 py-2">
+            <div class="container mx-auto px-4 flex justify-between">
+                <div>
+                    <span class="font-bold">Total:</span>
+                    <span id="total"></span>
+                </div>
+                <div>
+                    <span class="font-bold">DOTS:</span>
+                    <span id="dots"></span>
+                </div>
+                <div>
+                    <span class="font-bold">ID:</span>
+                    <span id="user-id"></span>
+                </div>
+                <div><span class="font-semibold">Age:</span> <span id="age"></span></div>
+                <div><span class="font-semibold">Bodyweight:</span> <span id="bodyweight"></span></div>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="right-section flex items-center">
+                <div id="profile-container" class="hidden"></div>
+
+                <div class="friend-list-wrapper ml-4">
+                    <button id="toggle-friend-list" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Show Friends</button>
+                    <div id="friend-list-container" class="hidden mt-2 bg-white shadow-md rounded p-4">
+                        <ul id="friend-list"></ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="weight-unit ml-4 relative">
+                <button class="weight-unit-btn bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 transition duration-300" onclick="toggleWeightUnit()">
+                    <span id="weightUnitButton" class="font-bold">lbs ▼</span>
+                </button>
+                <div class="weight-unit-content hidden absolute right-0 bg-white shadow-md rounded-md mt-2 z-50">
+                    <a href="#" onclick="selectWeightUnit('lbs')" class="block px-4 py-2 hover:bg-gray-100">lbs</a>
+                    <a href="#" onclick="selectWeightUnit('kgs')" class="block px-4 py-2 hover:bg-gray-100">kgs</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="search-bar-container mb-8">
+            <div class="relative">
+                <input type="text" class="search-bar w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search for lifters..." id="searchInput">
+                <div class="suggestions-container absolute w-full bg-white shadow-md rounded-lg mt-1 hidden" id="suggestionsContainer">
+                    <ul id="suggestionsList"></ul>
+                </div>
+                <button class="search-button absolute right-2 top-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <i class="fas fa-search mr-2"></i> Search
+                </button>
+            </div>
+        </div>
+        
+        <div id="liftDataInput" class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-2xl font-bold mb-4">Enter Your Lift Data</h2>
+            <table id="liftDataTable" class="w-full">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="px-4 py-2">Age</th>
+                        <th id="weightHeader" class="px-4 py-2">Weight (lbs)</th>
+                        <th class="px-4 py-2">Gender</th>
+                        <th id="squatHeader" class="px-4 py-2">Squat (lbs)</th>
+                        <th id="benchHeader" class="px-4 py-2">Bench (lbs)</th>
+                        <th id="deadliftHeader" class="px-4 py-2">Deadlift (lbs)</th>
+                        <th class="px-4 py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="liftDataBody">
+                    <tr>
+                        <td><input inputmode="numeric" type="number" class="age w-full px-2 py-1 border rounded" placeholder="Age"></td>
+                        <td><input inputmode="numeric" type="number" class="weight w-full px-2 py-1 border rounded" placeholder="Weight"></td>
+                        <td><input type="text" class="gender w-full px-2 py-1 border rounded" placeholder="Gender"></td>
+                        <td><input inputmode="numeric" type="number" class="squat w-full px-2 py-1 border rounded" placeholder="Squat"></td>
+                        <td><input inputmode="numeric" type="number" class="bench w-full px-2 py-1 border rounded" placeholder="Bench"></td>
+                        <td><input inputmode="numeric" type="number" class="deadlift w-full px-2 py-1 border rounded" placeholder="Deadlift"></td>
+                        <td><button onclick="removeRow(this)" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Remove</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="mt-4 space-x-4">
+                <button onclick="addRow()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Add Row</button>
+                <button onclick="submitLiftData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit Lift Data</button>
+            </div>
+        </div>
+    </div>
+
+  
+
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+    <script src="loggedin.js"></script>
+</body>
+</html>

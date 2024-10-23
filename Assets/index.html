@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lift Ascend</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+        }
+        .header-title {
+            font-family: 'Bowlby One SC', cursive;
+        }
+        #mobileWarning {
+            display: none; /* Initially hidden */
+            background-color: yellow;
+            color: red;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div id="mobileWarning">Enhance your experience by running the app on pc!</div>
+    <script>
+        function checkDevice() {
+            // Check if screen width is less than 768px (considered mobile)
+            if (window.innerWidth < 768) {
+                // Display the message for mobile users
+                document.getElementById("mobileWarning").style.display = "block";
+            }
+        }
+
+        // Run the check when the page loads
+        window.onload = checkDevice;
+    </script>
+    <header class="header bg-white shadow-md">
+        <div class="header-content container mx-auto px-4 py-6 flex justify-between items-center">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="Logo.PNG" alt="Lift Ascend logo" class="h-26">
+                </a>
+                <a href="about.html" class="ml-6 px-4 py-2 text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
+                    About
+                  </a>
+                  
+            </div>
+
+            <div id="percentile-content-container" class="bg-blue-100 rounded-lg p-4 shadow-md">
+                <h2 class="text-2xl font-bold mb-4 text-blue-800">Your Percentiles</h2>
+                <div class="percentile-item flex items-center mb-2">
+                    <span class="icon squat-icon text-3xl mr-2">🏋️‍♂️</span>
+                    <p class="text-lg">Your squat is <span id="squat-percentile" class="font-bold text-blue-600"></span></p>
+                </div>
+                <div class="percentile-item flex items-center mb-2">
+                    <span class="icon bench-icon text-3xl mr-2">🏋️‍♀️</span>
+                    <p class="text-lg">Your bench is <span id="bench-percentile" class="font-bold text-blue-600"></span></p>
+                </div>
+                <div class="percentile-item flex items-center">
+                    <span class="icon deadlift-icon text-3xl mr-2">🏋️‍♂️</span>
+                    <p class="text-lg">Your deadlift is <span id="deadlift-percentile" class="font-bold text-blue-600"></span></p>
+                </div>
+            </div>
+
+            <div id="profile-header-container" class="flex items-center">
+                <div class="rank-container mr-4" id="rankContainer">
+                    <h2 class="text-xl font-bold mb-2">Your Rank:</h2>
+                    <img src="https://ryuaus26.github.io/WebsiteLiftAscend/Images/Rank/.png" style="visibility: hidden;" class="rank-image w-24 h-24" id="rankImage" alt="Rank Image">
+                </div>
+                
+                <div id="login-dropdown" class="dropdown relative">
+                    <div class="dropdown-content bg-white text-gray-800 rounded-lg shadow-lg p-6" id="form_container">
+                        <div id="form_header_container" class="mb-4">
+                            <h2 id="form_header" class="text-2xl font-bold">Login/Register</h2>
+                        </div>
+                
+                        <div id="form_content_container">
+                            <div id="form_content_inner_container" class="space-y-4">
+                                <input type="text" id="full_name" placeholder="Full name" class="w-full px-4 py-2 bg-gray-700 text-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <input type="email" id="email" placeholder="Email" class="w-full px-4 py-2 bg-gray-700 text-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <input type="password" id="password" placeholder="New Password" class="w-full px-4 py-2 bg-gray-700 text-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                
+                                <div id="button_container" class="flex space-x-2">
+                                    <button onclick="login()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">Login</button>
+                                    <button onclick="register()" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">Register</button>
+                                </div>
+                                <form id="reset-password-form" class="mt-4">
+                                    <input type="email" id="reset-email" placeholder="Enter your email" required class="w-full px-4 py-2 bg-gray-700 text-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <button type="submit" class="mt-2 bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition duration-300">Reset Password</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                
+                
+
+        <div class="right-section flex items-center">
+            <div class="right-side-icons">
+                <!-- Add social icons here if needed -->
+            </div>
+           
+    </div>
+    </header>
+
+    <div class="relative max-w-4xl mx-auto mt-8 mb-12">  <!-- Wider container to accommodate both elements -->
+        <div class="search-bar-container max-w-3xl">
+            <div class="relative">
+                <input type="text" class="search-bar w-full px-4 py-3 rounded-full border-2 border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300" placeholder="Search for lifters..." id="searchInput">
+                <button class="search-button absolute right-2 top-2 bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300">
+                    <i class="fas fa-search mr-2"></i> Search
+                </button>
+            </div>
+            <div class="suggestions-container mt-2 bg-white rounded-lg shadow-lg" id="suggestionsContainer" style="display: none;">
+                <ul id="suggestionsList" class="py-2">
+                    <!-- Suggestions will be populated here -->
+                </ul>
+            </div>
+        </div>
+    
+        <div class="weight-unit absolute top-0 -right-24">
+            <button class="weight-unit-btn bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 transition duration-300" onclick="toggleWeightUnit()">
+                <span id="weightUnitButton" class="font-bold">lbs ▼</span>
+            </button>
+            <div class="weight-unit-content hidden absolute bg-white shadow-md rounded-md mt-2">
+                <a href="#" onclick="selectWeightUnit('lbs')" class="block px-4 py-2 hover:bg-gray-100">lbs</a>
+                <a href="#" onclick="selectWeightUnit('kgs')" class="block px-4 py-2 hover:bg-gray-100">kgs</a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="liftDataInput" class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8 mb-12">
+        <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Enter Your Lift Data</h2>
+        <table id="liftDataTable" class="w-full border-collapse">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="p-3 text-left">Age</th>
+                    <th id="weightHeader" class="p-3 text-left">Weight (lbs)</th>
+                    <th class="p-3 text-left">Gender</th>
+                    <th id="squatHeader" class="p-3 text-left">Squat (lbs)</th>
+                    <th id="benchHeader" class="p-3 text-left">Bench (lbs)</th>
+                    <th id="deadliftHeader" class="p-3 text-left">Deadlift (lbs)</th>
+                    <th class="p-3 text-left">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="liftDataBody">
+                <tr>
+                    <td><input type="number" class="age w-full p-2 border rounded" placeholder="Age"></td>
+                    <td><input type="number" class="weight w-full p-2 border rounded" placeholder="Weight"></td>
+                    <td><input type="text" class="gender w-full p-2 border rounded" placeholder="Gender"></td>
+                    <td><input type="number" class="squat w-full p-2 border rounded" placeholder="Squat"></td>
+                    <td><input type="number" class="bench w-full p-2 border rounded" placeholder="Bench"></td>
+                    <td><input type="number" class="deadlift w-full p-2 border rounded" placeholder="Deadlift"></td>
+                    <td><button onclick="removeRow(this)" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300">Remove</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="mt-6 flex justify-between">
+            <button onclick="addRow()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 transition duration-300">Add Row</button>
+            <button onclick="submitLiftData()" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300">Submit Lift Data</button>
+        </div>
+    </div>
+
+
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
+    
+    <script src="index.js"></script>
+    <script src="resetPass.js"></script>
+</body>
+</html>

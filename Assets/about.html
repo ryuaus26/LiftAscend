@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Lift Ascend</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .header-title {
+            font-family: 'Bowlby One SC', cursive;
+        }
+
+        #mobileWarning {
+            display: none;
+            background-color: yellow;
+            color: red;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div id="mobileWarning">Enhance your experience by running the app on PC!</div>
+    <script>
+        function checkDevice() {
+            if (window.innerWidth < 768) {
+                document.getElementById("mobileWarning").style.display = "block";
+            }
+        }
+        window.onload = checkDevice;
+    </script>
+
+    <header class="header bg-white shadow-md sticky top-0 z-50">
+        <div class="header-content container mx-auto px-4 py-6 flex items-center justify-between">
+            <div class="logo flex items-center">
+                <a href="index.html">
+                    <img src="Logo.PNG" alt="Lift Ascend logo" class="h-28">
+                </a>
+            </div>
+            <nav>
+                <a href="index.html" class="ml-6 px-4 py-2 text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
+                    Home
+                  </a>
+                <a href="about.html" class="ml-6 px-4 py-2 text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
+                    About
+                  </a>
+                
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12">
+        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
+            <h1 class="text-5xl font-bold text-gray-900 mb-8">About Lift Ascend</h1>
+
+            <div class="space-y-8">
+                <section class="about-section">
+                    <h2 class="text-3xl font-bold text-gray-700 mb-4">How to Use This App</h2>
+                    <div class="prose prose-lg text-gray-600">
+                        <p class="mb-4">Lift Ascend is designed to help you track your powerlifting progress and see how you compare against other lifters. 
+                            Simply input your powerlifting total (the combined weight from your squat, bench press, and deadlift), your age, bodyweight, and gender. 
+                            After submitting, you’ll see where you rank among your peers, and get a badge based on your percentile!</p>
+                    </div>
+                </section>
+
+                <section class="about-section">
+                    <h2 class="text-3xl font-bold text-gray-700 mb-4">Features</h2>
+                    <div class="prose prose-lg text-gray-600">
+                        <p class="mb-4">
+                            <strong>2. Rankings:</strong> Earn badges based on your percentile: Bronze, Silver, Gold, and Diamond, and track your progress on the leaderboard.
+                        </p>
+                        <div class="flex space-x-4 mb-4">
+                            <div class="text-center">
+                                <img src="Bronze.png" alt="Bronze Badge" class="w-16 h-16 mx-auto">
+                                <p class="text-sm text-gray-600 mt-2">Bronze</p>
+                            </div>
+                            <div class="text-center">
+                                <img src="Silver.png" alt="Silver Badge" class="w-16 h-16 mx-auto">
+                                <p class="text-sm text-gray-600 mt-2">Silver</p>
+                            </div>
+                            <div class="text-center">
+                                <img src="Gold.png" alt="Gold Badge" class="w-16 h-16 mx-auto">
+                                <p class="text-sm text-gray-600 mt-2">Gold</p>
+                            </div>
+                            <div class="text-center">
+                                <img src="Diamond.png" alt="Diamond Badge" class="w-16 h-16 mx-auto">
+                                <p class="text-sm text-gray-600 mt-2">Diamond</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+
+                <section class="about-section">
+                    <h2 class="text-3xl font-bold text-gray-700 mb-4">Getting Started</h2>
+                    <div class="prose prose-lg text-gray-600">
+                        <p class="mb-4"> To get started, create an account and input your first lift total. The app will walk you through how to add your stats, 
+                            view your rankings, and compete with friends. Whether you’re a beginner or advanced lifter, Lift Ascend makes it easy to track your progress and stay motivated.</p>
+                    </div>
+                </section>
+
+                <section class="about-section">
+                    <h2 class="text-3xl font-bold text-gray-700 mb-4">Data Sources</h2>
+                    <div class="prose prose-lg text-gray-600">
+                        <p class="mb-4">This app uses data from the OpenPowerlifting project, 
+                            <a href="https://www.openpowerlifting.org" class="text-blue-600 hover:text-blue-800 underline">https://www.openpowerlifting.org</a>. You may download a copy of the data at 
+                            <a href="https://data.openpowerlifting.org" class="text-blue-600 hover:text-blue-800 underline">https://openpowerlifting.gitlab.io/opl-csv/bulk-csv.html</a>.
+                        </p>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white mt-12 py-6">
+        <div class="container mx-auto px-4 text-center text-gray-600">
+            <p>&copy; 2024 Lift Ascend. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

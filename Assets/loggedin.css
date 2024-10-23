@@ -1,0 +1,498 @@
+#profile-header-container {
+    display: flex; /* Use flexbox */
+    flex-direction: row; /* Align items in a row */
+    align-items: center; /* Center items vertically */
+    justify-content: space-between; /* Space items evenly */
+    width: 50%; /* Full width of the parent */
+    height: 10%; /* Decreased height of the header */
+    padding: 5px; /* Reduced padding */
+}
+
+
+#profile-content-container {
+    margin-left: auto; /* Pushes the div to the right */
+    background-color: lightgray; /* Just for visibility */
+    padding: 5px; /* Reduced padding */
+    width: 250px; /* Decreased width */
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    
+}
+
+.header {
+    background-color: white;
+    border-bottom: 5px solid #e0e0e0;
+}
+
+.header-content {
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.logo {
+    margin-right: 30px;
+}
+
+.logo img {
+    height: auto;
+    max-width: 100%;
+    width: 10vw; /* Set a smaller width for logo */
+}
+
+.nav a {
+    margin: 0 10px; /* Space between nav items */
+    text-decoration: underline; /* Remove underline from links */
+    color: inherit; /* Use the current text color */
+    white-space: nowrap; /* Prevent text from wrapping */
+    font-size: 1.5vw;
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+}
+
+
+.nav a:hover {
+    color: #007bff;
+}
+
+
+
+.nav a:not(:last-child)::after {
+    content: '|';
+    margin-left: 15px;
+    margin-right: 15px;
+    color: #333;
+}
+
+
+.right-section {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+  
+}
+
+.social-icon {
+    font-size: 36px;
+    color: #333;
+    margin-right: 20px;
+}
+
+.social-icon:hover {
+    color: #007bff;
+}
+
+.weight-unit {
+    position: relative;
+    display: inline-block;
+}
+
+.weight-unit-btn {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    padding: 8px 16px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.weight-unit-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 120px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.weight-unit-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.weight-unit-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.weight-unit:hover .weight-unit-content {
+    display: block;
+}
+
+.search-bar-container {
+    background-color: #f8f9fa;
+    padding: 10px 20px;
+    border-bottom: 2px solid #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-bar {
+    width: 50%;
+    max-width: 600px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+.search-button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.search-button:hover {
+    background-color: #0056b3;
+}
+
+.table-container {
+    padding: 20px;
+    overflow-x: auto;
+    height: 500px; /* Set a fixed height for the table container */
+    overflow-y: scroll; /* Enable vertical scrolling */
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+th, td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+th {
+    background-color: #c41e3a;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+tr:hover {
+    background-color: #ddd;
+}
+.instagram-icon {
+    color: #833AB4;
+}
+.verified-icon {
+    color: #1DA1F2;
+}
+#loading {
+    text-align: center;
+    padding: 10px;
+    display: none;
+}
+
+/* LOGIN */
+#content_container {
+    width: 20%;
+    height: 70%;
+}
+
+#form_container {
+    width: 50%;
+    height: 100%;
+
+    background-color: #370617;
+    box-shadow: 0 0 50px -20px #000;
+    border-radius: 2%;
+    margin-left:700px;
+    overflow: hidden;
+}
+
+#form_header_container {
+    width: 100%;
+    height: 5%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+
+    padding: 20px;
+    padding-bottom: 30px;
+    padding-top: 30px;
+
+    border-bottom: 1px solid transparent;
+    border-image: -webkit-linear-gradient(25deg, #FFBE0B, #FB5607, #FF006E, #8338EC, #3A86FF) 20;
+    background: #000;
+}
+
+#form_header {
+    display: inline-block;
+    font-size: 15px;
+    font-family: Bowlby One SC;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+
+
+    background: -webkit-linear-gradient(25deg, #FFBE0B, #FB5607, #FF006E, #8338EC, #3A86FF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+}
+
+#form_content_container {
+    width: 100%;
+    height: 90%;
+
+    float: left;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding-top: 30px;
+}
+
+#form_content_inner_container {
+    width: 75%;
+    height: 100%;
+
+    float: left;
+
+}
+
+input {
+    width: 100%;
+    height: 40px;
+
+    padding-left: 10px;
+    margin-bottom: 20px;
+
+    background: #000;
+    font-family: Montserrat;
+    font-weight: 500;
+    color: #fff;
+    font-size: 12px;
+
+    border-bottom: 2px solid transparent;
+    border-top-left-radius: 2%;
+    border-top-right-radius: 2%;
+    border-image: -webkit-linear-gradient(25deg, #FFBE0B, #FB5607, #FF006E, #8338EC, #3A86FF) 1;
+}
+
+#button_container {
+    width: 100%;
+    height: 10%;
+
+    background-image: linear-gradient(80deg, #FFBE0B, #FB5607 50%, #FF006E 50%, #8338EC);
+    color: #fff;
+
+    float: left;
+
+    margin-top: 5px;
+}
+
+#button_container button {
+    width: 50%;
+    height: 100%;
+    float: left;
+
+    background: transparent;
+    color: inherit;
+
+    font-family: Montserrat;
+    letter-spacing: 1px;
+    font-weight: 900;
+    font-size: 12px;
+
+    cursor: pointer;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+#additional-info {
+    margin-top: 20px;
+    padding: 30px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;/
+}
+
+.rank-image {
+    width: 10vw; /* Adjust the width as needed */
+    height: auto; /* Maintain aspect ratio */
+}
+
+
+#profile-info p, #additional-info p {
+    margin: 10px 0; /* Space between the <p> elements */
+    display: flex; /* Use flexbox to align items */
+    justify-content: space-between; /* Distribute space between strong and span */
+}
+
+#profile-info p strong, #additional-info p strong {
+    width: auto; /* Allow the label to take width according to its content */
+    margin-right: 10px; /* Space between label and value */
+    white-space: nowrap; /* Prevent wrapping */
+}
+
+#profile-info p span, #additional-info p span {
+    flex: 1; /* Allow the value to take available space */
+    text-align: right; /* Right align the values */
+}
+
+.ais-SearchBox {
+    margin-bottom: 1em;
+  }
+  
+  .ais-InstantSearch {
+    max-width: 960px;
+    width: 100%;
+    display: block;
+    overflow: hidden;
+    margin: 0 auto;
+    font-family: sans-serif;
+  }
+  
+  .ais-Hits-item {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  .ais-Hits-item img {
+    margin-right: 1em
+  }
+  
+  .ais-Hits-list {
+    margin-bottom: 1em;
+  }
+
+  .search-bar-container {
+    position: relative;
+    width: 1000px; /* Adjust to your desired width */
+}
+
+.suggestions-container {
+    position: absolute;
+    top: 100%; /* Below the search bar */
+    left: 0;
+    width: 100%;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    max-height: 200px; /* Maximum height before scrolling */
+    overflow-y: auto;  /* Enable vertical scrolling if content exceeds max height */
+    z-index: 1000;     /* Ensure it appears above other elements */
+}
+
+.suggestions-container ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.suggestions-container li {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.suggestions-container li:hover {
+    background-color: #f0f0f0;
+}
+
+
+.friend-list-wrapper {
+    position: relative;
+    width: 200px; /* Adjust as needed */
+}
+
+#toggle-friend-list {
+    width: 100%;
+    padding: 10px;
+    background-color: #3b82f6; /* Blue background */
+    color: white; /* White text for better contrast */
+    border: 1px solid #2563eb; /* Slightly darker blue for border */
+    cursor: pointer;
+    font-weight: bold; /* Make the text bold for better visibility */
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+#toggle-friend-list:hover {
+    background-color: #2563eb; /* Slightly darker blue on hover */
+}
+
+#friend-list-container {
+    position: absolute;
+    width: 100%;
+    max-height: 300px; /* Adjust as needed */
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-top: none; /* Remove top border to connect with button */
+    background-color: white;
+    z-index: 1000;
+    top: 100%; /* Position right below the button */
+    left: 0;
+}
+
+#friend-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#friend-list li {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+#friend-list li:last-child {
+    border-bottom: none;
+}
+
+#percentile-content-container {
+    background-color: #f9f9f9; /* Light background */
+    border: 1px solid #ddd;    /* Soft border */
+    border-radius: 8px;        /* Rounded corners */
+    padding: 10px 15px;        /* Reduced padding for height */
+    max-width: 400px;          /* Max width */
+    margin: 20px auto;         /* Centered */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    font-family: Arial, sans-serif; /* Font style */
+}
+
+h2 {
+    text-align: center; /* Centered header */
+    color: #333;       /* Dark text color */
+    font-size: 20px;   /* Font size for header */
+    margin: 5px 0;     /* Reduced margin */
+}
+
+.percentile-item {
+    display: flex;          /* Flexbox for alignment */
+    align-items: center;   /* Center items vertically */
+    margin: 10px 0;       /* Reduced vertical margin */
+}
+
+.icon {
+    font-size: 20px;      /* Icon size */
+    margin-right: 8px;    /* Space between icon and text */
+    color: #007BFF;       /* Blue color for icons */
+}
+
+p {
+    font-size: 16px;      /* Font size for text */
+    color: #555;          /* Darker gray for text */
+}

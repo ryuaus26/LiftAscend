@@ -13,26 +13,6 @@ const firebaseConfig = {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 let currentWeightUnit = 'lbs'; 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -54,6 +34,33 @@ async function loadPercentileData(filepath) {
         throw error;
     }
 }
+function calculateLifterDOTS(weight, squat, bench, deadlift, isMale, unit) {
+    const maleCoeff = [-307.75076, 24.0900756, -0.1918759221, 0.0007391293, -0.000001093];
+    const femaleCoeff = [-57.96288, 13.6175032, -0.1126655495, 0.0005158568, -0.0000010706];
+
+    let bw = unit === 'lbs' ? weight * 0.453592 : weight;
+
+
+    let maxbw = isMale ? 210 : 150;
+    bw = Math.min(Math.max(bw, 40), maxbw);
+
+
+    let coeff = isMale ? maleCoeff : femaleCoeff;
+
+    let denominator = coeff[0];
+    for (let i = 1; i < coeff.length; i++) {
+        denominator += coeff[i] * Math.pow(bw, i);
+    }
+
+    let total = unit === 'lbs' ? 
+        (squat + bench + deadlift) * 0.453592 :
+        squat + bench + deadlift;
+
+    let score = (500 / denominator) * total;
+    return score.toFixed(2);
+}
+
+
 
 async function calculateUserPercentile(squat, bench, deadlift, userCategory) {
     const percentilesData = await loadPercentileData('percentile.json');
@@ -507,6 +514,7 @@ function loadUserData() {
         firebase.database().ref('users/' + user.uid + '/liftData').limitToLast(1).once('value')
             .then(async (snapshot) => {
                 const userData = snapshot.val();
+               
                 if (userData) {
                     const lastEntry = Object.values(userData)[0];
                     updateProfileDisplay(lastEntry);
@@ -635,6 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
             loadUserData();
+            populateLeaderboard();
         }
     });
 });
@@ -703,7 +712,7 @@ document.getElementById('toggle-friend-list').addEventListener('click', function
         
         // Load friends if they haven't been loaded yet
         if (!isFriendListLoaded) {
-            printFriendsIds();
+            populateFriendList();
             isFriendListLoaded = true;
         }
     } else {
@@ -712,79 +721,101 @@ document.getElementById('toggle-friend-list').addEventListener('click', function
     }
 });
 
-function printFriendsIds() {
+function populateFriendList() {
     const user = firebase.auth().currentUser;
 
     firebase.database().ref(`users/${user.uid}/friends`).once('value')
         .then((snapshot) => {
             const userData = snapshot.val();
             const friendList = document.getElementById('friend-list');
-
-            // Clear any previous content in the list
             friendList.innerHTML = '';
 
             if (userData) {
-                // Iterate over each friend object and create clickable <li> elements
+                // Create a Set to track unique friend IDs
+                const uniqueFriends = new Map();
+
+                // First pass: collect unique friends
                 for (const friendKey in userData) {
                     if (userData.hasOwnProperty(friendKey)) {
                         const friend = userData[friendKey];
-                   
-                        // Fetch all users
-                        firebase.database().ref('users').once('value')
-                            .then((usersSnapshot) => {
-                                const allUsers = usersSnapshot.val();
-                                let friendData = null;
-
-                                // Find the user whose full_name ends with the friendId
-                                for (const userId in allUsers) {
-                                    if (allUsers[userId].full_name && 
-                                        allUsers[userId].full_name.slice(-5) === friend.friendId) {
-                                        friendData = allUsers[userId];
-                                        break;
-                                    }
-                                }
-
-                                const friendName = friendData ? friendData.name : 'Unknown Friend';
-                                
-                                // Create a new list item
-                                const listItem = document.createElement('li');
-                              
-                                // Create a span for the friend's name
-                                const nameSpan = document.createElement('span');
-                                nameSpan.textContent = friendName;
-                                nameSpan.style.cursor = 'pointer';
-                                nameSpan.addEventListener('click', function() {
-                                    window.location.href = `profile.html?userId=${friend.friendId}`;
-                                });
-
-                                // Create a delete button
-                                const deleteButton = document.createElement('button');
-                                deleteButton.textContent = 'X';
-                                deleteButton.style.marginLeft = '10px';
-                                deleteButton.addEventListener('click', function() {
-                                    // Remove the friend from Firebase
-                                    firebase.database().ref(`users/${user.uid}/friends/${friendKey}`).remove()
-                                        .then(() => {
-                                            // Remove the list item from the DOM
-                                            listItem.remove();
-                                        })
-                                        .catch((error) => {
-                                            console.error("Error removing friend:", error);
-                                        });
-                                });
-
-                                // Append the name span and delete button to the list item
-                                listItem.appendChild(nameSpan);
-                                listItem.appendChild(deleteButton);
-
-                                // Append the list item to the friend list
-                                friendList.appendChild(listItem);
-                            })
-                            .catch((error) => {
-                                console.error("Error fetching users data:", error);
+                        if (!uniqueFriends.has(friend.friendId)) {
+                            uniqueFriends.set(friend.friendId, {
+                                key: friendKey,
+                                timestamp: friend.timestamp
                             });
+                        } else {
+                            // If duplicate found, keep the one with the most recent timestamp
+                            if (friend.timestamp > uniqueFriends.get(friend.friendId).timestamp) {
+                                // Remove old friend entry from Firebase
+                                firebase.database().ref(`users/${user.uid}/friends/${uniqueFriends.get(friend.friendId).key}`).remove();
+                                uniqueFriends.set(friend.friendId, {
+                                    key: friendKey,
+                                    timestamp: friend.timestamp
+                                });
+                            } else {
+                                // Remove new duplicate entry from Firebase
+                                firebase.database().ref(`users/${user.uid}/friends/${friendKey}`).remove();
+                            }
+                        }
                     }
                 }
+
+                // Second pass: display unique friends
+                firebase.database().ref('users').once('value')
+                    .then((usersSnapshot) => {
+                        const allUsers = usersSnapshot.val();
+
+                        uniqueFriends.forEach((friendInfo, friendId) => {
+                            let friendData = null;
+
+                            // Find friend by either full_name slice or uid slice
+                            for (const userId in allUsers) {
+                                const currentUser = allUsers[userId];
+                                if ((currentUser.full_name && currentUser.full_name.slice(-5) === friendId) ||
+                                    userId.slice(-5) === friendId) {
+                                    friendData = currentUser;
+                                    break;
+                                }
+                            }
+
+                            const friendName = friendData ? friendData.name : 'Unknown Friend';
+                            
+                            const listItem = document.createElement('li');
+                            
+                            const nameSpan = document.createElement('span');
+                            nameSpan.textContent = friendName;
+                            nameSpan.style.cursor = 'pointer';
+                            nameSpan.addEventListener('click', () => {
+                                window.location.href = `profile.html?userId=${friendId}`;
+                            });
+
+                            const deleteButton = document.createElement('button');
+                            deleteButton.textContent = 'X';
+                            deleteButton.style.marginLeft = '10px';
+                            deleteButton.addEventListener('click', () => {
+                                firebase.database().ref(`users/${user.uid}/friends/${friendInfo.key}`).remove()
+                                    .then(() => {
+                                        listItem.remove();
+                                    })
+                                    .catch((error) => {
+                                        console.error("Error removing friend:", error);
+                                    });
+                            });
+
+                            listItem.appendChild(nameSpan);
+                            listItem.appendChild(deleteButton);
+                            friendList.appendChild(listItem);
+                        });
+
+                        if (friendList.children.length === 0) {
+                            const noFriendsItem = document.createElement('li');
+                            noFriendsItem.textContent = "No friends found.";
+                            friendList.appendChild(noFriendsItem);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error fetching users data:", error);
+                    });
             } else {
                 const noFriendsItem = document.createElement('li');
                 noFriendsItem.textContent = "No friends found.";
@@ -795,6 +826,113 @@ function printFriendsIds() {
             console.error("Error loading user data:", error);
         });
 }
+// Close the friend list if the user clicks outside of it
+document.addEventListener('click', function(event) {
+    const friendListContainer = document.getElementById('friend-list-container');
+    const toggleButton = document.getElementById('toggle-friend-list');
+    
+    if (!friendListContainer.contains(event.target) && event.target !== toggleButton) {
+        friendListContainer.style.display = 'none';
+        toggleButton.textContent = 'Show Friends';
+    }
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    populateLeaderboard();
+});
+
+function populateLeaderboard() {
+    const user = firebase.auth().currentUser;
+    const tbody = document.getElementById('leaderboardBody');
+    tbody.innerHTML = '';
+    
+    firebase.database().ref(`users/${user.uid}/friends`).once('value')
+        .then((snapshot) => {
+            const userData = snapshot.val();
+        
+            if (userData) {
+                for (const friendKey in userData) {
+                    if (userData.hasOwnProperty(friendKey)) {
+                        const friend = userData[friendKey];
+                        
+                        firebase.database().ref('users').once('value')
+                            .then((usersSnapshot) => {
+                                const allUsers = usersSnapshot.val();
+                                let friendData = null;
+        
+                                for (const userId in allUsers) {
+                                    if (allUsers[userId].full_name && 
+                                        allUsers[userId].full_name.slice(-5) === friend.friendId) {
+                                        friendData = allUsers[userId];
+                                        break;
+                                    }
+                                }
+                           
+                                const friendName = friendData ? friendData.name : 'Unknown Friend';
+                                const friendProfileUrl = `profile.html?userId=${friendData.full_name.slice(-5)}`;
+
+                                // Get the most recent lift data
+                                let mostRecentLift = null;
+                                let maxTimestamp = 0;
+
+                                if (friendData && friendData.liftData) {
+                                    // Handle both array and object formats of liftData
+                                    const liftEntries = Array.isArray(friendData.liftData) 
+                                        ? friendData.liftData 
+                                        : Object.values(friendData.liftData);
+
+                                    for (const lift of liftEntries) {
+                                        if (lift.timestamp > maxTimestamp) {
+                                            maxTimestamp = lift.timestamp;
+                                            mostRecentLift = lift;
+                                        }
+                                    }
+                                }
+
+                                const row = document.createElement('tr');
+                              
+                                // Rank cell
+                                const rankCell = document.createElement('td');
+                                rankCell.textContent = mostRecentLift ? mostRecentLift.rank : '';
+                                rankCell.classList.add('px-4', 'py-3', 'text-left');
+                                row.appendChild(rankCell);
+
+                                // Name cell
+                                const nameCell = document.createElement('td');
+                                const nameLink = document.createElement('a');
+                                nameLink.href = friendProfileUrl;
+                                nameLink.textContent = friendName;
+                                nameLink.classList.add(
+                                    'bg-white', 'px-3', 'py-2', 'rounded-xl', 'shadow-lg',
+                                    'inline-flex', 'items-center', 'transform', 'hover:scale-105',
+                                    'transition-transform', 'duration-300', 'ease-in-out',
+                                    'hover:shadow-2xl'
+                                );
+                                nameCell.classList.add('px-4', 'py-3', 'text-left');
+                                nameCell.appendChild(nameLink);
+                                row.appendChild(nameCell);
+
+                                // Lifts cells
+                                const squat = mostRecentLift ? mostRecentLift.squat : 0;
+                                const bench = mostRecentLift ? mostRecentLift.bench : 0;
+                                const deadlift = mostRecentLift ? mostRecentLift.deadlift : 0;
+                                const total = squat + bench + deadlift;
+
+                              
+
+                                const totalCell = document.createElement('td');
+                                totalCell.textContent = total;
+                                totalCell.classList.add('px-4', 'py-3', 'text-right');
+                                row.appendChild(totalCell);
+
+                                tbody.appendChild(row);
+                            });
+                    }
+                }
+            }
+        });
+}
+
 
 // Close the friend list if the user clicks outside of it
 document.addEventListener('click', function(event) {
@@ -806,6 +944,18 @@ document.addEventListener('click', function(event) {
         toggleButton.textContent = 'Show Friends';
     }
 });
+
+// Close the friend list if the user clicks outside of it
+document.addEventListener('click', function(event) {
+    const friendListContainer = document.getElementById('friend-list-container');
+    const toggleButton = document.getElementById('toggle-friend-list');
+    
+    if (!friendListContainer.contains(event.target) && event.target !== toggleButton) {
+        friendListContainer.style.display = 'none';
+        toggleButton.textContent = 'Show Friends';
+    }
+});
+
 
 
 // Function to toggle weight unit display
@@ -1062,3 +1212,89 @@ document.getElementById('searchInput').addEventListener('input', async function 
 });
 
 
+
+
+// Add the printFriendsLeaderboard function you provided earlier, ensuring it updates the `leaderboardBody`
+
+// Modified sort function to handle both total and DOTS
+function sortLeaderboard(mode) {
+    const entries = window.liftEntries;
+    const dropdownButton = document.getElementById('modeButton');
+    const totalCells = document.querySelectorAll('[data-column="total"]');
+    const dotsCells = document.querySelectorAll('[data-column="dots"]');
+    
+    // Sort entries
+    if (mode === 'By Dots') {
+        entries.sort((a, b) => parseFloat(b.dots) - parseFloat(a.dots));
+        totalCells.forEach(cell => cell.style.display = 'none');
+        dotsCells.forEach(cell => cell.style.display = 'table-cell');
+    } else {
+        entries.sort((a, b) => b.total - a.total);
+        totalCells.forEach(cell => cell.style.display = 'table-cell');
+        dotsCells.forEach(cell => cell.style.display = 'none');
+    }
+    
+    // Update the leaderboard
+    const leaderboardBody = document.getElementById('leaderboardBody');
+    leaderboardBody.innerHTML = '';
+    
+    entries.forEach((entry, index) => {
+        const row = document.createElement('tr');
+        row.className = index % 2 === 0 ? 
+            'bg-white hover:bg-gray-100 transition-colors duration-200' : 
+            'bg-gray-50 hover:bg-gray-100 transition-colors duration-200';
+        
+        row.innerHTML = `
+            <td class="px-4 py-3 font-bold text-purple-600">${index + 1}</td>
+            <td class="px-4 py-3">${entry.name}</td>
+            <td class="px-4 py-3 font-semibold" data-column="total">${entry.total}</td>
+            <td class="px-4 py-3 font-semibold text-blue-600 dots-column" data-column="dots" style="display:${mode === 'By Dots' ? 'table-cell' : 'none'}">${entry.dots}</td>
+        `;
+        
+        leaderboardBody.appendChild(row);
+    });
+    
+
+    dropdownButton.textContent = mode;
+    document.getElementById('dropdownContent').classList.add('hidden');
+}
+
+function toggleDropdown() {
+    const dropdown = document.getElementById("dropdownContent");
+    dropdown.classList.toggle("hidden");
+}
+
+function sortLeaderboard(criteria) {
+    console.log("Sorting leaderboard by:", criteria);
+
+    // Call toggleColumns to show/hide columns based on the criteria
+    toggleColumns(criteria);
+
+    // Add your sorting logic here
+    // For example, you might want to sort the data and re-render the leaderboard
+
+}
+
+
+
+
+function toggleColumns(criteria) {
+    const totalColumn = document.querySelector('th[data-column="total"]');
+    const dotsColumn = document.querySelector('th[data-column="dots"]');
+
+    // Debugging logs
+    console.log("Total Column:", totalColumn);
+    console.log("Dots Column:", dotsColumn);
+
+    if (totalColumn && dotsColumn) {
+        if (criteria === "By Total") {
+            totalColumn.style.display = "table-cell"; // Show total column
+            dotsColumn.style.display = "none"; // Hide dots column
+        } else if (criteria === "By Dots") {
+            totalColumn.style.display = "none"; // Hide total column
+            dotsColumn.style.display = "table-cell"; // Show dots column
+        }
+    } else {
+        console.error("Column elements not found.");
+    }
+}

@@ -245,28 +245,58 @@ function fetchLiftData(uid, name) {
 document.addEventListener('DOMContentLoaded', loadAllUsers);
 function addFriend() {
     const currentUser = firebase.auth().currentUser;
-    if(! currentUser){
-        alert("you must be logged in")
+    if (!currentUser) {
+        alert("You must be logged in");
+        return;
     }
 
-    const profileUserId = getUserIdFromUrl()
+    const profileUserId = getUserIdFromUrl();
+
+    if (currentUser.uid.slice(-5) === profileUserId) {
+        alert("You cannot add yourself as a friend.");
+        return;
+    }
 
     // Reference to the friends node
     const friendsRef = firebase.database().ref(`users/${currentUser.uid}/friends`);
 
-    // Use push() to add a friend with the profileUserId
-    friendsRef.push({
-        friendId: profileUserId,
-        timestamp: Date.now() // Optional: Track when the friend was added
-    })
-    .then(() => {
-        
-        alert("Friend added successfully!");
-    })
-    .catch((error) => {
-        console.error("Error adding friend:", error);
-    });
+    // First check if the friend already exists
+    friendsRef.once('value')
+        .then((snapshot) => {
+            const friends = snapshot.val();
+            let isDuplicate = false;
+
+            if (friends) {
+                // Check each existing friend
+                Object.values(friends).forEach(friend => {
+                    if (friend.friendId === profileUserId) {
+                        isDuplicate = true;
+                    }
+                });
+            }
+
+            if (isDuplicate) {
+                alert("This user is already in your friends list.");
+                return;
+            }
+
+            // If not a duplicate, add the friend
+            return friendsRef.push({
+                friendId: profileUserId,
+                timestamp: Date.now()
+            });
+        })
+        .then((result) => {
+            if (result) { // Only show success if we actually added a friend
+                alert("Friend added successfully!");
+            }
+        })
+        .catch((error) => {
+            console.error("Error adding friend:", error);
+            alert("Error adding friend. Please try again.");
+        });
 }
+
 
 function loadAllUsers() {
     const usersRef = firebase.database().ref('users');
@@ -325,7 +355,7 @@ async function calculateUserPercentile(squat, bench, deadlift, userCategory) {
     
     // Remove 'kg' from weightClass and convert to string with .0
     const weightClassNum = userCategory.weightClass.replace('kg', '');
-    const formattedWeightClass = weightClassNum + '.0';
+    let formattedWeightClass = weightClassNum.endsWith('.5') ? weightClassNum : weightClassNum + ".0";
 
     // Map age groups to the categories in your JSON
     const ageGroupMapping = {

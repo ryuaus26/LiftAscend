@@ -593,11 +593,8 @@ firebase.auth().onAuthStateChanged((user) => {
       // User is signed in, delay redirection by 500 milliseconds
       setTimeout(() => {
         window.location.href = 'loggedin.html';
-      }, 500);
-    } else {
-      // User is not signed in, you could redirect to login.html or show a message
-      window.location.href = 'index.html'; // Optional: redirect to login page
-    }
+      }, 2000);
+    } 
   });
   
 

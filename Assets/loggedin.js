@@ -1000,7 +1000,7 @@ function populateLeaderboard(criteria) {
                     leaderboardData.sort((a, b) => {
                         return criteria === "By Dots" ? b.dots - a.dots : b.total - a.total;
                     });
-            
+                
                     // Clear existing content
                     tbody.innerHTML = '';
                   
@@ -1029,46 +1029,77 @@ function populateLeaderboard(criteria) {
                         // Score cell (will show either Total or DOTS based on criteria)
                         const scoreCell = document.createElement('td');
                         scoreCell.classList.add('px-4', 'py-3', 'text-left');
-                        
+                
                         // Total cell
                         const totalSpan = document.createElement('span');
-                        
                         let total = entry.total;
+                
                         if (entry.unit === 'kgs' && currentWeightUnit === 'lbs') {
-                            total = kgToLbs(entry.total).toFixed(1) 
+                            total = kgToLbs(entry.total).toFixed(1);
                         } 
-                         if (entry.unit === 'lbs' && currentWeightUnit === 'kgs') {
-                            total = lbsToKg(entry.total).toFixed(1) 
+                        if (entry.unit === 'lbs' && currentWeightUnit === 'kgs') {
+                            total = lbsToKg(entry.total).toFixed(1);
                         }
                         totalSpan.textContent = total + " " + currentWeightUnit;
-                        
                         totalSpan.classList.add('px-4', 'py-3', 'text-left', 'total-column');
-                        row.appendChild(totalSpan);
-                        
+                        scoreCell.appendChild(totalSpan);
+                
                         const dotsSpan = document.createElement('span');
                         dotsSpan.textContent = entry.dots;
                         dotsSpan.classList.add('dots-column');
                         dotsSpan.style.display = 'none'; // Hide DOTS by default
-                        
-                        scoreCell.appendChild(totalSpan);
                         scoreCell.appendChild(dotsSpan);
-                        row.appendChild(scoreCell);
-
-                        const squatSpan = document.createElement('span')
-                        squatSpan.textContent = entry.squat;
-                        squatSpan.classList.add('squat-column');
-                        squatSpan.style.display = 'none';
-
-                        const benchSpan = document.createElement('span')
-                        benchSpan.textContent = entry.bench;
-                        benchSpan.classList.add('bench-column');
-                        benchSpan.style.display = 'none';
-
-                        const deadliftSpan = document.createElement('span')
-                        deadliftSpan.textContent = entry.deadlift;
-                        deadliftSpan.classList.add('deadlift-column');
-                        deadliftSpan.style.display = 'none';
                 
+                        // Squat conversion
+                        const squatSpan = document.createElement('span');
+                        let squat = entry.squat;
+                
+                        if (entry.unit === 'kgs' && currentWeightUnit === 'lbs') {
+                            squat = kgToLbs(entry.squat).toFixed(1);
+                        } 
+                        if (entry.unit === 'lbs' && currentWeightUnit === 'kgs') {
+                            squat = lbsToKg(entry.squat).toFixed(1);
+                        }
+                        squatSpan.textContent = squat + " " + currentWeightUnit; // Add unit
+                        squatSpan.classList.add('squat-column');
+                        squatSpan.style.display = 'none'; // Initially hide squat
+                        scoreCell.appendChild(squatSpan); // Add squat span to score cell
+                
+                       
+                
+                        // Bench conversion
+                        const benchSpan = document.createElement('span');
+                        let bench = entry.bench;
+                
+                        if (entry.unit === 'kgs' && currentWeightUnit === 'lbs') {
+                            bench = kgToLbs(entry.bench).toFixed(1);
+                        } 
+                        if (entry.unit === 'lbs' && currentWeightUnit === 'kgs') {
+                            bench = lbsToKg(entry.bench).toFixed(1);
+                        }
+                        benchSpan.textContent = bench + " " + currentWeightUnit; // Add unit
+                        benchSpan.classList.add('bench-column');
+                        benchSpan.style.display = 'none'; // Initially hide bench
+                        scoreCell.appendChild(benchSpan); // Add bench span to score cell
+                
+                        // Deadlift conversion
+                        const deadliftSpan = document.createElement('span');
+                        let deadlift = entry.deadlift;
+                
+                        if (entry.unit === 'kgs' && currentWeightUnit === 'lbs') {
+                            deadlift = kgToLbs(entry.deadlift).toFixed(1);
+                        } 
+                        if (entry.unit === 'lbs' && currentWeightUnit === 'kgs') {
+                            deadlift = lbsToKg(entry.deadlift).toFixed(1);
+                        }
+                        deadliftSpan.textContent = deadlift + " " + currentWeightUnit; // Add unit
+                        deadliftSpan.classList.add('deadlift-column');
+                        deadliftSpan.style.display = 'none'; // Initially hide deadlift
+                        scoreCell.appendChild(deadliftSpan); // Add deadlift span to score cell
+                
+                        // Add the scoreCell to the row
+                        row.appendChild(scoreCell);
+                     
                         // Rank cell
                         const rankCell = document.createElement('td');
                         const rankImage = document.createElement('img');
@@ -1078,15 +1109,14 @@ function populateLeaderboard(criteria) {
                         rankCell.classList.add('px-4', 'py-3', 'text-left');
                         rankCell.appendChild(rankImage);
                         row.appendChild(rankCell);
-                
                         tbody.appendChild(row);
-                        
-                      
                     });
                 
                     // Update column visibility after populating
                     toggleColumns(criteria);
                 });
+                
+                
                 
             }
         });

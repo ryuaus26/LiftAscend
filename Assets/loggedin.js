@@ -12,7 +12,7 @@ const firebaseConfig = {
 
 
 
-
+let currentCriteria = "By Total"; // Initialize with a default value
 let currentWeightUnit = 'lbs'; 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -35,9 +35,6 @@ async function loadPercentileData(filepath) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    toggleColumns("By Total")
-});
 
 
 function calculateLifterDOTS(weight, squat, bench, deadlift, isMale, unit) {
@@ -472,7 +469,7 @@ function getAgeGroup(age) {
 function updateProfileDisplay(data) {
     // Update the global unit to match the stored data
     currentWeightUnit = data.unit || 'lbs';
-    
+  
     // Update the weight unit button text
     const weightUnitButton = document.getElementById('weightUnitButton');
     if (weightUnitButton) {
@@ -520,11 +517,14 @@ function loadUserData() {
         firebase.database().ref('users/' + user.uid + '/liftData').limitToLast(1).once('value')
             .then(async (snapshot) => {
                 const userData = snapshot.val();
-               
+              
+                
+              
                 if (userData) {
                     const lastEntry = Object.values(userData)[0];
                     updateProfileDisplay(lastEntry);
-
+                    currentWeightUnit = lastEntry.unit;
+                   
                     // Store the original weight and lifts
                     let userWeight = lastEntry.weight; // Assuming weight is stored in the database
                     let userSquat = lastEntry.squat;
@@ -844,9 +844,71 @@ document.addEventListener('click', function(event) {
     }
 });
 document.addEventListener("DOMContentLoaded", function() {
-    // Call populateLeaderboard every 5 seconds (5000 milliseconds)
+   
     populateLeaderboard();
 });
+
+function sortLeaderboard(criteria) {
+    currentCriteria = criteria; // Update the global criteria variable
+    toggleColumns(); // Call toggleColumns to reflect the new criteria
+    // Implement sorting logic here
+   
+
+   populateLeaderboard(); // Call to refresh the leaderboard display
+}
+
+function toggleColumns() {
+    const unit = getCurrentWeightUnit(); // Get the current unit here
+    const scoreHeader = document.querySelector('th[data-column="total"]');
+    const totalSpans = document.querySelectorAll('.total-column');
+    const dotsSpans = document.querySelectorAll('.dots-column');
+    const squatSpans = document.querySelectorAll('.squat-column');
+    const benchSpans = document.querySelectorAll('.bench-column');
+    const deadliftSpans = document.querySelectorAll('.deadlift-column');
+
+    // Update the total score header and visibility of columns based on current criteria
+    if (currentCriteria === "By Total") {
+        scoreHeader.textContent = "Total (" + unit + ")"; // Add unit to header
+        totalSpans.forEach(span => span.style.display = "inline");
+        dotsSpans.forEach(span => span.style.display = "none");
+        squatSpans.forEach(span => span.style.display = "none"); // Show squat columns
+        benchSpans.forEach(span => span.style.display = "none"); // Show bench columns
+        deadliftSpans.forEach(span => span.style.display = "none"); // Show deadlift columns
+    } else if (currentCriteria === "By Dots") {
+        scoreHeader.textContent = "DOTS Score"; // No unit needed for DOTS
+        totalSpans.forEach(span => span.style.display = "none");
+        dotsSpans.forEach(span => span.style.display = "inline");
+        squatSpans.forEach(span => span.style.display = "none"); // Hide squat columns
+        benchSpans.forEach(span => span.style.display = "none"); // Hide bench columns
+        deadliftSpans.forEach(span => span.style.display = "none"); // Hide deadlift columns
+    } else if (currentCriteria === "By Squat") {
+        scoreHeader.textContent = "Squat (" + unit + ")"; // Add unit to squat header
+        totalSpans.forEach(span => span.style.display = "none"); // Hide total columns
+        dotsSpans.forEach(span => span.style.display = "none"); // Hide DOTS columns
+        squatSpans.forEach(span => span.style.display = "inline"); // Show squat columns
+        benchSpans.forEach(span => span.style.display = "none"); // Hide bench columns
+        deadliftSpans.forEach(span => span.style.display = "none"); // Hide deadlift columns
+    } else if (currentCriteria === "By Bench") {
+        scoreHeader.textContent = "Bench (" + unit + ")"; // Add unit to bench header
+        totalSpans.forEach(span => span.style.display = "none"); // Hide total columns
+        dotsSpans.forEach(span => span.style.display = "none"); // Hide DOTS columns
+        squatSpans.forEach(span => span.style.display = "none"); // Hide squat columns
+        benchSpans.forEach(span => span.style.display = "inline"); // Show bench columns
+        deadliftSpans.forEach(span => span.style.display = "none"); // Hide deadlift columns
+    } else if (currentCriteria === "By Deadlift") {
+        scoreHeader.textContent = "Deadlift (" + unit + ")"; // Add unit to deadlift header
+        totalSpans.forEach(span => span.style.display = "none"); // Hide total columns
+        dotsSpans.forEach(span => span.style.display = "none"); // Hide DOTS columns
+        squatSpans.forEach(span => span.style.display = "none"); // Hide squat columns
+        benchSpans.forEach(span => span.style.display = "none"); // Hide bench columns
+        deadliftSpans.forEach(span => span.style.display = "inline"); // Show deadlift columns
+    }
+}
+
+
+
+
+
 
 // Existing function to populate the leaderboard
 // Function to populate the leaderboard
@@ -904,7 +966,9 @@ function populateLeaderboard(criteria) {
                                 const squat = mostRecentLift ? mostRecentLift.squat : 0;
                                 const bench = mostRecentLift ? mostRecentLift.bench : 0;
                                 const deadlift = mostRecentLift ? mostRecentLift.deadlift : 0;
-                                const total = parseFloat(squat) + parseFloat(bench) + parseFloat(deadlift);
+                                let total = parseFloat(squat) + parseFloat(bench) + parseFloat(deadlift);
+
+                                
 
                                 // Calculate DOTS score
                                 const weight = mostRecentLift.weight; // Make sure you have weight in friendData
@@ -917,8 +981,12 @@ function populateLeaderboard(criteria) {
                                     name: friendName,
                                     profileUrl: friendProfileUrl,
                                     total: total, // Use for total score view
+                                    squat:mostRecentLift.squat,
+                                    bench:mostRecentLift.bench,
+                                    deadlift:mostRecentLift.deadlift,
                                     dots: dotsScore, // Use for DOTS score view
-                                    rank: mostRecentLift ? mostRecentLift.rank : '' // Add rank if available
+                                    rank: mostRecentLift ? mostRecentLift.rank : '', // Add rank if available
+                                    unit : unit
                                 });
                             });
 
@@ -935,7 +1003,7 @@ function populateLeaderboard(criteria) {
             
                     // Clear existing content
                     tbody.innerHTML = '';
-            
+                  
                     // Populate the leaderboard
                     leaderboardData.forEach((entry, index) => {
                         const row = document.createElement('tr');
@@ -964,7 +1032,16 @@ function populateLeaderboard(criteria) {
                         
                         // Total cell
                         const totalSpan = document.createElement('span');
-                        totalSpan.textContent = entry.total + " " + currentWeightUnit;
+                        
+                        let total = entry.total;
+                        if (entry.unit === 'kgs' && currentWeightUnit === 'lbs') {
+                            total = kgToLbs(entry.total).toFixed(1) 
+                        } 
+                         if (entry.unit === 'lbs' && currentWeightUnit === 'kgs') {
+                            total = lbsToKg(entry.total).toFixed(1) 
+                        }
+                        totalSpan.textContent = total + " " + currentWeightUnit;
+                        
                         totalSpan.classList.add('px-4', 'py-3', 'text-left', 'total-column');
                         row.appendChild(totalSpan);
                         
@@ -976,6 +1053,21 @@ function populateLeaderboard(criteria) {
                         scoreCell.appendChild(totalSpan);
                         scoreCell.appendChild(dotsSpan);
                         row.appendChild(scoreCell);
+
+                        const squatSpan = document.createElement('span')
+                        squatSpan.textContent = entry.squat;
+                        squatSpan.classList.add('squat-column');
+                        squatSpan.style.display = 'none';
+
+                        const benchSpan = document.createElement('span')
+                        benchSpan.textContent = entry.bench;
+                        benchSpan.classList.add('bench-column');
+                        benchSpan.style.display = 'none';
+
+                        const deadliftSpan = document.createElement('span')
+                        deadliftSpan.textContent = entry.deadlift;
+                        deadliftSpan.classList.add('deadlift-column');
+                        deadliftSpan.style.display = 'none';
                 
                         // Rank cell
                         const rankCell = document.createElement('td');
@@ -988,6 +1080,8 @@ function populateLeaderboard(criteria) {
                         row.appendChild(rankCell);
                 
                         tbody.appendChild(row);
+                        
+                      
                     });
                 
                     // Update column visibility after populating
@@ -1063,7 +1157,7 @@ function selectWeightUnit(unit) {
         squatHeader.textContent = 'Squat (kgs)';
         benchHeader.textContent = 'Bench (kgs)';
         deadliftHeader.textContent = 'Deadlift (kgs)';
-        totalHeader.textContent = "Total (kgs)"
+      
 
         // Convert weights from lbs to kgs only if necessary
         if (currentWeightUnit === 'lbs') {
@@ -1074,7 +1168,7 @@ function selectWeightUnit(unit) {
         squatHeader.textContent = 'Squat (lbs)';
         benchHeader.textContent = 'Bench (lbs)';
         deadliftHeader.textContent = 'Deadlift (lbs)';
-        totalHeader.textContent = "Total (lbs)"
+       
         // Convert weights from kgs to lbs only if necessary
         if (currentWeightUnit === 'kgs') {
             convertToLbs();
@@ -1082,7 +1176,15 @@ function selectWeightUnit(unit) {
     }
 
     currentWeightUnit = unit; // Update the current unit
+    populateLeaderboard();
+    
+ 
+    getCurrentWeightUnit(currentWeightUnit)
+  
     isInitialLoad = false; // Mark that the initial load is done
+}
+function getCurrentWeightUnit() {
+    return currentWeightUnit; // Return the current weight unit
 }
 
 // Function to convert all weights to kgs
@@ -1101,13 +1203,7 @@ function convertToKgs() {
     document.getElementById('bodyweight').textContent = lbsToKg(bodyWeight).toFixed(1) + " kg";
     document.getElementById('total').textContent = lbsToKg(total).toFixed(1) + " kg";
 
-    const totalCells = document.getElementsByClassName('total-column'); // Returns an HTMLCollection
-
-    // Loop through the total cells
-    for (let i = 0; i < totalCells.length; i++) {
-        const leaderBoardTotal = parseFloat(totalCells[i].textContent);
-        totalCells[i].textContent = lbsToKg(leaderBoardTotal).toFixed(1) + " kg";
-    }
+    
 }
 
 // Function to convert all weights to lbs
@@ -1126,13 +1222,7 @@ function convertToLbs() {
     document.getElementById('bodyweight').textContent = kgToLbs(bodyWeight).toFixed(1) + " lbs";
     document.getElementById('total').textContent = kgToLbs(total).toFixed(1) + " lbs";
    
-    const totalCells = document.getElementsByClassName('total-column'); // Returns an HTMLCollection
-
-    // Loop through the total cells
-    for (let i = 0; i < totalCells.length; i++) {
-        const leaderBoardTotal = parseFloat(totalCells[i].textContent);
-        totalCells[i].textContent = kgToLbs(leaderBoardTotal).toFixed(1) + " lbs";
-    }
+    
 }
 
 
@@ -1314,25 +1404,6 @@ function toggleDropdown() {
 }
 
 
-function sortLeaderboard(criteria) {
-    console.log("Sorting leaderboard by:", criteria);
-    populateLeaderboard(criteria);
-}
 
 
 
-function toggleColumns(criteria) {
-    const scoreHeader = document.querySelector('th[data-column="total"]');
-    const totalSpans = document.querySelectorAll('.total-column');
-    const dotsSpans = document.querySelectorAll('.dots-column');
-
-    if (criteria === "By Total") {
-        scoreHeader.textContent = "Total (lbs)";
-        totalSpans.forEach(span => span.style.display = "inline");
-        dotsSpans.forEach(span => span.style.display = "none");
-    } else if (criteria === "By Dots") {
-        scoreHeader.textContent = "DOTS Score";
-        totalSpans.forEach(span => span.style.display = "none");
-        dotsSpans.forEach(span => span.style.display = "inline");
-    }
-}

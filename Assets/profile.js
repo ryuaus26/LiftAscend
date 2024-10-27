@@ -645,7 +645,7 @@ function searchForUser(query) {
             if (userData && userData.full_name && userData.full_name.toLowerCase() === query.toLowerCase()) {
                 console.log(`User found: ${userData.full_name} (ID: ${userId})`);
                 found = true;
-                document.getElementById('user-full-name').textContent = userData.full_name;
+     
                 // Redirect to the profile page with the user ID
                 window.location.href = `profile.html?userId=${userData.full_name.slice(-5)}`;
                 

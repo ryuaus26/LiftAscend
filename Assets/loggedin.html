@@ -91,7 +91,12 @@
                 <div class="flex-shrink-0">
                     <div class="rank-container" id="rankContainer">
                         <h2 class="text-base font-bold">Your Rank:</h2>
-                        <img src="https://ryuaus26.github.io/WebsiteLiftAscend/Images/Rank/.png" style="visibility: hidden;" class="rank-image w-20 h-20" id="rankImage" alt="Rank Image">
+                        <img 
+                        src="https://ryuaus26.github.io/WebsiteLiftAscend/Images/Rank/.png" 
+                        style="visibility: hidden;" 
+                        class="rank-image w-24 h-24 border border-gray-300 rounded-full transition-transform duration-200 hover:scale-110 shadow-md" 
+                        id="rankImage" 
+                        alt="Rank Image">
                     </div>
                 </div>
             </div>
@@ -240,6 +245,30 @@
                         >
                             By Dots
                         </a>
+                        <a
+                            href="#"
+                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onclick="sortLeaderboard('By Squat')"
+                            role="menuitem"
+                        >
+                            By Squat
+                        </a>
+                        <a
+                            href="#"
+                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onclick="sortLeaderboard('By Bench')"
+                            role="menuitem"
+                        >
+                            By Bench
+                        </a>
+                        <a
+                            href="#"
+                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onclick="sortLeaderboard('By Deadlift')"
+                            role="menuitem"
+                        >
+                            By Deadlift
+                        </a>
                     </div>
                 </div>
             </div>
@@ -247,16 +276,17 @@
             <table class="w-full text-center bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
                 <thead>
                     <tr class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-lg font-semibold">
-                        <th class="px-4 py-3 text-left font-medium">Rank</th>
-                        <th class="px-4 py-3 text-left font-medium">Lifter</th>
-                        <th class="px-4 py-3 text-left font-medium" data-column="total">Total (lbs)</th>
-                        <th class="px-4 py-3 text-left font-medium dots-column" data-column="dots" style="display:none">DOTS Score</th>
+                        <th class="px-4 py-3 text-left">Place</th>
+                        <th class="px-4 py-3 text-left" style="padding-left: 3rem;">Lifter</th>
+                        <th class="px-4 py-3 text-left" data-column="total" id ='totalHeader'>Total (lbs)</th>
+                        <th class="px-4 py-3 text-left" style="padding-left: 1rem;">Rank</th>
                     </tr>
                 </thead>
                 <tbody id="leaderboardBody" class="text-gray-700">
                     <!-- Dynamic content will be populated here -->
                 </tbody>
             </table>
+            
            
             
         </div>

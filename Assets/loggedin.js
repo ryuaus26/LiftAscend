@@ -34,6 +34,12 @@ async function loadPercentileData(filepath) {
         throw error;
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    toggleColumns("By Total")
+});
+
+
 function calculateLifterDOTS(weight, squat, bench, deadlift, isMale, unit) {
     const maleCoeff = [-307.75076, 24.0900756, -0.1918759221, 0.0007391293, -0.000001093];
     const femaleCoeff = [-57.96288, 13.6175032, -0.1126655495, 0.0005158568, -0.0000010706];
@@ -796,6 +802,7 @@ function populateFriendList() {
                                 firebase.database().ref(`users/${user.uid}/friends/${friendInfo.key}`).remove()
                                     .then(() => {
                                         listItem.remove();
+                                        populateLeaderboard();
                                     })
                                     .catch((error) => {
                                         console.error("Error removing friend:", error);
@@ -836,30 +843,35 @@ document.addEventListener('click', function(event) {
         toggleButton.textContent = 'Show Friends';
     }
 });
-
 document.addEventListener("DOMContentLoaded", function() {
+    // Call populateLeaderboard every 5 seconds (5000 milliseconds)
     populateLeaderboard();
 });
 
-function populateLeaderboard() {
+// Existing function to populate the leaderboard
+// Function to populate the leaderboard
+function populateLeaderboard(criteria) {
     const user = firebase.auth().currentUser;
     const tbody = document.getElementById('leaderboardBody');
     tbody.innerHTML = '';
-    
+
     firebase.database().ref(`users/${user.uid}/friends`).once('value')
         .then((snapshot) => {
             const userData = snapshot.val();
-        
+            const leaderboardData = []; // Array to hold leaderboard entries
+
             if (userData) {
+                const friendPromises = []; // Array to hold promises for fetching friend data
+
                 for (const friendKey in userData) {
                     if (userData.hasOwnProperty(friendKey)) {
                         const friend = userData[friendKey];
-                        
-                        firebase.database().ref('users').once('value')
+
+                        const promise = firebase.database().ref('users').once('value')
                             .then((usersSnapshot) => {
                                 const allUsers = usersSnapshot.val();
                                 let friendData = null;
-        
+
                                 for (const userId in allUsers) {
                                     if (allUsers[userId].full_name && 
                                         allUsers[userId].full_name.slice(-5) === friend.friendId) {
@@ -867,7 +879,7 @@ function populateLeaderboard() {
                                         break;
                                     }
                                 }
-                           
+
                                 const friendName = friendData ? friendData.name : 'Unknown Friend';
                                 const friendProfileUrl = `profile.html?userId=${friendData.full_name.slice(-5)}`;
 
@@ -876,7 +888,6 @@ function populateLeaderboard() {
                                 let maxTimestamp = 0;
 
                                 if (friendData && friendData.liftData) {
-                                    // Handle both array and object formats of liftData
                                     const liftEntries = Array.isArray(friendData.liftData) 
                                         ? friendData.liftData 
                                         : Object.values(friendData.liftData);
@@ -889,49 +900,108 @@ function populateLeaderboard() {
                                     }
                                 }
 
-                                const row = document.createElement('tr');
-                              
-                                // Rank cell
-                                const rankCell = document.createElement('td');
-                                rankCell.textContent = mostRecentLift ? mostRecentLift.rank : '';
-                                rankCell.classList.add('px-4', 'py-3', 'text-left');
-                                row.appendChild(rankCell);
-
-                                // Name cell
-                                const nameCell = document.createElement('td');
-                                const nameLink = document.createElement('a');
-                                nameLink.href = friendProfileUrl;
-                                nameLink.textContent = friendName;
-                                nameLink.classList.add(
-                                    'bg-white', 'px-3', 'py-2', 'rounded-xl', 'shadow-lg',
-                                    'inline-flex', 'items-center', 'transform', 'hover:scale-105',
-                                    'transition-transform', 'duration-300', 'ease-in-out',
-                                    'hover:shadow-2xl'
-                                );
-                                nameCell.classList.add('px-4', 'py-3', 'text-left');
-                                nameCell.appendChild(nameLink);
-                                row.appendChild(nameCell);
-
-                                // Lifts cells
+                                // Calculate total after conversions
                                 const squat = mostRecentLift ? mostRecentLift.squat : 0;
                                 const bench = mostRecentLift ? mostRecentLift.bench : 0;
                                 const deadlift = mostRecentLift ? mostRecentLift.deadlift : 0;
-                                const total = squat + bench + deadlift;
+                                const total = parseFloat(squat) + parseFloat(bench) + parseFloat(deadlift);
 
-                              
-
-                                const totalCell = document.createElement('td');
-                                totalCell.textContent = total;
-                                totalCell.classList.add('px-4', 'py-3', 'text-right');
-                                row.appendChild(totalCell);
-
-                                tbody.appendChild(row);
+                                // Calculate DOTS score
+                                const weight = mostRecentLift.weight; // Make sure you have weight in friendData
+                                
+                                const unit = mostRecentLift.unit || 'lbs'; // Default unit
+                                const dotsScore = calculateLifterDOTS(weight, squat, bench, deadlift, mostRecentLift.gender.toLowerCase() === 'male', unit);
+                         
+                                // Push data to leaderboardData array
+                                leaderboardData.push({
+                                    name: friendName,
+                                    profileUrl: friendProfileUrl,
+                                    total: total, // Use for total score view
+                                    dots: dotsScore, // Use for DOTS score view
+                                    rank: mostRecentLift ? mostRecentLift.rank : '' // Add rank if available
+                                });
                             });
+
+                        friendPromises.push(promise); // Collect promises
                     }
                 }
+
+                // Wait for all promises to resolve
+                Promise.all(friendPromises).then(() => {
+                    // Sort leaderboardData based on criteria
+                    leaderboardData.sort((a, b) => {
+                        return criteria === "By Dots" ? b.dots - a.dots : b.total - a.total;
+                    });
+            
+                    // Clear existing content
+                    tbody.innerHTML = '';
+            
+                    // Populate the leaderboard
+                    leaderboardData.forEach((entry, index) => {
+                        const row = document.createElement('tr');
+                
+                        // Place cell
+                        const placeCell = document.createElement('td');
+                        placeCell.textContent = index + 1;
+                        placeCell.classList.add('px-4', 'py-3', 'text-left', 'bg-white', 'text-gray-800', 'font-semibold', 'border-b', 'hover:bg-gray-100', 'transition-colors', 'duration-200');
+                        row.appendChild(placeCell);
+                
+                        // Name cell
+                        const nameCell = document.createElement('td');
+                        const nameLink = document.createElement('a');
+                        nameLink.href = entry.profileUrl;
+                        nameLink.textContent = entry.name;
+                        nameLink.classList.add('bg-white', 'px-3', 'py-2', 'rounded-xl', 'shadow-lg', 'inline-flex', 'items-center', 'transform', 'hover:scale-110', 'hover:bg-gray-200', 'transition-transform', 'transition-colors', 'duration-500', 'ease-in-out', 'hover:shadow-2xl');
+                        nameCell.style.whiteSpace = 'nowrap';
+                        nameCell.style.width = 'auto';
+                        nameCell.classList.add('px-4', 'py-3', 'text-left');
+                        nameCell.appendChild(nameLink);
+                        row.appendChild(nameCell);
+                
+                        // Score cell (will show either Total or DOTS based on criteria)
+                        const scoreCell = document.createElement('td');
+                        scoreCell.classList.add('px-4', 'py-3', 'text-left');
+                        
+                        // Total cell
+                        const totalSpan = document.createElement('span');
+                        totalSpan.textContent = entry.total + " " + currentWeightUnit;
+                        totalSpan.classList.add('px-4', 'py-3', 'text-left', 'total-column');
+                        row.appendChild(totalSpan);
+                        
+                        const dotsSpan = document.createElement('span');
+                        dotsSpan.textContent = entry.dots;
+                        dotsSpan.classList.add('dots-column');
+                        dotsSpan.style.display = 'none'; // Hide DOTS by default
+                        
+                        scoreCell.appendChild(totalSpan);
+                        scoreCell.appendChild(dotsSpan);
+                        row.appendChild(scoreCell);
+                
+                        // Rank cell
+                        const rankCell = document.createElement('td');
+                        const rankImage = document.createElement('img');
+                        rankImage.src = `${entry.rank}.png`;
+                        rankImage.alt = `Place ${entry.rank}`;
+                        rankImage.classList.add('w-20', 'h-20', 'border', 'border-gray-300', 'rounded-full', 'transition-transform', 'duration-200', 'hover:scale-110', 'shadow-md');
+                        rankCell.classList.add('px-4', 'py-3', 'text-left');
+                        rankCell.appendChild(rankImage);
+                        row.appendChild(rankCell);
+                
+                        tbody.appendChild(row);
+                    });
+                
+                    // Update column visibility after populating
+                    toggleColumns(criteria);
+                });
+                
             }
         });
 }
+
+
+
+
+
 
 
 // Close the friend list if the user clicks outside of it
@@ -979,6 +1049,8 @@ function selectWeightUnit(unit) {
     const squatHeader = document.getElementById('squatHeader');
     const benchHeader = document.getElementById('benchHeader');
     const deadliftHeader = document.getElementById('deadliftHeader');
+    const totalHeader = document.getElementById('totalHeader');
+
 
     const button = document.getElementById('weightUnitButton');
     button.textContent = `${unit} ▼`;
@@ -991,6 +1063,7 @@ function selectWeightUnit(unit) {
         squatHeader.textContent = 'Squat (kgs)';
         benchHeader.textContent = 'Bench (kgs)';
         deadliftHeader.textContent = 'Deadlift (kgs)';
+        totalHeader.textContent = "Total (kgs)"
 
         // Convert weights from lbs to kgs only if necessary
         if (currentWeightUnit === 'lbs') {
@@ -1001,7 +1074,7 @@ function selectWeightUnit(unit) {
         squatHeader.textContent = 'Squat (lbs)';
         benchHeader.textContent = 'Bench (lbs)';
         deadliftHeader.textContent = 'Deadlift (lbs)';
-
+        totalHeader.textContent = "Total (lbs)"
         // Convert weights from kgs to lbs only if necessary
         if (currentWeightUnit === 'kgs') {
             convertToLbs();
@@ -1020,13 +1093,21 @@ function convertToKgs() {
     const bodyWeight = parseFloat(document.getElementById('bodyweight').textContent);
     const total = parseFloat(document.getElementById('total').textContent);
 
+
     // Convert values from lbs to kgs
     document.getElementById('user-squat').textContent = Math.round(squatValue * 0.45359237 * 10) / 10 + " kg";
     document.getElementById('user-bench').textContent = Math.round(benchValue * 0.45359237 * 10) / 10 + " kg";
     document.getElementById('user-deadlift').textContent = Math.round(deadliftValue * 0.45359237 * 10) / 10 + " kg";
     document.getElementById('bodyweight').textContent = lbsToKg(bodyWeight).toFixed(1) + " kg";
     document.getElementById('total').textContent = lbsToKg(total).toFixed(1) + " kg";
-   
+
+    const totalCells = document.getElementsByClassName('total-column'); // Returns an HTMLCollection
+
+    // Loop through the total cells
+    for (let i = 0; i < totalCells.length; i++) {
+        const leaderBoardTotal = parseFloat(totalCells[i].textContent);
+        totalCells[i].textContent = lbsToKg(leaderBoardTotal).toFixed(1) + " kg";
+    }
 }
 
 // Function to convert all weights to lbs
@@ -1037,12 +1118,21 @@ function convertToLbs() {
     const bodyWeight = parseFloat(document.getElementById('bodyweight').textContent);
     const total = parseFloat(document.getElementById('total').textContent);
 
+
     // Convert values from kgs to lbs
     document.getElementById('user-squat').textContent = Math.round(squatValue / 0.45359237 * 10) / 10 + " lbs";
     document.getElementById('user-bench').textContent = Math.round(benchValue / 0.45359237 * 10) / 10 + " lbs";
     document.getElementById('user-deadlift').textContent = Math.round(deadliftValue / 0.45359237 * 10) / 10 + " lbs";
     document.getElementById('bodyweight').textContent = kgToLbs(bodyWeight).toFixed(1) + " lbs";
     document.getElementById('total').textContent = kgToLbs(total).toFixed(1) + " lbs";
+   
+    const totalCells = document.getElementsByClassName('total-column'); // Returns an HTMLCollection
+
+    // Loop through the total cells
+    for (let i = 0; i < totalCells.length; i++) {
+        const leaderBoardTotal = parseFloat(totalCells[i].textContent);
+        totalCells[i].textContent = kgToLbs(leaderBoardTotal).toFixed(1) + " lbs";
+    }
 }
 
 
@@ -1217,84 +1307,32 @@ document.getElementById('searchInput').addEventListener('input', async function 
 // Add the printFriendsLeaderboard function you provided earlier, ensuring it updates the `leaderboardBody`
 
 // Modified sort function to handle both total and DOTS
-function sortLeaderboard(mode) {
-    const entries = window.liftEntries;
-    const dropdownButton = document.getElementById('modeButton');
-    const totalCells = document.querySelectorAll('[data-column="total"]');
-    const dotsCells = document.querySelectorAll('[data-column="dots"]');
-    
-    // Sort entries
-    if (mode === 'By Dots') {
-        entries.sort((a, b) => parseFloat(b.dots) - parseFloat(a.dots));
-        totalCells.forEach(cell => cell.style.display = 'none');
-        dotsCells.forEach(cell => cell.style.display = 'table-cell');
-    } else {
-        entries.sort((a, b) => b.total - a.total);
-        totalCells.forEach(cell => cell.style.display = 'table-cell');
-        dotsCells.forEach(cell => cell.style.display = 'none');
-    }
-    
-    // Update the leaderboard
-    const leaderboardBody = document.getElementById('leaderboardBody');
-    leaderboardBody.innerHTML = '';
-    
-    entries.forEach((entry, index) => {
-        const row = document.createElement('tr');
-        row.className = index % 2 === 0 ? 
-            'bg-white hover:bg-gray-100 transition-colors duration-200' : 
-            'bg-gray-50 hover:bg-gray-100 transition-colors duration-200';
-        
-        row.innerHTML = `
-            <td class="px-4 py-3 font-bold text-purple-600">${index + 1}</td>
-            <td class="px-4 py-3">${entry.name}</td>
-            <td class="px-4 py-3 font-semibold" data-column="total">${entry.total}</td>
-            <td class="px-4 py-3 font-semibold text-blue-600 dots-column" data-column="dots" style="display:${mode === 'By Dots' ? 'table-cell' : 'none'}">${entry.dots}</td>
-        `;
-        
-        leaderboardBody.appendChild(row);
-    });
-    
-
-    dropdownButton.textContent = mode;
-    document.getElementById('dropdownContent').classList.add('hidden');
-}
 
 function toggleDropdown() {
     const dropdown = document.getElementById("dropdownContent");
     dropdown.classList.toggle("hidden");
 }
 
+
 function sortLeaderboard(criteria) {
     console.log("Sorting leaderboard by:", criteria);
-
-    // Call toggleColumns to show/hide columns based on the criteria
-    toggleColumns(criteria);
-
-    // Add your sorting logic here
-    // For example, you might want to sort the data and re-render the leaderboard
-
+    populateLeaderboard(criteria);
 }
 
 
 
-
 function toggleColumns(criteria) {
-    const totalColumn = document.querySelector('th[data-column="total"]');
-    const dotsColumn = document.querySelector('th[data-column="dots"]');
+    const scoreHeader = document.querySelector('th[data-column="total"]');
+    const totalSpans = document.querySelectorAll('.total-column');
+    const dotsSpans = document.querySelectorAll('.dots-column');
 
-    // Debugging logs
-    console.log("Total Column:", totalColumn);
-    console.log("Dots Column:", dotsColumn);
-
-    if (totalColumn && dotsColumn) {
-        if (criteria === "By Total") {
-            totalColumn.style.display = "table-cell"; // Show total column
-            dotsColumn.style.display = "none"; // Hide dots column
-        } else if (criteria === "By Dots") {
-            totalColumn.style.display = "none"; // Hide total column
-            dotsColumn.style.display = "table-cell"; // Show dots column
-        }
-    } else {
-        console.error("Column elements not found.");
+    if (criteria === "By Total") {
+        scoreHeader.textContent = "Total (lbs)";
+        totalSpans.forEach(span => span.style.display = "inline");
+        dotsSpans.forEach(span => span.style.display = "none");
+    } else if (criteria === "By Dots") {
+        scoreHeader.textContent = "DOTS Score";
+        totalSpans.forEach(span => span.style.display = "none");
+        dotsSpans.forEach(span => span.style.display = "inline");
     }
 }

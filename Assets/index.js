@@ -589,11 +589,17 @@ async function loadPercentileData(filepath) {
 
 // Check if the user is signed in
 firebase.auth().onAuthStateChanged((user) => {
-  if (user) {
-    // User is signed in, redirect to loggedin.html
-    window.location.href = 'loggedin.html';
-  }
-});
+    if (user) {
+      // User is signed in, delay redirection by 500 milliseconds
+      setTimeout(() => {
+        window.location.href = 'loggedin.html';
+      }, 500);
+    } else {
+      // User is not signed in, you could redirect to login.html or show a message
+      window.location.href = 'index.html'; // Optional: redirect to login page
+    }
+  });
+  
 
 async function calculateUserPercentile(squat, bench, deadlift, userCategory) {
     const percentilesData = await loadPercentileData('percentile.json');

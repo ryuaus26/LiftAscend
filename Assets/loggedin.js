@@ -9,7 +9,31 @@ const firebaseConfig = {
     measurementId: "G-RFR3H01R2N"
 };
 
-let currentWeightUnit = 'lbs'; // Default unit is pounds
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let currentWeightUnit = 'lbs'; 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
@@ -17,11 +41,13 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const database = firebase.database();
 
+
+//Percentiles
 async function loadPercentileData(filepath) {
     try {
         const response = await fetch(filepath);
         const data = await response.json();
-        console.log("Loaded JSON data structure:", data); // Debug log
+        console.log("Loaded JSON data structure:", data); 
         return data;
     } catch (error) {
         console.error("Error loading percentile data:", error);
@@ -32,11 +58,11 @@ async function loadPercentileData(filepath) {
 async function calculateUserPercentile(squat, bench, deadlift, userCategory) {
     const percentilesData = await loadPercentileData('percentile.json');
     
-    // Remove 'kg' from weightClass and convert to string with .0
+  
  
     const weightClassNum = userCategory.weightClass.replace('kg', '');
-    const formattedWeightClass = weightClassNum + ".0";
-
+    let formattedWeightClass = weightClassNum.endsWith('.5') ? weightClassNum : weightClassNum + ".0";
+    
     // Map age groups to the categories in your JSON
     const ageGroupMapping = {
         'Youth': 'Open',
@@ -70,30 +96,28 @@ async function calculateUserPercentile(squat, bench, deadlift, userCategory) {
         };
     }
 
-    // Improved helper function for more precise percentile interpolation
     function findPercentileFromBrackets(value, brackets) {
         // Convert brackets to arrays for easier manipulation
         const percentiles = Object.keys(brackets).map(Number).sort((a, b) => a - b);
         const values = percentiles.map(p => brackets[p]);
         
-        // If value is less than the lowest bracket
         if (value < values[0]) {
-            // Interpolate between 0 and first percentile
+     
             const slope = percentiles[0] / values[0];
             return Math.max(0, value * slope);
         }
         
-        // If value is greater than the highest bracket
+      
         if (value >= values[values.length - 1]) {
-            // Interpolate between last percentile and 100
+ 
             const lastPercentile = percentiles[percentiles.length - 1];
             const remainingPercentile = 100 - lastPercentile;
             const exceedance = value - values[values.length - 1];
-            const scale = remainingPercentile / (values[values.length - 1] * 0.1); // 10% buffer
+            const scale = remainingPercentile / (values[values.length - 1] * 0.1); 
             return Math.min(100, lastPercentile + (exceedance * scale));
         }
         
-        // Find the bracketing percentiles
+  
         for (let i = 0; i < values.length - 1; i++) {
             if (value >= values[i] && value < values[i + 1]) {
                 const lowerValue = values[i];
@@ -101,11 +125,10 @@ async function calculateUserPercentile(squat, bench, deadlift, userCategory) {
                 const lowerPercentile = percentiles[i];
                 const upperPercentile = percentiles[i + 1];
                 
-                // Calculate position within bracket (0 to 1)
+            
                 const position = (value - lowerValue) / (upperValue - lowerValue);
                 
-                // Interpolate between percentiles using cubic easing
-                // This provides smoother transitions between percentile brackets
+      
                 const t = position;
                 const smoothPosition = t * t * (3 - 2 * t);
                 
@@ -116,7 +139,7 @@ async function calculateUserPercentile(squat, bench, deadlift, userCategory) {
         return 100;
     }
 
-    // Calculate percentiles with two decimal precision
+
     if (currentWeightUnit == "lbs"){
         squat = lbsToKg(squat); 
         bench = lbsToKg(bench);
@@ -131,12 +154,11 @@ async function calculateUserPercentile(squat, bench, deadlift, userCategory) {
     return userPercentiles;
 }
 
-// Helper function to format percentile for display
 function formatPercentile(percentile) {
     return Number(percentile).toFixed(2);
 }
 
-// Helper function to normalize gender string
+
 function normalizeGender(gender) {
     gender = gender.toLowerCase().trim();
     return gender === 'male' || gender === 'm' ? 'male' : 
@@ -144,32 +166,32 @@ function normalizeGender(gender) {
 }
 
 
-// Helper function to determine the user's percentile based on their lift with interpolation
+
 function getPercentile(lift, liftData) {
-    // Convert liftData keys to integers and sort them
+
     const percentiles = Object.keys(liftData).map(Number).sort((a, b) => a - b);
     
-    // Check if the lift exceeds the highest in the data
+
     if (lift >= liftData[percentiles[percentiles.length - 1]]) {
-        return 100; // If the lift exceeds the highest percentile
+        return 100; 
     }
 
-    // Find the closest weights below and above the user's lift
+
     let lowerWeight = null;
     let upperWeight = null;
 
     for (const percentile of percentiles) {
         if (liftData[percentile] < lift) {
-            lowerWeight = percentile; // this is a lower bound
+            lowerWeight = percentile; 
         } else if (liftData[percentile] >= lift && upperWeight === null) {
-            upperWeight = percentile; // this is an upper bound
+            upperWeight = percentile; 
             break;
         }
     }
 
-    // If lowerWeight is null, it means the user's lift is below all
+
     if (lowerWeight === null) {
-        return percentiles[0]; // The lowest percentile
+        return percentiles[0]; 
     }
 
     // Perform linear interpolation to find the exact percentile
@@ -186,9 +208,6 @@ function getPercentile(lift, liftData) {
 // Function to display the user's percentile
 async function displayUserStrengthComparison(squat, bench, deadlift, userCategory) {
     const userPercentiles = await calculateUserPercentile(squat, bench, deadlift, userCategory);
-    
-
- 
       
 }
 
@@ -457,7 +476,7 @@ function updateProfileDisplay(data) {
     const squatHeader = document.getElementById('squatHeader');
     const benchHeader = document.getElementById('benchHeader');
     const deadliftHeader = document.getElementById('deadliftHeader');
-
+  
     if (weightHeader) weightHeader.textContent = `Weight (${data.unit})`;
     if (squatHeader) squatHeader.textContent = `Squat (${data.unit})`;
     if (benchHeader) benchHeader.textContent = `Bench (${data.unit})`;
@@ -559,29 +578,25 @@ function loadUserData() {
     function calculateLifterDOTS(weight, squat, bench, deadlift, isMale, unit) {
         const maleCoeff = [-307.75076, 24.0900756, -0.1918759221, 0.0007391293, -0.000001093];
         const femaleCoeff = [-57.96288, 13.6175032, -0.1126655495, 0.0005158568, -0.0000010706];
-    
-        // Convert weight to kg if in lbs
+   
         let bw = unit === 'lbs' ? weight * 0.453592 : weight;
     
-        // Set the max allowed bodyweight (in kg)
+
         let maxbw = isMale ? 210 : 150;
         bw = Math.min(Math.max(bw, 40), maxbw);
     
-        // Select coefficient set
+
         let coeff = isMale ? maleCoeff : femaleCoeff;
-    
-        // Calculate denominator
+
         let denominator = coeff[0];
         for (let i = 1; i < coeff.length; i++) {
             denominator += coeff[i] * Math.pow(bw, i);
         }
     
-        // Convert lifts to kg if in lbs
         let total = unit === 'lbs' ? 
             (squat + bench + deadlift) * 0.453592 :
             squat + bench + deadlift;
     
-        // Calculate the DOTS score
         let score = (500 / denominator) * total;
         return score.toFixed(2);
     }
@@ -818,6 +833,8 @@ function selectWeightUnit(unit) {
     const button = document.getElementById('weightUnitButton');
     button.textContent = `${unit} ▼`;
 
+
+   
     // Change headers based on selected unit
     if (unit === 'kgs') {
         weightHeader.textContent = 'Weight (kgs)';

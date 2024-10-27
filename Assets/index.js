@@ -30,110 +30,7 @@ async function loadPercentileData(filepath) {
     }
 }
 
-async function calculateUserPercentile(squat, bench, deadlift, userCategory) {
-    const percentilesData = await loadPercentileData('percentile.json');
-    
-    // Remove 'kg' from weightClass and convert to string with .0
-    const weightClassNum = userCategory.weightClass.replace('kg', '');
-    const formattedWeightClass = weightClassNum + '.0';
 
-    // Map age groups to the categories in your JSON
-    const ageGroupMapping = {
-        'Youth': 'Open',
-        'Teen1': 'Teen1',
-        'Teen2': 'Teen2',
-        'Teen3': 'Teen3',
-        'Sub-Master': 'Sub-Master',
-        'Master I': 'Master I',
-        'Master II': 'Master II'
-    };
-
-    const mappedAgeGroup = ageGroupMapping[userCategory.ageGroup] || 'Open';
-
-    // Access data based on mapped categories
-    const weightClassData = percentilesData[userCategory.gender]?.[formattedWeightClass]?.[mappedAgeGroup];
-
-    if (!weightClassData) {
-        console.error("No data found for the given user category:", {
-            original: userCategory,
-            mapped: {
-                gender: userCategory.gender,
-                weightClass: formattedWeightClass,
-                ageGroup: mappedAgeGroup
-            }
-        });
-        return {
-            squat: 0,
-            bench: 0,
-            deadlift: 0
-        };
-    }
-
-    // Improved helper function for more precise percentile interpolation
-    function findPercentileFromBrackets(value, brackets) {
-        // Convert brackets to arrays for easier manipulation
-        const percentiles = Object.keys(brackets).map(Number).sort((a, b) => a - b);
-        const values = percentiles.map(p => brackets[p]);
-        
-        // If value is less than the lowest bracket
-        if (value < values[0]) {
-            // Interpolate between 0 and first percentile
-            const slope = percentiles[0] / values[0];
-            return Math.max(0, value * slope);
-        }
-        
-        // If value is greater than the highest bracket
-        if (value >= values[values.length - 1]) {
-            // Interpolate between last percentile and 100
-            const lastPercentile = percentiles[percentiles.length - 1];
-            const remainingPercentile = 100 - lastPercentile;
-            const exceedance = value - values[values.length - 1];
-            const scale = remainingPercentile / (values[values.length - 1] * 0.1); // 10% buffer
-            return Math.min(100, lastPercentile + (exceedance * scale));
-        }
-        
-        // Find the bracketing percentiles
-        for (let i = 0; i < values.length - 1; i++) {
-            if (value >= values[i] && value < values[i + 1]) {
-                const lowerValue = values[i];
-                const upperValue = values[i + 1];
-                const lowerPercentile = percentiles[i];
-                const upperPercentile = percentiles[i + 1];
-                
-                // Calculate position within bracket (0 to 1)
-                const position = (value - lowerValue) / (upperValue - lowerValue);
-                
-                // Interpolate between percentiles using cubic easing
-                // This provides smoother transitions between percentile brackets
-                const t = position;
-                const smoothPosition = t * t * (3 - 2 * t);
-                
-                return lowerPercentile + (smoothPosition * (upperPercentile - lowerPercentile));
-            }
-        }
-        
-        return 100;
-    }
-
-    // Calculate percentiles with two decimal precision
-    if (currentWeightUnit == "lbs"){
-        squat = lbsToKg(squat); 
-        bench = lbsToKg(bench);
-        deadlift = lbsToKg(deadlift);
-    }
-    const userPercentiles = {
-        squat: Number(findPercentileFromBrackets(squat, weightClassData.Best3SquatKg).toFixed(2)),
-        bench: Number(findPercentileFromBrackets(bench, weightClassData.Best3BenchKg).toFixed(2)),
-        deadlift: Number(findPercentileFromBrackets(deadlift, weightClassData.Best3DeadliftKg).toFixed(2))
-    };
-
-    return userPercentiles;
-}
-
-// Helper function to format percentile for display
-function formatPercentile(percentile) {
-    return Number(percentile).toFixed(2);
-}
 
 // Helper function to normalize gender string
 function normalizeGender(gender) {
@@ -444,6 +341,7 @@ function submitLiftData() {
                 deadlift: parseInt(deadlift),
                 total: totalLift,
                 timestamp: Date.now(),
+                unit:currentWeightUnit,
                 weightClass: weightClass,
                 ageGroup: getAgeGroup(parseInt(age)),
                 rank: userRank // Store the calculated rank here
@@ -692,7 +590,9 @@ async function calculateUserPercentile(squat, bench, deadlift, userCategory) {
     const percentilesData = await loadPercentileData('percentile.json');
     
     const weightClassNum = userCategory.weightClass.replace('kg', '');
-    const formattedWeightClass = weightClassNum + ".0";
+    let formattedWeightClass = weightClassNum.endsWith('.5') ? weightClassNum : weightClassNum + ".0";
+    
+   
 
     const ageGroupMapping = {
         'Youth': 'Open',

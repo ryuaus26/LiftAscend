@@ -6,8 +6,8 @@ Lift Ascend is an innovative web application designed for powerlifters to track 
 
 ## Table of Contents 📚
 
-- [Features](#features)
 - [Usage](#usage)
+- [Features](#features)
 - [Leaderboards Overview](#leaderboards-overview)
 - [Data Sources](#data-sources)
 - [License](#license)
@@ -76,6 +76,8 @@ We welcome contributions from the community! Here’s how you can help:
 
 7. **Create a Pull Request**: Navigate to the original repository and submit a pull request. Describe the changes you’ve made and reference any related issues. 📬
 
-### Code of Conduct
+## Contact 📱
+Email: yunryu1217@gmail.com
+Austin Ryu
 
 **© 2024 Lift Ascend. All rights reserved.** ✨

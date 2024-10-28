@@ -84,5 +84,6 @@ We welcome contributions from the community! Here’s how you can help:
 ## Contact 📱
 Email: yunryu1217@gmail.com
 Austin Ryu
+##
 
 **© 2024 Lift Ascend. All rights reserved.** ✨

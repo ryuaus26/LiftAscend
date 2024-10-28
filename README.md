@@ -1,66 +1,81 @@
-Lift Ascend
-![Logo (2)](https://github.com/user-attachments/assets/2e7e3272-5bf7-4e45-affe-67f648aab7a4)
+# Lift Ascend 🚀
 
-Lift Ascend is a powerlifting progress tracking application that helps lifters monitor their strength gains and compete with friends. Compare your performance against peers, earn achievement badges, and stay motivated on your strength journey.
-Features
-🏋️‍♂️ Performance Tracking
+Lift Ascend is an innovative web application designed for powerlifters to track their lifting progress, compare their achievements with friends, and earn badges based on their performance. The app is built with a user-friendly interface that allows lifters of all levels to stay motivated and engaged in their fitness journey. 💪
 
-Input and track your powerlifting totals (squat, bench press, and deadlift)
-Monitor your progress over time
-Compare your performance against lifters in your age group and weight class
+![Logo](https://github.com/user-attachments/assets/ded8aa0c-ebda-414a-b635-b636f5c88155)
 
-🏆 Achievement System
-Earn badges based on your percentile rankings:
+## Table of Contents 📚
 
-🥉 Bronze Badge
-🥈 Silver Badge
-🥇 Gold Badge
-💎 Diamond Badge
+- [Features](#features)
+- [Usage](#usage)
+- [Leaderboards Overview](#leaderboards-overview)
+- [Data Sources](#data-sources)
+- [License](#license)
+- [Contributing](#contributing)
+- [Contact](#contact)
 
-📊 Leaderboards
+## Usage 📝
 
-Add and compete with friends
-Multiple ranking modes:
+1. **Create an Account**:  
+   - Visit the registration page and fill in the required fields to create your account. 🆕
 
-By Total Weight
-By DOTS Score
+2. **Input Your Lift Totals**:  
+   - After logging in, navigate to the input section.  
+   - Enter your squat, bench press, and deadlift weights to calculate your total lift. 📊
 
+3. **Add Friends**:  
+   - Use the search function to find friends by their usernames and send them friend requests. 🤝
+   - Once accepted, they will appear in your friends list for comparison.
 
-View detailed performance metrics for you and your friends
-Track individual lift progress (squat, bench, deadlift)
+4. **View Rankings**:  
+   - Go to the leaderboard section to see your ranking compared to friends. 📈
+   - You can switch between different modes to view rankings by total lifts or dots.
 
-👥 Social Features
+5. **Earn Badges**:  
+   - As you improve and hit milestones, you will earn badges (Bronze, Silver, Gold, Diamond) based on your performance percentile. 🏅
 
-Create a personal profile
-Add friends and view their progress
-Build a community of fellow powerlifters
+## Features 🌟
 
-Getting Started
+- **Progress Tracking**: Easily track your powerlifting totals across various lifts (squat, bench press, deadlift).
+- **Rankings**: View your performance compared to friends and earn badges based on your percentile.
+- **User-Friendly Interface**: Intuitive design for a seamless experience.
+- **Leaderboards**: Compare your lifts and rankings with friends in different modes.
 
-Create an account on Lift Ascend
-Input your initial lift totals
-Add your age, bodyweight, and gender for accurate comparisons
-Start tracking your progress and earning badges
-Connect with friends to compete on the leaderboards
+## Leaderboards Overview 📊
 
-System Requirements
-For optimal experience, we recommend using Lift Ascend on a desktop or laptop computer. While the application is accessible on mobile devices, some features may be better experienced on larger screens.
-Data Sources
-Lift Ascend uses data from the OpenPowerlifting project:
+The Leaderboards section allows you to compare your performance with your friends:
 
-Main website: https://www.openpowerlifting.org
-Bulk data download: https://openpowerlifting.gitlab.io/opl-csv/bulk-csv.html
+1. **Add Friends**: Search and add friends by their usernames. 🔍
+2. **Select Comparison Mode**: Choose between different ranking modes (e.g., "By Dots" or "By Total").
+3. **View Rankings**: Check the rankings and individual lift performances of your friends. 👀
+4. **Compare Performance**: Use the leaderboard for motivation and friendly competition. 🏆
 
-License
-Proprietary - All Rights Reserved
-Copyright (c) 2024 Lift Ascend
-This software and associated documentation files (the "Software") are proprietary and confidential. All rights are reserved. No part of this Software may be reproduced, distributed, or transmitted in any form or by any means without the prior written permission of the copyright holder.
-Connect With Us
+## Data Sources 📁
 
-Instagram: @lift_ascend
-Website: liftascend.web.aoo
+This application uses data from the [OpenPowerlifting](https://www.openpowerlifting.org) project. For more data, you can download a copy from [OpenPowerlifting Data](https://data.openpowerlifting.org).
 
-Support
-For questions, feedback, or support, please reach out to us through our Instagram account or website contact form.
+## License 📜
 
-Built with 💪 by the Lift Ascend Team
+This project is licensed under a **Proprietary License**. For more details, please refer to the LICENSE file in this repository.
+
+## Contributing 🤝
+
+We welcome contributions from the community! Here’s how you can help:
+
+1. **Reporting Issues**: If you encounter any bugs or have suggestions for new features, please open an issue in the GitHub repository. Provide a detailed description of the problem or enhancement. 🐛
+
+2. **Fork the Repository**: If you want to make changes, start by forking the repository to your own GitHub account. You can do this by clicking the "Fork" button at the top right of the repository page. 🍴
+
+3. **Create a Branch**: After forking, create a new branch for your feature or bug fix:  
+
+4. **Make Your Changes**: Implement your changes in your branch. Be sure to follow the coding standards and commit messages conventions used in the project. 💻
+
+5. **Commit Your Changes**: Once you're satisfied with your changes, commit them with a clear message:  
+
+6. **Push to Your Fork**: Push your changes to your forked repository:  
+
+7. **Create a Pull Request**: Navigate to the original repository and submit a pull request. Describe the changes you’ve made and reference any related issues. 📬
+
+### Code of Conduct
+
+**© 2024 Lift Ascend. All rights reserved.** ✨

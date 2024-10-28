@@ -941,53 +941,56 @@ function populateLeaderboard(criteria) {
                                         break;
                                     }
                                 }
-
-                                const friendName = friendData ? friendData.name : 'Unknown Friend';
-                                const friendProfileUrl = `profile.html?userId=${friendData.full_name.slice(-5)}`;
-
-                                // Get the most recent lift data
-                                let mostRecentLift = null;
-                                let maxTimestamp = 0;
-
-                                if (friendData && friendData.liftData) {
-                                    const liftEntries = Array.isArray(friendData.liftData) 
-                                        ? friendData.liftData 
-                                        : Object.values(friendData.liftData);
-
-                                    for (const lift of liftEntries) {
-                                        if (lift.timestamp > maxTimestamp) {
-                                            maxTimestamp = lift.timestamp;
-                                            mostRecentLift = lift;
+                                if (friendData) {
+                                    const friendName = friendData ? friendData.name : 'Unknown Friend';
+                                    const friendProfileUrl = `profile.html?userId=${friendData.full_name.slice(-5)}`;
+    
+                                    // Get the most recent lift data
+                                    let mostRecentLift = null;
+                                    let maxTimestamp = 0;
+    
+                                    if (friendData && friendData.liftData) {
+                                        const liftEntries = Array.isArray(friendData.liftData) 
+                                            ? friendData.liftData 
+                                            : Object.values(friendData.liftData);
+    
+                                        for (const lift of liftEntries) {
+                                            if (lift.timestamp > maxTimestamp) {
+                                                maxTimestamp = lift.timestamp;
+                                                mostRecentLift = lift;
+                                            }
                                         }
                                     }
+    
+                                    // Calculate total after conversions
+                                    const squat = mostRecentLift ? mostRecentLift.squat : 0;
+                                    const bench = mostRecentLift ? mostRecentLift.bench : 0;
+                                    const deadlift = mostRecentLift ? mostRecentLift.deadlift : 0;
+                                    let total = parseFloat(squat) + parseFloat(bench) + parseFloat(deadlift);
+    
+                                    
+    
+                                    // Calculate DOTS score
+                                    const weight = mostRecentLift.weight; // Make sure you have weight in friendData
+                                    
+                                    const unit = mostRecentLift.unit || 'lbs'; // Default unit
+                                    const dotsScore = calculateLifterDOTS(weight, squat, bench, deadlift, mostRecentLift.gender.toLowerCase() === 'male', unit);
+                                    leaderboardData.push({
+                                        name: friendName,
+                                        profileUrl: friendProfileUrl,
+                                        total: total, // Use for total score view
+                                        squat:mostRecentLift.squat,
+                                        bench:mostRecentLift.bench,
+                                        deadlift:mostRecentLift.deadlift,
+                                        dots: dotsScore, // Use for DOTS score view
+                                        rank: mostRecentLift ? mostRecentLift.rank : '', // Add rank if available
+                                        unit : unit
+                                    });
                                 }
-
-                                // Calculate total after conversions
-                                const squat = mostRecentLift ? mostRecentLift.squat : 0;
-                                const bench = mostRecentLift ? mostRecentLift.bench : 0;
-                                const deadlift = mostRecentLift ? mostRecentLift.deadlift : 0;
-                                let total = parseFloat(squat) + parseFloat(bench) + parseFloat(deadlift);
-
                                 
-
-                                // Calculate DOTS score
-                                const weight = mostRecentLift.weight; // Make sure you have weight in friendData
-                                
-                                const unit = mostRecentLift.unit || 'lbs'; // Default unit
-                                const dotsScore = calculateLifterDOTS(weight, squat, bench, deadlift, mostRecentLift.gender.toLowerCase() === 'male', unit);
                          
                                 // Push data to leaderboardData array
-                                leaderboardData.push({
-                                    name: friendName,
-                                    profileUrl: friendProfileUrl,
-                                    total: total, // Use for total score view
-                                    squat:mostRecentLift.squat,
-                                    bench:mostRecentLift.bench,
-                                    deadlift:mostRecentLift.deadlift,
-                                    dots: dotsScore, // Use for DOTS score view
-                                    rank: mostRecentLift ? mostRecentLift.rank : '', // Add rank if available
-                                    unit : unit
-                                });
+                             
                             });
 
                         friendPromises.push(promise); // Collect promises

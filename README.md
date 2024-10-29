@@ -64,7 +64,7 @@ This application uses data from the [OpenPowerlifting](https://www.openpowerlift
 
 This project is licensed under a **Proprietary License**. For more details, please refer to the LICENSE file in this repository.
 
-## Contributing 🤝
+## Contributing-🤝
 
 We welcome contributions from the community! Here’s how you can help:
 

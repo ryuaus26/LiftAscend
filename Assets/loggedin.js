@@ -21,6 +21,13 @@ const auth = firebase.auth();
 const database = firebase.database();
 
 
+auth.onAuthStateChanged((user) => {
+    if (!user) {
+        // User is not logged in, redirect to index.html
+        window.location.href = "index.html";
+    }
+   
+});
 //Percentiles
 async function loadPercentileData(filepath) {
     try {

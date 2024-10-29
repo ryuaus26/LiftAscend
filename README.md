@@ -1,5 +1,10 @@
 # Lift Ascend 🚀
 
+🚀 LiftAscend is now live! 🚀
+
+Check it out at https://liftascend.web.app/
+
+
 Lift Ascend is an innovative web application designed for powerlifters to track their lifting progress, compare their achievements with friends, and earn badges based on their performance. The app is built with a user-friendly interface that allows lifters of all levels to stay motivated and engaged in their fitness journey. 💪
 
 ![Logo](https://github.com/user-attachments/assets/ded8aa0c-ebda-414a-b635-b636f5c88155)
@@ -79,5 +84,6 @@ We welcome contributions from the community! Here’s how you can help:
 ## Contact 📱
 Email: yunryu1217@gmail.com
 Austin Ryu
+##
 
 **© 2024 Lift Ascend. All rights reserved.** ✨

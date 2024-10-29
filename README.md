@@ -11,13 +11,14 @@ Lift Ascend is an innovative web application designed for powerlifters to track 
 
 ## Table of Contents 📚
 
-- [Usage](#usage)
-- [Features](#features)
-- [Leaderboards Overview](#leaderboards-overview)
-- [Data Sources](#data-sources)
-- [License](#license)
-- [Contributing](#contributing)
-- [Contact](#contact)
+- [Usage](#usage-📝)
+- [Features](#features-🌟)
+- [Leaderboards Overview](#leaderboards-overview-📊)
+- [Data Sources](#data-sources-📁)
+- [License](#license-📜)
+- [Contributing](#contributing-🤝)
+- [Contact](#contact-📱)
+
 
 ## Usage 📝
 

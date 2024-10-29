@@ -1,6 +1,11 @@
-// Your web app's Firebase configuration
 const firebaseConfig = {
-     //YOUR API
+    apiKey: "AIzaSyB5pHK1U6Oy5Ta9oPOcL5LfWXGP_U3838E",
+    authDomain: "liftascend.firebaseapp.com",
+    projectId: "liftascend",
+    storageBucket: "liftascend.appspot.com",
+    messagingSenderId: "403461421933",
+    appId: "1:403461421933:web:52452b598fb853c3cb3864",
+    measurementId: "G-RFR3H01R2N"
 };
 let currentWeightUnit = 'lbs'; // Default unit is pounds
 // Initialize Firebase
@@ -235,6 +240,20 @@ function fetchLiftData(uid, name) {
     return score.toFixed(2);
 }
 
+firebase.initializeApp(firebaseConfig);
+
+// Check if user is logged in
+firebase.auth().onAuthStateChanged((user) => {
+    const logoLink = document.getElementById("logoLink");
+
+    if (user) {
+        // User is logged in, set link to loggedin.html
+        logoLink.href = "loggedin.html";
+    } else {
+        // User is not logged in, set link to index.html
+        logoLink.href = "index.html";
+    }
+});
   
 document.addEventListener('DOMContentLoaded', loadAllUsers);
 function addFriend() {

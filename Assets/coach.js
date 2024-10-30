@@ -1,55 +1,132 @@
-import Anthropic from "@anthropic-ai/sdk";
+// Main chat widget functionality
+const chatButton = document.getElementById("chatButton");
+const chatForm = document.getElementById("chatForm");
+const chatInput = document.getElementById("chatInput");
+const chatMessages = document.getElementById("chatMessages");
+const sendMessage = document.getElementById("sendMessage");
 
-const anthropic = new Anthropic({
-  apiKey: "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",
-});
 
-document.getElementById('chatForm').addEventListener('submit', async function(e) {
-  e.preventDefault(); // Prevent form submission
+// Chat Widget Class
+class ChatWidget {
+    constructor() {
+        this.isOpen = false;
+        this.setupEventListeners();
+    }
 
-  const userMessage = document.getElementById('userMessage').value;
-  if (userMessage.trim() === '') return; // Ignore empty messages
+    setupEventListeners() {
+        const chatButton = document.getElementById("chatButton");
+        const chatForm = document.getElementById("chatForm");
+        const chatInput = document.getElementById("chatInput");
+        const sendMessage = document.getElementById("sendMessage");
 
-  // Display the user's message
-  const chatContainer = document.getElementById('chatContainer');
-  const userMessageElement = document.createElement('p');
-  userMessageElement.className = 'text-right text-blue-600 font-semibold my-2';
-  userMessageElement.textContent = `You: ${userMessage}`;
-  chatContainer.appendChild(userMessageElement);
-  
-  // Scroll to the bottom of the chat container
-  chatContainer.scrollTop = chatContainer.scrollHeight;
+        chatButton.addEventListener("click", (event) => {
+            event.stopPropagation();
+            this.toggleChat();
+        });
 
-  // Clear the input field
-  document.getElementById('userMessage').value = '';
+        sendMessage.addEventListener("click", () => this.sendMessage());
+        
+        chatInput.addEventListener("keypress", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                this.sendMessage();
+            }
+        });
 
-  // Send the user's message to Claude
-  try {
-    const response = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
-      max_tokens: 1000,
-      temperature: 0,
-      system: "This is a powerlifting coach chatbot and you sound like an enthusiastic human. Help the user with their powerlifting questions; all other unrelated questions can be ignored. When the user gives a question, provide tips to improve with specific steps and give links to helpful up-to-date articles.",
-      messages: [
-        {
-          role: "user",
-          content: userMessage // Send the user's message here
+        document.addEventListener("click", (event) => {
+            if (!chatForm.contains(event.target) && event.target !== chatButton) {
+                this.closeChat();
+            }
+        });
+
+        chatInput.addEventListener("input", () => {
+            sendMessage.disabled = chatInput.value.trim() === "";
+        });
+    }
+
+    toggleChat() {
+        const chatForm = document.getElementById("chatForm");
+        const chatButton = document.getElementById("chatButton");
+        const chatInput = document.getElementById("chatInput");
+
+        this.isOpen = !this.isOpen;
+
+        if (this.isOpen) {
+            chatForm.classList.add("active");
+            chatButton.classList.add("active");
+            chatInput.focus();
+            this.addSystemMessage("In testing Mode");
+        } else {
+            chatForm.classList.remove("active");
+            chatButton.classList.remove("active");
         }
-      ]
-    });
+    }
 
-    // Display the bot's response
-    const botMessageElement = document.createElement('p');
-    botMessageElement.className = 'text-left text-gray-600 my-2';
-    botMessageElement.textContent = `Lift Ascend Bot: ${response.choices[0].message.content}`; // Adjust based on response format
-    chatContainer.appendChild(botMessageElement);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-  } catch (error) {
-    console.error("Error communicating with Claude:", error);
-    const errorMessageElement = document.createElement('p');
-    errorMessageElement.className = 'text-left text-red-600 my-2';
-    errorMessageElement.textContent = "Sorry, there was an error connecting to the bot. Please try again.";
-    chatContainer.appendChild(errorMessageElement);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-  }
-});
+    closeChat() {
+        const chatForm = document.getElementById("chatForm");
+        this.isOpen = false;
+        chatForm.classList.remove("active");
+    }
+
+    sendMessage() {
+        const chatInput = document.getElementById("chatInput");
+        const message = chatInput.value.trim();
+        if (message !== "") {
+            this.addUserMessage(message);
+            chatInput.value = "";
+            document.getElementById("sendMessage").disabled = true;
+            
+            // Show typing indicator
+            this.addSystemMessage("Typing...");
+
+            setTimeout(() => {
+                this.generateResponse(message);
+            }, 1000);
+        }
+    }
+
+    addUserMessage(text) {
+        const chatMessages = document.getElementById("chatMessages");
+        const messageElement = document.createElement("div");
+        messageElement.className = "message user";
+        messageElement.textContent = text;
+        chatMessages.appendChild(messageElement);
+        this.scrollToBottom();
+    }
+
+    addSystemMessage(text) {
+        const chatMessages = document.getElementById("chatMessages");
+        const messageElement = document.createElement("div");
+        messageElement.className = "message system";
+        messageElement.textContent = text;
+        chatMessages.appendChild(messageElement);
+        this.scrollToBottom();
+    }
+
+    generateResponse(userMessage) {
+        // Remove the typing indicator before generating the response
+        const chatMessages = document.getElementById("chatMessages");
+        const typingIndicator = chatMessages.querySelector(".message.system:last-child");
+        if (typingIndicator && typingIndicator.textContent === "Typing...") {
+            typingIndicator.remove();
+        }
+
+        const responses = [
+            "Thanks for your message! Our team will get back to you soon.",
+            "I understand. Let me help you with that.",
+            "Thank you for reaching out. How else can I assist you?",
+            "I've noted your message. Is there anything else you'd like to know?"
+        ];
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        this.addSystemMessage(randomResponse);
+    }
+
+    scrollToBottom() {
+        const chatMessages = document.getElementById("chatMessages");
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+}
+
+// Initialize the chat widget
+const chatWidget = new ChatWidget();
+

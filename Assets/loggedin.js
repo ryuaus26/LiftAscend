@@ -1172,31 +1172,30 @@ function kgToLbs(kg) {
 }
 // Function to handle weight unit selection
 
+function selectWeightUnit (unit) {
+    // Prevent the default action of the button (e.g., form submission)
 
-function selectWeightUnit(unit) {
+
     // Check if the selected unit is the same as the current unit
-    if (unit === currentWeightUnit ){
+    if (unit === currentWeightUnit) {
         return; // Exit the function to avoid unnecessary conversions
     }
+
     const weightHeader = document.getElementById('weightHeader');
     const squatHeader = document.getElementById('squatHeader');
     const benchHeader = document.getElementById('benchHeader');
     const deadliftHeader = document.getElementById('deadliftHeader');
     const totalHeader = document.getElementById('totalHeader');
 
-
     const button = document.getElementById('weightUnitButton');
     button.textContent = `${unit} ▼`;
 
-
-   
     // Change headers based on selected unit
     if (unit === 'kgs') {
         weightHeader.textContent = 'Weight (kgs)';
         squatHeader.textContent = 'Squat (kgs)';
         benchHeader.textContent = 'Bench (kgs)';
         deadliftHeader.textContent = 'Deadlift (kgs)';
-      
 
         // Convert weights from lbs to kgs only if necessary
         if (currentWeightUnit === 'lbs') {
@@ -1207,7 +1206,7 @@ function selectWeightUnit(unit) {
         squatHeader.textContent = 'Squat (lbs)';
         benchHeader.textContent = 'Bench (lbs)';
         deadliftHeader.textContent = 'Deadlift (lbs)';
-       
+
         // Convert weights from kgs to lbs only if necessary
         if (currentWeightUnit === 'kgs') {
             convertToLbs();
@@ -1217,11 +1216,11 @@ function selectWeightUnit(unit) {
     currentWeightUnit = unit; // Update the current unit
     populateLeaderboard();
     
- 
-    getCurrentWeightUnit(currentWeightUnit)
-  
+    getCurrentWeightUnit(currentWeightUnit);
+
     isInitialLoad = false; // Mark that the initial load is done
 }
+
 function getCurrentWeightUnit() {
     return currentWeightUnit; // Return the current weight unit
 }

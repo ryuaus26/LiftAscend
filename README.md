@@ -11,13 +11,14 @@ Lift Ascend is an innovative web application designed for powerlifters to track 
 
 ## Table of Contents 📚
 
-- [Usage](#usage)
-- [Features](#features)
-- [Leaderboards Overview](#leaderboards-overview)
-- [Data Sources](#data-sources)
-- [License](#license)
-- [Contributing](#contributing)
-- [Contact](#contact)
+- [Usage](#usage-📝)
+- [Features](#features-🌟)
+- [Leaderboards Overview](#leaderboards-overview-📊)
+- [Data Sources](#data-sources-📁)
+- [License](#license-📜)
+- [Contributing](#contributing-🤝)
+- [Contact](#contact-📱)
+
 
 ## Usage 📝
 
@@ -63,7 +64,7 @@ This application uses data from the [OpenPowerlifting](https://www.openpowerlift
 
 This project is licensed under a **Proprietary License**. For more details, please refer to the LICENSE file in this repository.
 
-## Contributing 🤝
+## Contributing-🤝
 
 We welcome contributions from the community! Here’s how you can help:
 

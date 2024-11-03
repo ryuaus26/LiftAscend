@@ -9,7 +9,7 @@ firebase-debug.*.log*
 C:\\Users\\yunry\\OneDrive\\바탕 화면\\LiftAscend\\openpowerlifting-2024-10-19\\openpowerlifting-2024-10-19-50627554.csv
 # Firebase cache
 .firebase/
-
+.env
 
 
 # Firebase config

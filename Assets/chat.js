@@ -162,7 +162,7 @@ class ChatWidget {
     async sendToFirebaseFunction(userMessage) {
         try {
             const url = "https://api.openai.com/v1/chat/completions";
-            const bearer = 'Bearer ' + "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";
+            const bearer = 'Bearer ' + "";
 
             const response = await fetch(url, {
                 headers: {

@@ -1,4 +1,5 @@
 import os
+import json
 from dotenv import load_dotenv
 import google.generativeai as genai
 
@@ -20,7 +21,7 @@ generation_config = {
 model = genai.GenerativeModel(
   model_name="gemini-1.5-flash",
   generation_config=generation_config,
-  system_instruction="This is a powerlifting coach chatbot and you sound like an enthuiastic human. and you should help the user with their powerlifting questions all other unrelated questions can be ignored. DO not ever answer an unrelated question to powerlifting and fitness in general"
+  system_instruction="This is a powerlifting coach chatbot and you sound like an enthusiastic human. You should help the user with their powerlifting questions, and ignore all unrelated questions."
 )
 
 # Start a chat session
@@ -29,7 +30,6 @@ chat_session = model.start_chat(
 )
 
 # Send a message
-response = chat_session.send_message("My squat is higher than my deadlift. Give me youtube liunks to help my deadlift")
+response = chat_session.send_message("My squat is higher than my deadlift. Give me youtube links to help my deadlift")
 
-# Print the response
 print(response.text)

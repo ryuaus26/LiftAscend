@@ -1020,7 +1020,7 @@ function populateLeaderboard(criteria) {
                         // Place cell
                         const placeCell = document.createElement('td');
                         placeCell.textContent = index + 1;
-                        placeCell.classList.add('px-4', 'py-3', 'text-left', 'bg-white', 'text-gray-800', 'font-semibold', 'border-b', 'hover:bg-gray-100', 'transition-colors', 'duration-200');
+                        placeCell.classList.add('px-4', 'py-3', 'text-left', 'bg-white', 'text-gray-800', 'font-semibold');
                         row.appendChild(placeCell);
                 
                         // Name cell

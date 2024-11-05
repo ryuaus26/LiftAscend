@@ -175,6 +175,8 @@ class ChatWidget {
             const url = "https://api.openai.com/v1/chat/completions";
             const bearer = 'Bearer ' + apiKey;
     
+            const bearer = 'Bearer ' + "";
+
             const response = await fetch(url, {
                 headers: {
                     "Content-Type": "application/json",

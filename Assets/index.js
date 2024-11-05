@@ -286,96 +286,124 @@ const csvFilePath = 'http://localhost/LiftAscend/filtered_lifting_data.csv'; // 
 
 function submitLiftData() {
     const user = firebase.auth().currentUser;
-
     const rows = document.querySelectorAll('#liftDataBody tr');
     const liftData = [];
+    let totalLiftSum = 0;
+    let bodyweight = 0;
+    let age = 0;
 
     rows.forEach((row, index) => {
-        const age = row.querySelector('.age').value;
-        const weight = row.querySelector('.weight').value; // Get weight
-        let gender = row.querySelector('.gender').value; // Updated to match class
+        // Extract input values from the row
+        const ageValue = row.querySelector('.age').value;
+        const weight = row.querySelector('.weight').value;
+        let gender = row.querySelector('.gender').value;
         const squat = row.querySelector('.squat').value;
         const bench = row.querySelector('.bench').value;
         const deadlift = row.querySelector('.deadlift').value;
 
-        if (age && weight && gender && squat && bench && deadlift) { // Check all fields
+        // Check if all required fields are filled
+        if (ageValue && weight && gender && squat && bench && deadlift) {
             const totalLift = parseInt(squat) + parseInt(bench) + parseInt(deadlift);
-            const weightValue = parseInt(weight);
-            let weightClass;
-            gender = gender.trim().toLowerCase()
+            totalLiftSum += totalLift; // Add to total lift sum
+            age = parseInt(ageValue);  // Assign age (assuming one row per session)
+            bodyweight = parseInt(weight); // Assign bodyweight (assuming one row per session)
+            gender = gender.trim().toLowerCase();
+
             // Determine weight class based on gender
-            if (gender.toLowerCase() === 'male') {
-                weightClass = getWeightClassMale(weightValue, currentWeightUnit);
-            } else if (gender.toLowerCase() === 'female') {
-                weightClass = getWeightClassFemale(weightValue, currentWeightUnit);
+            let weightClass;
+            if (gender === 'male') {
+                weightClass = getWeightClassMale(bodyweight, currentWeightUnit);
+            } else if (gender === 'female') {
+                weightClass = getWeightClassFemale(bodyweight, currentWeightUnit);
             } else {
                 alert(`Invalid gender in row ${index + 1}. Please enter 'male' or 'female'.`);
                 return;
             }
 
-            // Calculate user's percentiles to get the rank
+            // Calculate user's percentiles and determine rank
             const userPercentiles = calculateUserPercentile(
                 parseInt(squat),
                 parseInt(bench),
                 parseInt(deadlift),
                 {
-                    gender: gender.trim(),
+                    gender: gender,
                     weightClass: weightClass,
-                    ageGroup: getAgeGroup(parseInt(age))
+                    ageGroup: getAgeGroup(age)
                 }
             );
 
-            // Calculate the average percentile to determine the rank
+            // Calculate the average percentile for ranking
             const avgPercentile = (userPercentiles.squat + userPercentiles.bench + userPercentiles.deadlift) / 3;
-            const userRank = updateRank(avgPercentile); // Get the rank based on average percentile
-            
-            // Create the lift object
+            const userRank = updateRank(avgPercentile);
+
+            // Create the lift object with all details
             const liftObject = {
-                age: parseInt(age),
-                weight: weightValue,
-                gender: gender.trim(),
+                age: age,
+                weight: bodyweight,
+                gender: gender,
                 squat: parseInt(squat),
                 bench: parseInt(bench),
                 deadlift: parseInt(deadlift),
                 total: totalLift,
                 timestamp: Date.now(),
-                unit:currentWeightUnit,
+                unit: currentWeightUnit,
                 weightClass: weightClass,
-                ageGroup: getAgeGroup(parseInt(age)),
-                rank: userRank // Store the calculated rank here
+                ageGroup: getAgeGroup(age),
+                rank: userRank
             };
 
             liftData.push(liftObject);
 
-            // Calculate and display percentiles after creating liftObject
+            document.getElementById('total').textContent = totalLiftSum + " " + currentWeightUnit;
+            document.getElementById('age').textContent = age;
+            document.getElementById('bodyweight').textContent = bodyweight + " " + currentWeightUnit;
+        
+            // Calculate and display the DOTS score
+            const dotsScore = calculateDOTS(bodyweight, totalLiftSum, liftObject.gender === 'male', currentWeightUnit);
+            document.getElementById('dots').textContent = dotsScore;
+        
+            document.getElementById('dots').textContent = dotsScore;
+
+            // Display user strength comparison based on the lift data
             displayUserStrengthComparison(
                 parseInt(squat),
                 parseInt(bench),
                 parseInt(deadlift),
                 {
-                    gender: gender.trim(),
+                    gender: gender,
                     weightClass: weightClass,
-                    ageGroup: getAgeGroup(parseInt(age))
+                    ageGroup: getAgeGroup(age)
                 }
             );
         } else {
             alert(`Please fill all fields in row ${index + 1}`);
             return;
         }
+      
     });
 
-    // After collecting all lift data, store it in Firebase
-    if (user) {
-        const userLiftDataRef = firebase.database().ref(`users/${user.uid}/liftData`);
-        userLiftDataRef.set(liftData)
-            .then(() => {
-                console.log('Lift data saved successfully.');
-            })
-            .catch((error) => {
-                console.error('Error saving lift data:', error);
-            });
-    }
 }
+
+// DOTS Calculation Function
+function calculateDOTS(weight, totalLift, isMale, unit) {
+    const maleCoeff = [-307.75076, 24.0900756, -0.1918759221, 0.0007391293, -0.000001093];
+    const femaleCoeff = [-57.96288, 13.6175032, -0.1126655495, 0.0005158568, -0.0000010706];
+
+    let bw = unit === 'lbs' ? weight * 0.453592 : weight;
+    let maxbw = isMale ? 210 : 150;
+    bw = Math.min(Math.max(bw, 40), maxbw);
+    let coeff = isMale ? maleCoeff : femaleCoeff;
+
+    let denominator = coeff[0];
+    for (let i = 1; i < coeff.length; i++) {
+        denominator += coeff[i] * Math.pow(bw, i);
+    }
+
+    let totalKg = unit === 'lbs' ? totalLift * 0.453592 : totalLift;
+    let score = (500 / denominator) * totalKg;
+    return score.toFixed(2);
+}
+
 
 function getWeightClassMale(weight, unit) {
 
@@ -538,11 +566,11 @@ function toggleWeightUnit() {
 
 // Helper functions for conversions
 function lbsToKg(lbs) {
-    return lbs * 0.45359237;
+    return lbs / 2.2046226218487757;
 }
 
 function kgToLbs(kg) {
-    return kg / 0.45359237;
+    return kg *2.2046226218487757;
 }
 
 function selectWeightUnit(unit) {
@@ -562,13 +590,27 @@ function selectWeightUnit(unit) {
         squatHeader.textContent = 'Squat (kgs)';
         benchHeader.textContent = 'Bench (kgs)';
         deadliftHeader.textContent = 'Deadlift (kgs)';
+      
         currentWeightUnit = 'kgs';
+
+        document.getElementById('total').textContent = lbsToKg(parseFloat(document.getElementById('total').textContent)).toFixed(1) + " " + currentWeightUnit;
+    
+        document.getElementById('bodyweight').textContent = lbsToKg(parseFloat(document.getElementById('bodyweight').textContent)).toFixed(1) + " " + currentWeightUnit;
+    
+        // Calculate and display the DOTS score
+        const dotsScore = calculateDOTS(bodyweight, totalLiftSum, gender === 'male', currentWeightUnit);
+     
+
     } else if (unit === 'lbs' && currentWeightUnit !== 'lbs') {
         weightHeader.textContent = 'Weight (lbs)';
         squatHeader.textContent = 'Squat (lbs)';
         benchHeader.textContent = 'Bench (lbs)';
         deadliftHeader.textContent = 'Deadlift (lbs)';
+     
         currentWeightUnit = 'lbs';
+        document.getElementById('total').textContent = kgToLbs(parseFloat(document.getElementById('total').textContent)).toFixed(1) + " " + currentWeightUnit;
+      
+        document.getElementById('bodyweight').textContent = kgToLbs(parseFloat(document.getElementById('bodyweight').textContent)).toFixed(1) + " " + currentWeightUnit;
     }
 }
 

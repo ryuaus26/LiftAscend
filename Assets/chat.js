@@ -1,3 +1,5 @@
+
+
 class ChatWidget {
     constructor() {
         this.isOpen = false;
@@ -161,9 +163,18 @@ class ChatWidget {
 
     async sendToFirebaseFunction(userMessage) {
         try {
+            const apiKeyRef = this.database.ref('APIKEY');
+            const snapshot = await apiKeyRef.once('value');
+            const apiKey = snapshot.val();
+    
+            if (!apiKey) {
+                console.error('API key not found in Firebase for user:', user.uid);
+                return null;
+            }
+    
             const url = "https://api.openai.com/v1/chat/completions";
-            const bearer = 'Bearer ' + "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";
-
+            const bearer = 'Bearer ' + apiKey;
+    
             const response = await fetch(url, {
                 headers: {
                     "Content-Type": "application/json",
@@ -186,16 +197,16 @@ class ChatWidget {
                     max_tokens: 150
                 }),
             });
-
+    
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('Error from OpenAI API:', errorData);
                 return null;
             }
-
+    
             const data = await response.json();
             return data.choices[0].message.content;
-
+    
         } catch (error) {
             console.error('Error connecting to OpenAI API:', error);
             return null;

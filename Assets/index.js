@@ -124,15 +124,12 @@ function clearLiftDataTable() {
     addRow(); // Add one empty row
 }
 function login() {
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const enteredName = document.getElementById('full_name').value.trim();
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    
     
     // Validate inputs
-    if (!email || !password || !enteredName) {
-        alert('Please fill in all fields');
-        return;
-    }
+    
 
     if (!validate_email(email) || !validate_password(password)) {
         alert('Email or Password is invalid!');
@@ -140,11 +137,7 @@ function login() {
     }
     
     // Show loading state
-    const submitButton = document.querySelector('button[type="submit"]');
-    if (submitButton) {
-        submitButton.disabled = true;
-        submitButton.textContent = 'Logging in...';
-    }
+
     
     auth.signInWithEmailAndPassword(email, password)
         .then(function(userCredential) {
@@ -165,22 +158,18 @@ function login() {
         })
         .then(function(snapshot) {
             const user_info = snapshot.val();
-            
+            const loginBtn = document.getElementById('login-btn');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
             // Check if user info exists
             if (!user_info || !user_info.name) {
+                window.location.href = "index.html";  // Redirect if user info is incomplete
                 throw new Error('User data not found');
             }
 
-            // Case-insensitive name comparison
-            if (enteredName.toLowerCase() === user_info.name.toLowerCase()) {
-                // Store session data if needed
-                sessionStorage.setItem('userName', user_info.name);
-                
-                // Redirect to logged in page
-                window.location.href = "loggedin.html";
-            } else {
-                throw new Error('Name verification failed');
-            }
+            // Redirect to loggedin.html if everything is correct
+            window.location.href = "loggedin.html"; // Correct the redirection
+           
         })
         .catch(function(error) {
             console.error("Login error:", error);
@@ -190,19 +179,25 @@ function login() {
             switch (error.code) {
                 case 'auth/user-not-found':
                     errorMessage = 'No account found with this email';
+                    window.location.href = "index.html";  // Correct
                     break;
                 case 'auth/wrong-password':
                     errorMessage = 'Incorrect password';
+                    window.location.href = "index.html";  // Correct
                     break;
                 case 'auth/too-many-requests':
                     errorMessage = 'Too many failed attempts. Please try again later';
+                    window.location.href = "index.html";  // Correct
                     break;
                 default:
                     errorMessage = error.message === 'Name verification failed' 
+                    
                         ? 'The name you entered does not match our records'
                         : 'An error occurred during login. Please try again';
+                        window.location.href = "index.html";  // Correct
             }
             
+
             alert(errorMessage);
         })
         .finally(() => {
@@ -633,7 +628,7 @@ firebase.auth().onAuthStateChanged((user) => {
       // User is signed in, delay redirection by 500 milliseconds
       setTimeout(() => {
         window.location.href = 'loggedin.html';
-      }, 2000);
+      }, 1000);
     } 
   });
   
@@ -779,7 +774,26 @@ function displayRank(rank) {
     }
 }
 
+function showLogin() {
+    document.getElementById('form_header').textContent = 'Login';
+    document.getElementById('login-form').classList.remove('hidden');
+    document.getElementById('register-form').classList.add('hidden');
+    document.getElementById('reset-password-form').classList.add('hidden');
+}
 
+function showRegister() {
+    document.getElementById('form_header').textContent = 'Register';
+    document.getElementById('login-form').classList.add('hidden');
+    document.getElementById('register-form').classList.remove('hidden');
+    document.getElementById('reset-password-form').classList.add('hidden');
+}
+
+function showResetPassword() {
+    document.getElementById('form_header').textContent = 'Reset Password';
+    document.getElementById('login-form').classList.add('hidden');
+    document.getElementById('register-form').classList.add('hidden');
+    document.getElementById('reset-password-form').classList.remove('hidden');
+}
 // Function to search for lifters based on user input
 function searchLifters(query) {
     const suggestionsContainer = document.getElementById('suggestionsContainer');

@@ -2,7 +2,7 @@ document.getElementById('reset-password-form').addEventListener('submit', functi
     event.preventDefault(); // Prevent form submission
     
     const email = document.getElementById('reset-email').value;
-    
+   
     auth.sendPasswordResetEmail(email)
         .then(() => {
             alert('Password reset email sent! Check your inbox.');

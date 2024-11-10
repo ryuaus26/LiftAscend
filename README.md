@@ -2,7 +2,7 @@
 
 🚀 LiftAscend is now live! 🚀
 
-Check it out at https://liftascend.web.app/
+Check it out at https://liftascend.com
 
 
 Lift Ascend is an innovative web application designed for powerlifters to track their lifting progress, compare their achievements with friends, and earn badges based on their performance. The app is built with a user-friendly interface that allows lifters of all levels to stay motivated and engaged in their fitness journey. 💪

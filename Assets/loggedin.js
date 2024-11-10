@@ -795,6 +795,17 @@ function populateFriendList() {
                             const listItem = document.createElement('li');
                             
                             const nameSpan = document.createElement('span');
+                            nameSpan.classList.add(
+                                'text-lg',            // Large text
+                                'font-semibold',      // Bold font
+                                'text-blue-600',      // Blue text color
+                                'hover:text-blue-800', // Darker blue on hover
+                                'px-2',               // Padding on the x-axis
+                                'py-1',               // Padding on the y-axis
+                                'rounded-md',         // Rounded corners
+                                'transition-colors',  // Smooth color transition on hover
+                                'duration-300'        // 300ms transition duration
+                            );
                             nameSpan.textContent = friendName;
                             nameSpan.style.cursor = 'pointer';
                             nameSpan.addEventListener('click', () => {
@@ -804,6 +815,22 @@ function populateFriendList() {
                             const deleteButton = document.createElement('button');
                             deleteButton.textContent = 'X';
                             deleteButton.style.marginLeft = '10px';
+                            deleteButton.classList.add(
+                                'ml-2',               // Margin-left for spacing
+                                'text-white',         // White text color
+                                'bg-red-500',         // Red background color
+                                'hover:bg-red-700',   // Darker red on hover
+                                'font-bold',          // Bold font
+                                'px-2',               // Padding on the x-axis
+                                'py-1',               // Padding on the y-axis
+                                'rounded',            // Rounded corners
+                                'transition-colors',  // Smooth color transition on hover
+                                'duration-300',
+                                'text-xs'          // 300ms transition duration
+                            );
+                            
+                            // Optional: Add an accessible title for screen readers
+                            deleteButton.setAttribute('aria-label', 'Delete friend name');
                             deleteButton.addEventListener('click', () => {
                                 firebase.database().ref(`users/${user.uid}/friends/${friendInfo.key}`).remove()
                                     .then(() => {
@@ -1440,16 +1467,58 @@ document.getElementById('searchInput').addEventListener('input', async function 
 
 
 
-// Add the printFriendsLeaderboard function you provided earlier, ensuring it updates the `leaderboardBody`
+// Get the dropdown button and content elements
+const modeButton = document.getElementById('modeButton');
+const dropdownContent = document.getElementById('dropdownContent');
 
-// Modified sort function to handle both total and DOTS
+// Initialize the aria-expanded state when the page loads
+window.addEventListener('DOMContentLoaded', function() {
+    // Make sure the dropdown starts closed
+    modeButton.setAttribute('aria-expanded', 'false');
+    dropdownContent.classList.add('hidden');
+});
 
 function toggleDropdown() {
-    const dropdown = document.getElementById("dropdownContent");
-    dropdown.classList.toggle("hidden");
+    const isExpanded = modeButton.getAttribute('aria-expanded') === 'true';
+    modeButton.setAttribute('aria-expanded', !isExpanded);
+    dropdownContent.classList.toggle('hidden');
 }
 
+// Add click event listener to the document
+document.addEventListener('click', function(event) {
+    // Always check if dropdown is visible (not hidden)
+    if (!dropdownContent.classList.contains('hidden')) {
+        // Check if click is outside both the button and dropdown content
+        const isClickOutside = !modeButton.contains(event.target) && 
+                              !dropdownContent.contains(event.target);
+        
+        if (isClickOutside) {
+            modeButton.setAttribute('aria-expanded', 'false');
+            dropdownContent.classList.add('hidden');
+        }
+    }
+});
 
+// Prevent clicks on the dropdown menu items from triggering the document click handler
+dropdownContent.addEventListener('click', function(event) {
+    // Only prevent propagation if clicking on a menu item
+    if (event.target.getAttribute('role') === 'menuitem') {
+        event.stopPropagation();
+        // Close the dropdown after selecting an option
+        modeButton.setAttribute('aria-expanded', 'false');
+        dropdownContent.classList.add('hidden');
+    }
+});
 
+// Prevent clicks on the button from triggering the document click handler
+modeButton.addEventListener('click', function(event) {
+    event.stopPropagation();
+});
 
-
+// Optional: Close dropdown when pressing Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && !dropdownContent.classList.contains('hidden')) {
+        modeButton.setAttribute('aria-expanded', 'false');
+        dropdownContent.classList.add('hidden');
+    }
+});

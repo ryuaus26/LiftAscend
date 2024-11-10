@@ -330,7 +330,7 @@ function submitLiftData() {
             // Calculate the average percentile for ranking
             const avgPercentile = (userPercentiles.squat + userPercentiles.bench + userPercentiles.deadlift) / 3;
             const userRank = updateRank(avgPercentile);
-
+            
             // Create the lift object with all details
             const liftObject = {
                 age: age,
@@ -758,6 +758,7 @@ function updateRank(percentile) {
         return "Bronze";
     }
 }
+
 
 // Update the rank image dynamically
 function displayRank(rank) {

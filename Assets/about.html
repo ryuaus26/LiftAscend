@@ -129,13 +129,13 @@
                 <section class="about-section">
                     <h2 class="text-3xl font-bold text-gray-700 mb-4">Getting Started</h2>
                     <div class="prose prose-lg text-gray-600">
-                        <p class="mb-4"> To get started, create an account and input your first lift total. Additionally, you can add your friends by making an account. Whether you’re a beginner or advanced lifter, Lift Ascend makes it easy to track your progress and stay motivated.</p>
+                        <p class="mb-4"> To get started, create an account and input your first powerlift total. Additionally, you can add your friends by making an account. Whether you’re a beginner or advanced lifter, Lift Ascend makes it easy to track your progress and stay motivated.</p>
                     </div>
                 </section>
                 <section class="leaderboards-section">
                     <h2 class="text-3xl font-bold text-gray-700 mb-4">Leaderboards Overview</h2>
                     <div class="prose prose-lg text-gray-600">
-                        <p class="mb-4">The Leaderboards in this app allow you to compare your performance with your friends in a fun and interactive way.</p>
+                        <p class="mb-4">The Leaderboards in this app allow you to compare your strength with your friends in a fun and interactive way.</p>
                         <ol class="mb-4">
                             <li><strong>Add Friends:</strong> Begin by adding your friends to your list. This can be done by entering their usernames or selecting them from your contacts. Once added, they will appear in your friends' leaderboard.</li>
                             <li><strong>Select the Mode:</strong> To view the leaderboard, click on the dropdown menu located at the top of the Leaderboards section. This dropdown allows you to select the mode you want to use for comparison, such as "By Dots" or "By Total." Each mode offers a different way to rank your friends based on their performance metrics.</li>
@@ -148,7 +148,9 @@
                 <section class="about-section">
                     <h2 class="text-3xl font-bold text-gray-700 mb-4">Data Sources</h2>
                     <div class="prose prose-lg text-gray-600">
-                        <p class="mb-4">This app uses data from the OpenPowerlifting project, 
+                        <p class="mb-4">This app uses data from the OpenPowerlifting project to provide an accurate assessment of where lifters rank based on their strength. Using OpenPowerlifting’s CSV data, we gather extensive records on lifts across various weight classes and age brackets. To calculate percentiles, we apply cubic smooth interpolation, which allows us to estimate ranks precisely even between recorded data points.
+
+                            When you input your body weight (in kg) and your total, our calculator matches your stats against this interpolated dataset. This way, we can accurately position your lifting performance within a percentile relative to other lifters in your weight class and age group.
                             <a href="https://www.openpowerlifting.org" class="text-blue-600 hover:text-blue-800 underline">https://www.openpowerlifting.org</a>. You may download a copy of the data at 
                             <a href="https://data.openpowerlifting.org" class="text-blue-600 hover:text-blue-800 underline">https://openpowerlifting.gitlab.io/opl-csv/bulk-csv.html</a>.
                         </p>

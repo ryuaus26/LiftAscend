@@ -6,7 +6,7 @@
     <meta name="description" content="Lift Ascend helps powerlifters track their progress, calculate strength percentiles, and compare lifting performance across different weight classes and age groups.">
 
    
-    <title>Lift Ascend - Powerlifting Standards Calculator</title>
+    <title>Lift Ascend - Powerlifting Strength Calculator</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -280,7 +280,73 @@
         </div>
     </div>
 
-
+    <div class="flex flex-col items-center max-w-3xl mx-auto p-6">
+        <!-- Header Section -->
+        <div class="w-full text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Rank Explanation</h1>
+            <div class="w-24 h-1 bg-gradient-to-r from-blue-500 via-yellow-500 to-yellow-800 mx-auto rounded-full mb-4"></div>
+            <p class="text-gray-600 text-lg">Our ranking system shows where you stand among fellow lifters. Each tier represents your progress and dedication to strength training.</p>
+        </div>
+    
+        <!-- Ranks Container -->
+        <div class="flex flex-col items-center space-y-8">
+            <!-- Diamond Rank -->
+            <div class="flex items-center space-x-6 hover:transform hover:scale-105 transition-transform duration-300">
+                <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-blue-500 shadow-lg hover:shadow-blue-200">
+                    <img src="Diamond.png" alt="Diamond Rank" class="w-full h-full object-cover">
+                </div>
+                <div class="text-left">
+                    <p class="text-2xl font-extrabold text-blue-500 tracking-wide mb-1">Diamond</p>
+                    <p class="text-gray-600 font-medium leading-snug">
+                        You're in the <span class="text-blue-500 font-bold">top 20%</span> of all lifters!
+                    </p>
+                </div>
+            </div>
+    
+            <!-- Gold Rank -->
+            <div class="flex items-center space-x-6 hover:transform hover:scale-105 transition-transform duration-300">
+                <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-yellow-500 shadow-lg hover:shadow-yellow-200">
+                    <img src="Gold.png" alt="Gold Rank" class="w-full h-full object-cover">
+                </div>
+                <div class="text-left">
+                    <p class="text-2xl font-extrabold text-yellow-500 tracking-wide mb-1">Gold</p>
+                    <p class="text-gray-600 font-medium leading-snug">
+                        You're in the <span class="text-yellow-500 font-bold">top 35%</span> of all lifters!
+                    </p>
+                </div>
+            </div>
+    
+            <!-- Silver Rank -->
+            <div class="flex items-center space-x-6 hover:transform hover:scale-105 transition-transform duration-300">
+                <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-400 shadow-lg hover:shadow-gray-200">
+                    <img src="Silver.png" alt="Silver Rank" class="w-full h-full object-cover">
+                </div>
+                <div class="text-left">
+                    <p class="text-2xl font-extrabold text-gray-400 tracking-wide mb-1">Silver</p>
+                    <p class="text-gray-600 font-medium leading-snug">
+                        You're in the <span class="text-gray-400 font-bold">top 55%</span> of all lifters!
+                    </p>
+                </div>
+            </div>
+    
+            <!-- Bronze Rank -->
+            <div class="flex items-center space-x-6 hover:transform hover:scale-105 transition-transform duration-300">
+                <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-yellow-800 shadow-lg hover:shadow-yellow-100">
+                    <img src="Bronze.png" alt="Bronze Rank" class="w-full h-full object-cover">
+                </div>
+                <div class="text-left">
+                    <p class="text-2xl font-extrabold text-yellow-800 tracking-wide mb-1">Bronze</p>
+                    <p class="text-gray-600 font-medium leading-snug">
+                        You're in the <span class="text-yellow-800 font-bold">top 75%</span> of all lifters!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    
+    
     <!-- Scripts -->
     <script src="https://apis.google.com/js/api.js"></script>
 

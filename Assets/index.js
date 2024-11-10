@@ -818,11 +818,13 @@ function searchLifters(query) {
             // Display LOs
             if (results.length > 0) {
                 suggestionsContainer.style.display = 'block'; // Show suggestions
-                results.forEach((name) => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = name;
-                    listItem.onclick = () => selectSuggestion(name); // Handle suggestion click
-                    suggestionsList.appendChild(listItem);
+    suggestionsContainer.classList.add('z-20'); // Ensure overlap
+    results.forEach((name) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = name;
+        listItem.classList.add('p-2', 'cursor-pointer', 'hover:bg-gray-200');
+        listItem.onclick = () => selectSuggestion(name); // Handle suggestion click
+        suggestionsList.appendChild(listItem);
                 });
             } else {
                 suggestionsContainer.style.display = 'none'; // Hide if no results

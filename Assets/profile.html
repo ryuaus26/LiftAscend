@@ -23,7 +23,7 @@
            z-index: 1000;
        }
    </style>
-   <link rel="icon" href="Logo.png" type="image/png" />
+   <link rel="icon" href="./Images/Logo.png" type="image/png" />
 </head>
 
 <body class="h-full">
@@ -44,7 +44,7 @@
         <div class="max-w-full mx-auto px-8 sm:px-12 lg:px-16 py-6 flex justify-between items-center gap-8">
             <div class="flex-shrink-0">
                 <a href="loggedin.html" class="inline-block" id ="logoLink">
-                    <img class="h-24 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-lg rounded-lg" src="Logo.png" alt="Lift Ascend logo">
+                    <img class="h-24 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-lg rounded-lg" src="./Images/Logo.PNG" alt="Lift Ascend logo">
                 </a>
             </div>
         
@@ -146,18 +146,19 @@
         </div>
     </div>
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="search-bar-container mb-8">
-            <div class="relative">
-                <input type="text" class="search-bar w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search for lifters..." id="searchInput">
-                <div class="suggestions-container absolute w-full bg-white border border-gray-300 rounded-md mt-1 hidden" id="suggestionsContainer">
-                    <ul id="suggestionsList" class="divide-y divide-gray-200"></ul>
+        <div class="container mx-auto px-4 py-8">
+            <div class="search-bar-container mb-8">
+                <div class="relative">
+                    <input type="text" class="search-bar w-full px-4 py-2 pr-16 rounded-lg border border-gray-700 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search for lifters..." id="searchInput">
+                    <div class="suggestions-container absolute w-full bg-white shadow-md rounded-lg mt-1 hidden border border-gray-300" id="suggestionsContainer">
+                        <ul id="suggestionsList"></ul>
+                    </div>
+                    <button class="search-button absolute right-0 top-0 bg-blue-500 text-white px-4 py-2 h-full rounded-r-lg hover:bg-blue-600">
+                        <i class="fas fa-search"></i> Search
+                    </button>
                 </div>
-                <button class="search-button absolute right-2 top-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                    <i class="fas fa-search mr-2"></i> Search
-                </button>
             </div>
         </div>
-
        
     </main>
 
@@ -167,6 +168,6 @@
     <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
     
-    <script src="profile.js"></script>
+    <script src="./Javascript/profile.js"></script>
 </body>
 </html>

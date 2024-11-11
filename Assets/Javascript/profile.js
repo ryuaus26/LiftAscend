@@ -819,7 +819,7 @@ function displayRank(rank) {
     
     if (rankImage && rankContainer) {
         // Update the rank image
-        rankImage.src = `${rank}.png`;
+        rankImage.src = `./Images/${rank}.png`;
         rankImage.alt = rank;
         rankImage.style.visibility = "visible"
         // Make the rank container visible after user input

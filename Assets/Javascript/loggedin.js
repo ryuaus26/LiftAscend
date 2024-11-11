@@ -1147,7 +1147,7 @@ if (friendData) {
                         // Rank cell
                         const rankCell = document.createElement('td');
                         const rankImage = document.createElement('img');
-                        rankImage.src = `${entry.rank}.png`;
+                        rankImage.src = `./Images/${entry.rank}.png`;
                         rankImage.alt = `Place ${entry.rank}`;
                         rankImage.classList.add('w-20', 'h-20', 'border', 'border-gray-300', 'rounded-full', 'transition-transform', 'duration-200', 'hover:scale-110', 'shadow-md');
                         rankCell.classList.add('px-4', 'py-3', 'text-left');
@@ -1348,7 +1348,7 @@ function displayRank(rank) {
 
     if (rankImage && rankContainer) {
         // Update the rank image source and visibility
-        rankImage.src = `${rank}.png`;
+        rankImage.src = `./Images/${rank}.png`;
         rankImage.alt = rank;
         rankImage.style.visibility = "visible"; // Show the image
 

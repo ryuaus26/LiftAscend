@@ -239,7 +239,13 @@ function addRow() {
         <td>
         <input inputmode="numeric" type="number" class="age w-full px-2 py-1 border rounded" placeholder="Age"></td>
                         <td><input inputmode="numeric" type="number" class="weight w-full px-2 py-1 border rounded" placeholder="Weight"></td>
-                        <td><input type="text" class="gender w-full px-2 py-1 border rounded" placeholder="Gender"></td>
+                                                <td>
+                            <select class="gender w-full p-2 border rounded">
+                                <option value="" disabled selected>Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </td>
                         <td><input inputmode="numeric" type="number" class="squat w-full px-2 py-1 border rounded" placeholder="Squat"></td>
                         <td><input inputmode="numeric" type="number" class="bench w-full px-2 py-1 border rounded" placeholder="Bench"></td>
                         <td><input inputmode="numeric" type="number" class="deadlift w-full px-2 py-1 border rounded" placeholder="Deadlift"></td>

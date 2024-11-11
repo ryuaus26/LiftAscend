@@ -1522,3 +1522,7 @@ document.addEventListener('keydown', function(event) {
         dropdownContent.classList.add('hidden');
     }
 });
+function toggleRankExplanation() {
+    const explanationDiv = document.getElementById("rankExplanation");
+    explanationDiv.classList.toggle("hidden");
+}

@@ -586,7 +586,7 @@ function selectWeightUnit(unit) {
     const content = document.querySelector('.weight-unit-content');
     content.style.display = 'none';
 
-    if (unit === 'kgs' && currentWeightUnit !== 'kgs') {
+    if (unit === 'kgs' && currentWeightUnit !== 'kgs' && document.getElementById('total').textContent) {
         weightHeader.textContent = 'Weight (kgs)';
         squatHeader.textContent = 'Squat (kgs)';
         benchHeader.textContent = 'Bench (kgs)';

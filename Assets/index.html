@@ -184,15 +184,7 @@
     </div>
     
     
-        <div class="weight-unit absolute top-0 -right-24">
-            <button class="weight-unit-btn bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 transition duration-300" onclick="toggleWeightUnit()">
-                <span id="weightUnitButton" class="font-bold">lbs ▼</span>
-            </button>
-            <div class="weight-unit-content hidden absolute bg-white shadow-md rounded-md mt-2">
-                <a href="#" onclick="selectWeightUnit('lbs')" class="block px-4 py-2 hover:bg-gray-100">lbs</a>
-                <a href="#" onclick="selectWeightUnit('kgs')" class="block px-4 py-2 hover:bg-gray-100">kgs</a>
-            </div>
-        </div>
+
     </div>
     <div id="additional-info" class="bg-gradient-to-r from-gray-100 to-gray-200 shadow-md border-t border-b border-gray-300">
         <div class="container mx-auto px-4 py-3">
@@ -215,11 +207,20 @@
                         <span class="font-bold text-gray-800 text-lg">Bodyweight:</span>
                         <span id="bodyweight" class="text-blue-700 font-semibold text-lg"></span>
                     </div>
-                    
+                    <div class="weight-unit absolute top-0 -right-24">
+                        <button class="weight-unit-btn bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 transition duration-300" onclick="toggleWeightUnit()">
+                            <span id="weightUnitButton" class="font-bold">lbs ▼</span>
+                        </button>
+                        <div class="weight-unit-content hidden absolute bg-white shadow-md rounded-md mt-2">
+                            <a href="#" onclick="selectWeightUnit('lbs')" class="block px-4 py-2 hover:bg-gray-100">lbs</a>
+                            <a href="#" onclick="selectWeightUnit('kgs')" class="block px-4 py-2 hover:bg-gray-100">kgs</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     <div id="liftDataInput" class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8 mb-12">
+        
         <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Enter Your Lift Data</h2>
         <table id="liftDataTable" class="w-full border-collapse">
             <thead>

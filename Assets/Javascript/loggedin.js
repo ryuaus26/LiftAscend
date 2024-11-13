@@ -492,7 +492,7 @@ function updateProfileDisplay(data) {
     document.getElementById('user-bench').textContent = `${data.bench} ${currentWeightUnit}`;
     document.getElementById('user-squat').textContent = `${data.squat} ${currentWeightUnit}`;
     document.getElementById('user-deadlift').textContent = `${data.deadlift} ${currentWeightUnit}`;
-
+    document.getElementById('user-gender').textContent = `${data.gender}`;
     // Update headers to reflect current unit
     const weightHeader = document.getElementById('weightHeader');
     const squatHeader = document.getElementById('squatHeader');
@@ -1232,7 +1232,7 @@ function selectWeightUnit (unit) {
     button.textContent = `${unit} ▼`;
 
     // Change headers based on selected unit
-    if (unit === 'kgs') {
+    if (unit === 'kgs' && currentWeightUnit !== 'kgs' && document.getElementById('total').textContent) {
         weightHeader.textContent = 'Weight (kgs)';
         squatHeader.textContent = 'Squat (kgs)';
         benchHeader.textContent = 'Bench (kgs)';
@@ -1242,7 +1242,7 @@ function selectWeightUnit (unit) {
         if (currentWeightUnit === 'lbs') {
             convertToKgs();
         }
-    } else if (unit === 'lbs') {
+    } else if (unit === 'lbs' && currentWeightUnit !== 'lbs') {
         weightHeader.textContent = 'Weight (lbs)';
         squatHeader.textContent = 'Squat (lbs)';
         benchHeader.textContent = 'Bench (lbs)';

@@ -144,6 +144,7 @@ function displayLiftData(data, name) {
     document.getElementById('user-bench').textContent = (data.bench)+ " " + currentWeightUnit;
     document.getElementById('user-squat').textContent = data.squat + " " + currentWeightUnit;
     document.getElementById('user-deadlift').textContent = data.deadlift + " " + currentWeightUnit;
+    document.getElementById('user-gender').textContent = `${data.gender}`;
 }
 
 function fetchLiftData(uid, name) {
@@ -737,14 +738,14 @@ function selectWeightUnit(unit) {
     button.textContent = `${unit} ▼`;
 
     // Change headers based on selected unit
-    if (unit === 'kgs') {
+    if (unit === 'kgs' && currentWeightUnit !== 'kgs' && document.getElementById('total').textContent) {
        
 
         // Convert weights from lbs to kgs only if necessary
         if (currentWeightUnit === 'lbs') {
             convertToKgs();
         }
-    } else if (unit === 'lbs') {
+    } else if (unit === 'lbs' && currentWeigh !== 'lbs') {
      
         // Convert weights from kgs to lbs only if necessary
         if (currentWeightUnit === 'kgs') {

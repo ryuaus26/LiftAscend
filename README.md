@@ -85,7 +85,7 @@ We welcome contributions from the community! Here’s how you can help:
 Lift Ascend 🏋️‍♂️ is your all-in-one powerlifting app! Our app is packed with tools to elevate your strength journey, including:
 
 
-8. **AI Powered Coach**
+## AI Powered Coach 🤖 
 💪 Strength Standards Calculator
 📈 Progress Tracker
 🤖 AI-Powered Lifting Coach

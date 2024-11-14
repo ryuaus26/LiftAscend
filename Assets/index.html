@@ -75,15 +75,15 @@
                 <h2 class="text-2xl font-bold mb-4 text-blue-800">Your Percentiles</h2>
                 <div class="percentile-item flex items-center mb-2">
                     <span class="icon squat-icon text-3xl mr-2">🏋️‍♂️</span>
-                    <p class="text-lg">Your squat is <span id="squat-percentile" class="font-bold text-blue-600"></span></p>
+                    <p class="text-lg">Your squat is <span id="squat-percentile" class="font-bold text-blue-600">0 % better than others</span></p>
                 </div>
                 <div class="percentile-item flex items-center mb-2">
                     <span class="icon bench-icon text-3xl mr-2">🏋️‍♀️</span>
-                    <p class="text-lg">Your bench is <span id="bench-percentile" class="font-bold text-blue-600"></span></p>
+                    <p class="text-lg">Your bench is <span id="bench-percentile" class="font-bold text-blue-600">0 % better than others</span></p>
                 </div>
                 <div class="percentile-item flex items-center">
                     <span class="icon deadlift-icon text-3xl mr-2">🏋️‍♂️</span>
-                    <p class="text-lg">Your deadlift is <span id="deadlift-percentile" class="font-bold text-blue-600"></span></p>
+                    <p class="text-lg">Your deadlift is <span id="deadlift-percentile" class="font-bold text-blue-600">0 % better than others</span></p>
                 </div>
             </div>
 
@@ -91,9 +91,9 @@
                 <div class="rank-container mr-4" id="rankContainer">
                     <h2 class="text-xl font-bold mb-2">Your Rank:</h2>
                     <img 
-                        src="https://ryuaus26.github.io/WebsiteLiftAscend/Images/Rank/.png" 
-                        style="visibility: hidden;" 
-                        class="rank-image w-24 h-24 border border-gray-300 rounded-full transition-transform duration-200 hover:scale-110 shadow-md" 
+                        src="./Images/Unranked.png" 
+                      
+                        class="rank-image w-32 h-32 border border-gray-300 rounded-full transition-transform duration-200 hover:scale-110 shadow-md" 
                         id="rankImage" 
                         alt="Rank Image">
                 </div>
@@ -192,72 +192,75 @@
                 <div class="flex flex-wrap md:flex-nowrap justify-between gap-6 items-center">
                     <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
                         <span class="font-bold text-gray-800 text-lg">Total:</span>
-                        <span id="total" class="text-blue-700 font-semibold text-lg"></span>
+                        <span id="total" class="text-blue-700 font-semibold text-lg"> N/A</span>
                     </div>
                     <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
                         <span class="font-bold text-gray-800 text-lg">DOTS:</span>
-                        <span id="dots" class="text-blue-700 font-semibold text-lg"></span>
+                        <span id="dots" class="text-blue-700 font-semibold text-lg"> N/A</span>
                     </div>
                     
                     <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
                         <span class="font-bold text-gray-800 text-lg">Age:</span>
-                        <span id="age" class="text-blue-700 font-semibold text-lg"></span>
+                        <span id="age" class="text-blue-700 font-semibold text-lg"> N/A</span>
                     </div>
                     <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
                         <span class="font-bold text-gray-800 text-lg">Bodyweight:</span>
-                        <span id="bodyweight" class="text-blue-700 font-semibold text-lg"></span>
+                        <span id="bodyweight" class="text-blue-700 font-semibold text-lg"> N/A</span>
                     </div>
-                    <div class="weight-unit absolute top-0 -right-24">
-                        <button class="weight-unit-btn bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 transition duration-300" onclick="toggleWeightUnit()">
-                            <span id="weightUnitButton" class="font-bold">lbs ▼</span>
-                        </button>
-                        <div class="weight-unit-content hidden absolute bg-white shadow-md rounded-md mt-2">
-                            <a href="#" onclick="selectWeightUnit('lbs')" class="block px-4 py-2 hover:bg-gray-100">lbs</a>
-                            <a href="#" onclick="selectWeightUnit('kgs')" class="block px-4 py-2 hover:bg-gray-100">kgs</a>
-                        </div>
-                    </div>
+                </div>
                 </div>
             </div>
         </div>
-    <div id="liftDataInput" class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8 mb-12">
         
-        <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Enter Your Lift Data</h2>
-        <table id="liftDataTable" class="w-full border-collapse">
-            <thead>
-                <tr class="bg-gray-200">
-                    <th class="p-3 text-left">Age</th>
-                    <th id="weightHeader" class="p-3 text-left">Weight (lbs)</th>
-                    <th class="p-3 text-left">Gender</th>
-                    <th id="squatHeader" class="p-3 text-left">Squat (lbs)</th>
-                    <th id="benchHeader" class="p-3 text-left">Bench (lbs)</th>
-                    <th id="deadliftHeader" class="p-3 text-left">Deadlift (lbs)</th>
-                    <th class="p-3 text-left">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="liftDataBody">
-                <tr>
-                    <td><input type="number" class="age w-full p-2 border rounded" placeholder="Age"></td>
-                    <td><input type="number" class="weight w-full p-2 border rounded" placeholder="Weight"></td>
-                    <td>
-                        <select class="gender w-full p-2 border rounded">
-                            <option value="" disabled selected>Gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                        </select>
-                    </td>
-                    <td><input type="number" class="squat w-full p-2 border rounded" placeholder="Squat"></td>
-                    <td><input type="number" class="bench w-full p-2 border rounded" placeholder="Bench"></td>
-                    <td><input type="number" class="deadlift w-full p-2 border rounded" placeholder="Deadlift"></td>
-                    <td><button onclick="removeRow(this)" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300">Remove</button></td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="mt-6 flex justify-between">
-            <button onclick="addRow()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 transition duration-300">Add Row</button>
-            <button onclick="submitLiftData()" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300">Submit Lift Data</button>
+        <div id="liftDataInput" class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8 mb-12">
+            <div class="flex justify-end mb-4">
+                <div class="relative">
+                    <button class="weight-unit-btn bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 transition duration-300" onclick="toggleWeightUnit()">
+                        <span id="weightUnitButton" class="font-bold">lbs ▼</span>
+                    </button>
+                    <div class="weight-unit-content hidden absolute right-0 bg-white shadow-md rounded-md mt-2">
+                        <a href="#" onclick="selectWeightUnit('lbs')" class="block px-4 py-2 hover:bg-gray-100">lbs</a>
+                        <a href="#" onclick="selectWeightUnit('kgs')" class="block px-4 py-2 hover:bg-gray-100">kgs</a>
+                    </div>
+                </div>
+            </div>
+            <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Enter Your Lift Data</h2>
+            
+            <table id="liftDataTable" class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="p-3 text-left">Age</th>
+                        <th id="weightHeader" class="p-3 text-left">Weight (lbs)</th>
+                        <th class="p-3 text-left">Gender</th>
+                        <th id="squatHeader" class="p-3 text-left">Squat (lbs)</th>
+                        <th id="benchHeader" class="p-3 text-left">Bench (lbs)</th>
+                        <th id="deadliftHeader" class="p-3 text-left">Deadlift (lbs)</th>
+                        <th class="p-3 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="liftDataBody">
+                    <tr>
+                        <td><input type="number" class="age w-full p-2 border rounded" placeholder="Age"></td>
+                        <td><input type="number" class="weight w-full p-2 border rounded" placeholder="Weight"></td>
+                        <td>
+                            <select class="gender w-full p-2 border rounded">
+                                <option value="" disabled selected>Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </td>
+                        <td><input type="number" class="squat w-full p-2 border rounded" placeholder="Squat"></td>
+                        <td><input type="number" class="bench w-full p-2 border rounded" placeholder="Bench"></td>
+                        <td><input type="number" class="deadlift w-full p-2 border rounded" placeholder="Deadlift"></td>
+                        <td><button onclick="removeRow(this)" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300">Remove</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="mt-6 flex justify-between">
+                <button onclick="addRow()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 transition duration-300">Add Row</button>
+                <button onclick="submitLiftData()" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300">Submit Lift Data</button>
+            </div>
         </div>
-       
-    </div>
     <div class="chat-widget">
         <button id="chatButton">💬</button>
         <div id="chatForm">

@@ -1232,22 +1232,36 @@ function selectWeightUnit (unit) {
     button.textContent = `${unit} ▼`;
 
     // Change headers based on selected unit
-    if (unit === 'kgs' && currentWeightUnit !== 'kgs' && document.getElementById('total').textContent) {
+    if (unit === 'kgs' && currentWeightUnit !== 'kgs' ) {
+        if (((document.getElementById('total').textContent).trim() == "N/A")) {
+            document.getElementById('total').textContent = '0 ' + unit;
+            document.getElementById('bodyweight').textContent = '0 '+ unit;
+            document.getElementById('user-squat').textContent = '0 ' + unit;
+            document.getElementById('user-bench').textContent = '0 ' + unit;
+            document.getElementById('user-deadlift').textContent = '0 ' + unit;
+        }
         weightHeader.textContent = 'Weight (kgs)';
         squatHeader.textContent = 'Squat (kgs)';
         benchHeader.textContent = 'Bench (kgs)';
         deadliftHeader.textContent = 'Deadlift (kgs)';
-
+        button.textContent = `${unit} ▼`;
         // Convert weights from lbs to kgs only if necessary
         if (currentWeightUnit === 'lbs') {
             convertToKgs();
         }
     } else if (unit === 'lbs' && currentWeightUnit !== 'lbs') {
+        if (((document.getElementById('total').textContent).trim() == "N/A")) {
+            document.getElementById('total').textContent = '0 ' + unit;
+            document.getElementById('bodyweight').textContent = '0 '+ unit;
+            document.getElementById('user-squat').textContent = '0 ' + unit;
+            document.getElementById('user-bench').textContent = '0 ' + unit;
+            document.getElementById('user-deadlift').textContent = '0 ' + unit;
+        }
         weightHeader.textContent = 'Weight (lbs)';
         squatHeader.textContent = 'Squat (lbs)';
         benchHeader.textContent = 'Bench (lbs)';
         deadliftHeader.textContent = 'Deadlift (lbs)';
-
+        button.textContent = `${unit} ▼`;
         // Convert weights from kgs to lbs only if necessary
         if (currentWeightUnit === 'kgs') {
             convertToLbs();

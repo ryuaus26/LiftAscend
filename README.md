@@ -42,6 +42,15 @@ Lift Ascend is an innovative web application designed for powerlifters to track 
 
 ## Features 🌟
 
+
+## AI Powered Coach 🤖 
+💪 Strength Standards Calculator
+📈 Progress Tracker
+🤖 AI-Powered Lifting Coach
+Just log in to track your powerlifting totals — squat, bench press, and deadlift — alongside your age, weight class, and gender. You’ll instantly calculate your powerlifting ranking percentile 🎖️ and earn achievement badges 🏆 as you make progress!
+
+With Lift Ascend, members also enjoy personalized strength tips from our GPT-4 AI coach 🤓, designed to help you refine your technique and reach new PRs! From tracking strength standards to comparing weightlifting stats, our AI-powered coach has your back every step of the way!
+
 - **Progress Tracking**: Easily track your powerlifting totals across various lifts (squat, bench press, deadlift).
 - **Rankings**: View your performance compared to friends and earn badges based on your percentile.
 - **User-Friendly Interface**: Intuitive design for a seamless experience.
@@ -83,15 +92,6 @@ We welcome contributions from the community! Here’s how you can help:
 7. **Create a Pull Request**: Navigate to the original repository and submit a pull request. Describe the changes you’ve made and reference any related issues. 📬
 🤖 AI-Powered Lifting Coach - Lift Ascend
 Lift Ascend 🏋️‍♂️ is your all-in-one powerlifting app! Our app is packed with tools to elevate your strength journey, including:
-
-
-## AI Powered Coach 🤖 
-💪 Strength Standards Calculator
-📈 Progress Tracker
-🤖 AI-Powered Lifting Coach
-Just log in to track your powerlifting totals — squat, bench press, and deadlift — alongside your age, weight class, and gender. You’ll instantly calculate your powerlifting ranking percentile 🎖️ and earn achievement badges 🏆 as you make progress!
-
-With Lift Ascend, members also enjoy personalized strength tips from our GPT-4 AI coach 🤓, designed to help you refine your technique and reach new PRs! From tracking strength standards to comparing weightlifting stats, our AI-powered coach has your back every step of the way!
 
 ## Contact 📱
 Email: yunryu1217@gmail.com

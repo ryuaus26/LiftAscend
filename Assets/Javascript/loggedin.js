@@ -1048,7 +1048,20 @@ if (friendData) {
                 Promise.all(friendPromises).then(() => {
                     // Sort leaderboardData based on criteria
                     leaderboardData.sort((a, b) => {
-                        return criteria === "By Dots" ? b.dots - a.dots : b.total - a.total;
+                        switch (criteria) {
+                            case 'By Total':
+                                return b.total - a.total;
+                            case 'By Dots':
+                                return b.dots - a.dots;
+                            case 'By Squat':
+                                return b.squat - a.squat;
+                            case 'By Bench':
+                                return b.bench - a.bench;
+                            case 'By Deadlift':
+                                return b.deadlift - a.deadlift;
+                            default:
+                                return 0; // Default case if no criteria matches
+                        }
                     });
                 
                     // Clear existing content

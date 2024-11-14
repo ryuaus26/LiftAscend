@@ -590,7 +590,6 @@ function selectWeightUnit(unit) {
         if ((document.getElementById('total').textContent).trim() === "N/A") {
             document.getElementById('total').textContent = '0 ' + unit
             document.getElementById('bodyweight').textContent = '0 '+ unit
-         
         }
         weightHeader.textContent = 'Weight (kgs)';
         squatHeader.textContent = 'Squat (kgs)';

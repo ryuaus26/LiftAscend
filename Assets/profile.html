@@ -7,6 +7,7 @@
     <link rel="icon" href="./Images/android-chrome-512x512.png" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./CSS/coach.css">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap" rel="stylesheet">
@@ -56,15 +57,15 @@
                 <div class="flex flex-row space-x-8 justify-between">
                     <div class="flex-1 flex items-center bg-white shadow-md p-4 rounded-lg transition-transform duration-300 hover:scale-105">
                         <span class="text-3xl mr-3">🏋️‍♂️</span>
-                        <p class="text-lg">Their squat is <span id="squat-percentile" class="text-blue-600 font-semibold text-lg"></span></p>
+                        <p class="text-lg">Their squat is <span id="squat-percentile" class="text-blue-600 font-semibold text-lg">0 % better than others</span></p>
                     </div>
                     <div class="flex-1 flex items-center bg-white shadow-md p-4 rounded-lg transition-transform duration-300 hover:scale-105">
                         <span class="text-3xl mr-3">🏋️‍♀️</span>
-                        <p class="text-lg">Their bench is <span id="bench-percentile" class="text-blue-600 font-semibold text-lg"></span></p>
+                        <p class="text-lg">Their bench is <span id="bench-percentile" class="text-blue-600 font-semibold text-lg">0 % better than others</span></p>
                     </div>
                     <div class="flex-1 flex items-center bg-white shadow-md p-4 rounded-lg transition-transform duration-300 hover:scale-105">
                         <span class="text-3xl mr-3">🏋️‍♂️</span>
-                        <p class="text-lg">Their deadlift is <span id="deadlift-percentile" class="text-blue-600 font-semibold text-lg"></span></p>
+                        <p class="text-lg">Their deadlift is <span id="deadlift-percentile" class="text-blue-600 font-semibold text-lg">0 % better than others</span></p>
                     </div>
                 </div>
             </div>
@@ -82,10 +83,10 @@
                     </div>
                     <div class="grid grid-cols-2 gap-x-6 gap-y-3">
                         <p class="text-gray-700 text-base"><strong>Full Name:</strong> <span id="user-full-name"></span></p>
-                        <p class="text-gray-700 text-base"><strong>Squat:</strong> <span id="user-squat"></span></p>
-                        <p class="text-gray-700 text-base"><strong>Bench:</strong> <span id="user-bench"></span></p>
-                        <p class="text-gray-700 text-base"><strong>Deadlift:</strong> <span id="user-deadlift"></span></p>
-                        <p class="text-gray-700 text-base"><strong>Gender:</strong> <span id="user-gender"></span></p>
+                        <p class="text-gray-700 text-base"><strong>Squat:</strong> <span id="user-squat"> N/A</span></p>
+                        <p class="text-gray-700 text-base"><strong>Bench:</strong> <span id="user-bench"> N/A<span></p>
+                        <p class="text-gray-700 text-base"><strong>Deadlift:</strong> <span id="user-deadlift"> N/A</span></p>
+                        <p class="text-gray-700 text-base"><strong>Gender:</strong> <span id="user-gender"> N/A</span></p>
                     </div>
                 </div>
                 
@@ -93,9 +94,9 @@
                     <div class="rank-container" id="rankContainer">
                         <h2 class="text-base font-bold">Their Rank:</h2>
                         <img 
-                        src="https://ryuaus26.github.io/WebsiteLiftAscend/Images/Rank/.png" 
-                        style="visibility: hidden;" 
-                        class="rank-image w-24 h-24 border border-gray-300 rounded-full transition-transform duration-200 hover:scale-110 shadow-md" 
+                        src="./Images/Unranked.png" 
+                      
+                        class="rank-image w-32 h-32 border border-gray-300 rounded-full transition-transform duration-200 hover:scale-110 shadow-md" 
                         id="rankImage" 
                         alt="Rank Image">
                     </div>
@@ -119,11 +120,11 @@
                 <div class="flex flex-wrap md:flex-nowrap justify-between gap-6 items-center">
                     <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
                         <span class="font-bold text-gray-800 text-lg">Total:</span>
-                        <span id="total" class="text-blue-700 font-semibold text-lg"></span>
+                        <span id="total" class="text-blue-700 font-semibold text-lg"> N/A</span>
                     </div>
                     <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
                         <span class="font-bold text-gray-800 text-lg">DOTS:</span>
-                        <span id="dots" class="text-blue-700 font-semibold text-lg"></span>
+                        <span id="dots" class="text-blue-700 font-semibold text-lg"> N/A</span>
                     </div>
                     <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
                         <span class="font-bold text-gray-800 text-lg">ID:</span>
@@ -131,11 +132,11 @@
                     </div>
                     <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
                         <span class="font-bold text-gray-800 text-lg">Age:</span>
-                        <span id="age" class="text-blue-700 font-semibold text-lg"></span>
+                        <span id="age" class="text-blue-700 font-semibold text-lg"> N/A</span>
                     </div>
                     <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
                         <span class="font-bold text-gray-800 text-lg">Bodyweight:</span>
-                        <span id="bodyweight" class="text-blue-700 font-semibold text-lg"></span>
+                        <span id="bodyweight" class="text-blue-700 font-semibold text-lg"> N/A</span>
                     </div>
                     <div class="flex items-center space-x-4">
                         <a href="https://www.instagram.com/lift_ascend/" target="_blank" class="text-blue-600 hover:text-blue-800 transition duration-300">
@@ -162,7 +163,29 @@
                 </div>
             </div>
         </div>
-       
+        <div class="chat-widget">
+            <button id="chatButton">💬</button>
+            <div id="chatForm">
+                <div id="chatHeader">
+                    <div class="header-content">
+                        <img src="./Images/Coach.png" alt="ChatBot Icon" class="chat-icon">
+                        <div class="title-status">
+                            <div>Chat with an AI Coach</div>
+                            <div class="online-status">
+                                <span class="status-dot"></span>
+                                <span>Online</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="chatMessages"></div>
+                <div id="typingIndicator" style="display:none">Coach is typing...</div>
+                <div id="chatInputContainer">
+                    <input type="text" id="chatInput" placeholder="Type your message...">
+                    <button id="sendMessage">Send</button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
@@ -170,7 +193,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
-    
+    <script src="./Javascript/chat.js"></script>
     <script src="./Javascript/profile.js"></script>
 </body>
 </html>

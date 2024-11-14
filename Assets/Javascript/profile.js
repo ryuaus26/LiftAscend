@@ -656,12 +656,16 @@ function displayPercentiles(percentiles) {
     // If none of the elements exist, create a new element to display percentiles
     if (!percentileDisplay.squat && !percentileDisplay.bench && !percentileDisplay.deadlift) {
         const percentileContainer = document.getElementById('percentile-content-container');
+        document.getElementById("squat-percentile").textContent = "";
         document.getElementById("squat-percentile").textContent = " " + percentiles.squat + "%" + " better than others"
         document.getElementById("bench-percentile").textContent = " " + percentiles.bench + "%" + " better than others"
         document.getElementById("deadlift-percentile").textContent = " " + percentiles.deadlift + "%" + " better than others"
-       
+    }
 
-     
+    if(!document.getElementById("squat-percentile").textContent) {
+        document.getElementById("squat-percentile").textContent = " " + 0 + "%" + " better than others"
+        document.getElementById("bench-percentile").textContent = " " + 0 + "%" + " better than others"
+        document.getElementById("deadlift-percentile").textContent = " " + 0 + "%" + " better than others"
     }
 }
 
@@ -738,19 +742,34 @@ function selectWeightUnit(unit) {
     button.textContent = `${unit} ▼`;
 
     // Change headers based on selected unit
-    if (unit === 'kgs' && currentWeightUnit !== 'kgs' && document.getElementById('total').textContent) {
-       
+    if (unit === 'kgs' && currentWeightUnit !== 'kgs') {
+        if (((document.getElementById('total').textContent).trim() == "N/A")) {
+            document.getElementById('total').textContent = '0 ' + unit;
+            document.getElementById('bodyweight').textContent = '0 '+ unit;
+            document.getElementById('user-squat').textContent = '0 ' + unit;
+            document.getElementById('user-bench').textContent = '0 ' + unit;
+            document.getElementById('user-deadlift').textContent = '0 ' + unit;
+
+        } 
 
         // Convert weights from lbs to kgs only if necessary
         if (currentWeightUnit === 'lbs') {
             convertToKgs();
         }
-    } else if (unit === 'lbs' && currentWeigh !== 'lbs') {
-     
+        button.textContent = `${unit} ▼`;
+    } else if (unit === 'lbs' && currentWeightUnit !== 'lbs') {
+        if (((document.getElementById('total').textContent).trim() == "N/A")){
+            document.getElementById('total').textContent = '0 ' + unit
+            document.getElementById('bodyweight').textContent = '0 '+ unit
+            document.getElementById('user-squat').textContent = '0 ' + unit;
+            document.getElementById('user-bench').textContent = '0 ' + unit;
+            document.getElementById('user-deadlift').textContent = '0 ' + unit;
+        }
         // Convert weights from kgs to lbs only if necessary
         if (currentWeightUnit === 'kgs') {
             convertToLbs();
         }
+        button.textContent = `${unit} ▼`;
     }
 
     currentWeightUnit = unit; // Update the current unit

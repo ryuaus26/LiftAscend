@@ -581,17 +581,22 @@ function selectWeightUnit(unit) {
     const deadliftHeader = document.getElementById('deadliftHeader');
 
     const button = document.getElementById('weightUnitButton');
-    button.textContent = `${unit} ▼`;
+   
     
     const content = document.querySelector('.weight-unit-content');
     content.style.display = 'none';
 
-    if (unit === 'kgs' && currentWeightUnit !== 'kgs' && document.getElementById('total').textContent) {
+    if (unit === 'kgs' && currentWeightUnit !== 'kgs') {
+        if (!(document.getElementById('total').textContent)) {
+            document.getElementById('total').textContent = '0 ' + unit
+            document.getElementById('bodyweight').textContent = '0 '+ unit
+         
+        }
         weightHeader.textContent = 'Weight (kgs)';
         squatHeader.textContent = 'Squat (kgs)';
         benchHeader.textContent = 'Bench (kgs)';
         deadliftHeader.textContent = 'Deadlift (kgs)';
-      
+        button.textContent = `${unit} ▼`;
         currentWeightUnit = 'kgs';
 
         document.getElementById('total').textContent = lbsToKg(parseFloat(document.getElementById('total').textContent)).toFixed(1) + " " + currentWeightUnit;
@@ -603,11 +608,15 @@ function selectWeightUnit(unit) {
      
 
     } else if (unit === 'lbs' && currentWeightUnit !== 'lbs') {
+        if (!(document.getElementById('total').textContent)) {
+            document.getElementById('total').textContent = '0 ' + unit
+            document.getElementById('bodyweight').textContent = '0 '+ unit
+        }
         weightHeader.textContent = 'Weight (lbs)';
         squatHeader.textContent = 'Squat (lbs)';
         benchHeader.textContent = 'Bench (lbs)';
         deadliftHeader.textContent = 'Deadlift (lbs)';
-     
+      
         currentWeightUnit = 'lbs';
         document.getElementById('total').textContent = kgToLbs(parseFloat(document.getElementById('total').textContent)).toFixed(1) + " " + currentWeightUnit;
       

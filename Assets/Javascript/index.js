@@ -587,7 +587,7 @@ function selectWeightUnit(unit) {
     content.style.display = 'none';
 
     if (unit === 'kgs' && currentWeightUnit !== 'kgs') {
-        if (!(document.getElementById('total').textContent)) {
+        if ((document.getElementById('total').textContent).trim() === "N/A") {
             document.getElementById('total').textContent = '0 ' + unit
             document.getElementById('bodyweight').textContent = '0 '+ unit
          
@@ -608,7 +608,7 @@ function selectWeightUnit(unit) {
      
 
     } else if (unit === 'lbs' && currentWeightUnit !== 'lbs') {
-        if (!(document.getElementById('total').textContent)) {
+        if ((document.getElementById('age').textContent).trim() === "N/A") {
             document.getElementById('total').textContent = '0 ' + unit
             document.getElementById('bodyweight').textContent = '0 '+ unit
         }

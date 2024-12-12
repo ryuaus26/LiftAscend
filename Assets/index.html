@@ -68,8 +68,13 @@
                 <a href="about.html" class="ml-6 px-4 py-2 text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
                     About
                   </a>
+                  <a href="unity.html" class="ml-6 px-4 py-2 text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
+                    Lifting Simulator 🏋️‍♂️🎮💪
+                  </a>
+                  
                   
             </div>
+            
 
             <div id="percentile-content-container" class="bg-blue-100 rounded-lg p-4 shadow-md">
                 <h2 class="text-2xl font-bold mb-4 text-blue-800">Your Percentiles</h2>
@@ -261,29 +266,47 @@
                 <button onclick="submitLiftData()" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300">Submit Lift Data</button>
             </div>
         </div>
-    <div class="chat-widget">
-        <button id="chatButton">💬</button>
-        <div id="chatForm">
-            <div id="chatHeader">
-                <div class="header-content">
-                    <img src="./Images/Coach.png" alt="ChatBot Icon" class="chat-icon">
-                    <div class="title-status">
-                        <div>Chat with an AI Coach</div>
-                        <div class="online-status">
-                            <span class="status-dot"></span>
-                            <span>Online</span>
-                        </div>
-                    </div>
+       
+        <div class="chat-widget">
+            <button id="chatButton" style="background: none; border: none; padding: 0;">
+                <!-- New Chat Logo SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40" fill="#007bff">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                    <circle cx="12" cy="10" r="2"/>
+                    <circle cx="16" cy="10" r="2"/>
+                    <circle cx="8" cy="10" r="2"/>
+                </svg>
+            </button>
+          <div id="chatForm">
+    <div id="chatHeader">
+        <div class="header-content">
+            <img src="./Images/Coach.svg" alt="ChatBot Icon" class="chat-icon">
+            <div class="title-status">
+                <div>Chat with an AI Coach</div>
+                <div class="online-status">
+                    <span class="status-dot"></span>
+                    <span>Online</span>
                 </div>
             </div>
-            <div id="chatMessages"></div>
-            <div id="typingIndicator" style="display:none">Coach is typing...</div>
-            <div id="chatInputContainer">
-                <input type="text" id="chatInput" placeholder="Type your message...">
-                <button id="sendMessage">Send</button>
-            </div>
+            <button id="closeChatButton" class="absolute top-2 right-2 text-3xl text-white bg-black p-1 rounded-full">
+                X
+              </button>
+              
+              
+              
         </div>
     </div>
+    <div id="chatMessages"></div>
+    <div id="typingIndicator" style="display:none">Coach is typing...</div>
+    <div id="chatInputContainer">
+        <input type="text" id="chatInput" placeholder="Type your message...">
+        <button id="sendMessage">Send</button>
+    </div>
+    </div>
+</div>
+
+        
+        
 
     <div class="flex flex-col items-center max-w-3xl mx-auto p-6">
         <!-- Header Section -->

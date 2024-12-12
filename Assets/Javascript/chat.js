@@ -27,14 +27,59 @@ class ChatWidget {
             }
         });
     }
-
+    setupEventListeners() {
+        const chatWidget = document.querySelector('.chat-widget');
+        const chatButton = document.getElementById('chatButton');
+        const chatForm = document.getElementById('chatForm');
+        const chatInput = document.getElementById('chatInput');
+        const sendMessage = document.getElementById('sendMessage');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const closeChatButton = document.getElementById('closeChatButton');  // Close button reference
+    
+        chatButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            this.toggleChat();
+        });
+    
+        closeChatButton.addEventListener('click', (event) => {  // Close chat functionality
+            event.stopPropagation();
+            this.closeChat();
+        });
+    
+        sendMessage.addEventListener('click', () => this.sendMessage());
+    
+        chatInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                this.sendMessage();
+            }
+        });
+    
+        document.addEventListener('click', (event) => {
+            const isClickInsideWidget = chatWidget.contains(event.target);
+            if (!isClickInsideWidget) {
+                this.closeChat();
+            }
+        });
+    
+        chatInput.addEventListener('input', () => {
+            sendMessage.disabled = chatInput.value.trim() === '';
+        });
+    
+        window.addEventListener('online', () => this.handleOnlineStatus(true));
+        window.addEventListener('offline', () => this.handleOnlineStatus(false));
+    }
+    
     async loadInitialHistory() {
         if (this.auth.currentUser) {
             await this.loadChatHistory();
+            this.sendInitialWelcomeMessage();  // Send the initial welcome message if the user is logged in
         } else {
             this.loadLocalMessages();
+            this.sendInitialWelcomeMessage();  // Send the initial welcome message if no user is logged in
         }
     }
+    
 
     setupEventListeners() {
         const chatWidget = document.querySelector('.chat-widget');
@@ -158,6 +203,23 @@ class ChatWidget {
         } finally {
             typingIndicator.style.display = 'none';
             document.getElementById('sendMessage').disabled = false;
+        }
+    }
+    async sendInitialWelcomeMessage() {
+        const initialMessage = "Welcome to your Powerlifting Coach! I'm here to help you improve your strength training. What lifting goals can I assist you with today?";
+        
+        // Add system message
+        this.addSystemMessage(initialMessage);
+
+        // Try to get an AI-generated response to the initial message
+        try {
+            const responseMessage = await this.sendToFirebaseFunction(initialMessage);
+            if (responseMessage) {
+                await this.saveSystemResponse(responseMessage, null);
+                this.addSystemMessage(responseMessage);
+            }
+        } catch (error) {
+            console.error('Error generating initial response:', error);
         }
     }
 

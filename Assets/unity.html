@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placeholder Animation</title>
+    <link rel="stylesheet" href="./CSS/coach.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        .placeholder-container {
+            text-align: center;
+        }
+
+        .placeholder-text {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #ccc;
+            animation: fadeInOut 2s infinite;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Optional slide animation */
+        .placeholder-text.slide {
+            animation: slideInOut 3s infinite;
+        }
+
+        @keyframes slideInOut {
+            0% {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            50% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Left arrow button styles */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+
+        .back-button::before {
+            content: '←';
+            font-size: 24px;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button" aria-label="Go back to home page"></a>
+    <div class="placeholder-container">
+        <div class="placeholder-text">PLACEHOLDER</div>
+        <!-- To use the slide animation, add the class 'slide' -->
+        <!-- <div class="placeholder-text slide">PLACEHOLDER</div> -->
+    </div>
+    <div class="chat-widget">
+        <button id="chatButton" style="background: none; border: none; padding: 0;">
+            <!-- New Chat Logo SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40" fill="#007bff">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                <circle cx="12" cy="10" r="2"/>
+                <circle cx="16" cy="10" r="2"/>
+                <circle cx="8" cy="10" r="2"/>
+            </svg>
+        </button>
+        <div id="chatForm">
+            <div id="chatHeader">
+                <div class="header-content">
+                    <img src="./Images/Coach.png" alt="ChatBot Icon" class="chat-icon">
+                    <div class="title-status">
+                        <div>Chat with an AI Coach</div>
+                        <div class="online-status">
+                            <span class="status-dot"></span>
+                            <span>Online</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="chatMessages"></div>
+            <div id="typingIndicator" style="display:none">Coach is typing...</div>
+            <div id="chatInputContainer">
+                <input type="text" id="chatInput" placeholder="Type your message...">
+                <button id="sendMessage">Send</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

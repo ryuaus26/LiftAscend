@@ -42,6 +42,14 @@
         // Run the check when the page loads
         window.onload = checkDevice;
     </script>
+    <div id="notification-banner" style="background-color: #fff3cd; padding: 12px; text-align: center; position: relative; border-bottom: 1px solid #ffeeba;">
+        <span style="color: #856404; font-family: Arial, sans-serif;">
+            User data may not accurately reflect real-life information. Future updates will introduce an additional page displaying accurate data.
+        </span>
+        <button onclick="this.parentElement.style.display='none'" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 5px;">
+            ✕
+        </button>
+    </div>
     <header class="bg-white shadow-md">
         <div class="max-w-full mx-auto px-4 sm:px-8 lg:px-16 py-6 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-8">
             <div class="flex-shrink-0">
@@ -390,7 +398,15 @@
               
         </div>
         <div class="chat-widget">
-            <button id="chatButton">💬</button>
+            <button id="chatButton" style="background: none; border: none; padding: 0;">
+                <!-- New Chat Logo SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40" fill="#007bff">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                    <circle cx="12" cy="10" r="2"/>
+                    <circle cx="16" cy="10" r="2"/>
+                    <circle cx="8" cy="10" r="2"/>
+                </svg>
+            </button>
             <div id="chatForm">
                 <div id="chatHeader">
                     <div class="header-content">

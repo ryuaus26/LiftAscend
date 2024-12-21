@@ -1213,7 +1213,15 @@ document.addEventListener('click', function(event) {
     }
 });
 
+function displayFileName() {
+    const fileInput = document.getElementById('uploadFile');
+    const fileNameContainer = document.getElementById('fileNameContainer');
 
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        fileNameContainer.textContent = `Uploaded file: ${file.name}`;
+    }
+}
 
 // Function to toggle weight unit display
 function toggleWeightUnit() {

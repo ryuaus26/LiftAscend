@@ -18,7 +18,8 @@ class ChatWidget {
         }
         this.auth = firebase.auth();
         this.database = firebase.database();
-        
+        this.storage = firebase.storage(); // Initialize Firebase Storage
+    
         this.auth.onAuthStateChanged((user) => {
             if (user) {
                 this.loadChatHistory();
@@ -29,6 +30,8 @@ class ChatWidget {
     }
     setupEventListeners() {
         const chatWidget = document.querySelector('.chat-widget');
+        const uploadFileInput = document.getElementById('uploadFile');
+        uploadFileInput.addEventListener('change', (event) => this.handleFileUpload(event));
         const chatButton = document.getElementById('chatButton');
         const chatForm = document.getElementById('chatForm');
         const chatInput = document.getElementById('chatInput');
@@ -80,7 +83,98 @@ class ChatWidget {
         }
     }
     
-
+    async handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+    
+        // Optional: Validate file type and size
+        const validTypes = ['image/jpeg', 'image/png', 'video/mp4', 'video/webm'];
+        if (!validTypes.includes(file.type)) {
+            this.addSystemMessage('Unsupported file type. Please upload an image or video.');
+            return;
+        }
+    
+        const maxSizeInBytes = 10 * 1024 * 1024; // 10 MB limit
+        if (file.size > maxSizeInBytes) {
+            this.addSystemMessage('File size exceeds the 10MB limit.');
+            return;
+        }
+    
+        // Show uploading indicator
+        this.addSystemMessage('Uploading your file...');
+    
+        try {
+            const user = this.auth.currentUser;
+            if (!user) {
+                this.addSystemMessage('Please log in to upload files.');
+                return;
+            }
+    
+            const storageRef = this.storage.ref();
+            const fileRef = storageRef.child(`uploads/${user.uid}/${Date.now()}_${file.name}`);
+            const snapshot = await fileRef.put(file);
+            const downloadURL = await snapshot.ref.getDownloadURL();
+    
+            // Add user message with media
+            this.addUserMediaMessage(downloadURL, file.type.startsWith('image/') ? 'image' : 'video');
+    
+            // Optionally, send the media URL to the API model
+            await this.sendMediaToApi(downloadURL, file.type);
+    
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            this.addSystemMessage('Failed to upload the file. Please try again.');
+        } finally {
+            // Reset the file input
+            event.target.value = '';
+        }
+    }
+    addUserMediaMessage(url, type) {
+        const chatMessages = document.getElementById('chatMessages');
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message user media-message';
+    
+        if (type === 'image') {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = 'User uploaded image';
+            img.className = 'chat-image';
+            messageElement.appendChild(img);
+        } else if (type === 'video') {
+            const video = document.createElement('video');
+            video.src = url;
+            video.controls = true;
+            video.className = 'chat-video';
+            messageElement.appendChild(video);
+        }
+    
+        chatMessages.appendChild(messageElement);
+        this.scrollToBottom();
+    }
+    
+    addSystemMediaMessage(url, type) {
+        const chatMessages = document.getElementById('chatMessages');
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message system media-message';
+    
+        if (type === 'image') {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = 'AI response image';
+            img.className = 'chat-image';
+            messageElement.appendChild(img);
+        } else if (type === 'video') {
+            const video = document.createElement('video');
+            video.src = url;
+            video.controls = true;
+            video.className = 'chat-video';
+            messageElement.appendChild(video);
+        }
+    
+        chatMessages.appendChild(messageElement);
+        this.scrollToBottom();
+    }
+    
     setupEventListeners() {
         const chatWidget = document.querySelector('.chat-widget');
         const chatButton = document.getElementById('chatButton');

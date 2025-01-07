@@ -396,18 +396,22 @@
               
               
               
-        </div>
+      
         <div class="chat-widget">
+            <!-- Chat Button -->
             <button id="chatButton" style="background: none; border: none; padding: 0;">
-                <!-- New Chat Logo SVG -->
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40" fill="#007bff">
+                <!-- Chat Icon SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40" fill="#ffffff">
                     <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
                     <circle cx="12" cy="10" r="2"/>
                     <circle cx="16" cy="10" r="2"/>
                     <circle cx="8" cy="10" r="2"/>
                 </svg>
             </button>
-            <div id="chatForm">
+    
+            <!-- Chat Form -->
+            <div id="chatForm" class="hidden">
+                <!-- Chat Header -->
                 <div id="chatHeader">
                     <div class="header-content">
                         <img src="./Images/Coach.png" alt="ChatBot Icon" class="chat-icon">
@@ -419,15 +423,38 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Close Chat Button -->
+                    <button id="closeChatButton">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
+    
+                <!-- Chat Messages -->
                 <div id="chatMessages"></div>
+    
+                <!-- Typing Indicator -->
                 <div id="typingIndicator" style="display:none">Coach is typing...</div>
+    
+                <!-- Chat Input Container -->
                 <div id="chatInputContainer">
-                    <input type="text" id="chatInput" placeholder="Type your message...">
-                    <button id="sendMessage">Send</button>
+                    <input type="text" id="chatInput" placeholder="Type your message or drag a file here...">
+                    <button id="sendMessage" disabled>Send</button>
+                    <!-- File Preview Container -->
+                    <div id="filePreview" class="hidden mt-2"></div>
+                    <!-- Drag Overlay -->
+                    <div id="dragOverlay" class="hidden">
+                        <p>Drop your files here</p>
+                    </div>
+                    <!-- File Upload Button -->
+                    <button id="uploadButton" type="button" class="ml-2">
+                        <i class="fas fa-upload"></i> Upload
+                    </button>
+                    <input type="file" id="fileInput" accept="image/png, image/jpeg, text/plain" style="display: none;" multiple>
                 </div>
             </div>
         </div>
+        
+        
         
         
        

@@ -397,102 +397,42 @@
               
               
         </div>
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Chat Widget with File Upload</title>
-            <style>
-                /* Existing styles remain the same */
-                .file-preview {
-                    display: flex;
-                    align-items: center;
-                    margin-top: 10px;
-                    background-color: #f0f0f0;
-                    padding: 5px;
-                    border-radius: 5px;
-                }
-                .file-preview img, .file-preview video {
-                    max-width: 100px;
-                    max-height: 100px;
-                    margin-right: 10px;
-                }
-                .file-preview-name {
-                    flex-grow: 1;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                }
-                .file-preview-remove {
-                    background: none;
-                    border: none;
-                    color: red;
-                    cursor: pointer;
-                    font-weight: bold;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="chat-widget">
-                <button id="chatButton" style="background: none; border: none; padding: 0;">
-                    <!-- New Chat Logo SVG -->
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40" fill="#007bff">
-                        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
-                        <circle cx="12" cy="10" r="2" />
-                        <circle cx="16" cy="10" r="2" />
-                        <circle cx="8" cy="10" r="2" />
-                    </svg>
-                </button>
-                <div id="chatForm" class="chat-container">
-                    <div id="chatHeader" class="chat-header">
-                        <div class="header-content">
-                            <img src="./Images/Coach.svg" alt="ChatBot Icon" class="chat-icon">
-                            <div class="title-status">
-                                <div>Chat with an AI Coach</div>
-                                <div class="online-status">
-                                    <span class="status-dot"></span>
-                                    <span>Online</span>
-                                </div>
+        <div class="chat-widget">
+            <button id="chatButton" style="background: none; border: none; padding: 0;">
+                <!-- New Chat Logo SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40" fill="#007bff">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                    <circle cx="12" cy="10" r="2"/>
+                    <circle cx="16" cy="10" r="2"/>
+                    <circle cx="8" cy="10" r="2"/>
+                </svg>
+            </button>
+            <div id="chatForm">
+                <div id="chatHeader">
+                    <div class="header-content">
+                        <img src="./Images/Coach.png" alt="ChatBot Icon" class="chat-icon">
+                        <div class="title-status">
+                            <div>Chat with an AI Coach</div>
+                            <div class="online-status">
+                                <span class="status-dot"></span>
+                                <span>Online</span>
                             </div>
-                            <button id="closeChatButton" class="close-chat">X</button>
                         </div>
                     </div>
-                    <div id="chatMessages" class="chat-messages"></div>
-                    <div id="typingIndicator" style="display: none;">Coach is typing...</div>
-                    <div id="chatInputContainer" class="flex items-center p-3 bg-gray-100 border-t border-gray-300">
-                        <input 
-                            type="text" 
-                            id="chatInput" 
-                            placeholder="Type your message..." 
-                            class="flex-grow text-sm p-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                        >
-                        <label 
-                            for="uploadFile" 
-                            class="text-xl text-gray-600 cursor-pointer mx-3 hover:text-blue-500" 
-                            title="Attach a file"
-                        >
-                            📎
-                        </label>
-                        <input 
-                            type="file" 
-                            id="uploadFile" 
-                            accept="image/*,video/*" 
-                            class="hidden"
-                            onchange="displayFileName()"
-                        >
-                        <button 
-                            id="sendMessage" 
-                            class="bg-blue-500 text-white text-lg px-6 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            Send
-                        </button>
-                    </div>
-                    <div id="fileNameContainer" class="mt-2 text-sm text-gray-600"></div>
+                </div>
+                <div id="chatMessages"></div>
+                <div id="typingIndicator" style="display:none">Coach is typing...</div>
+                <div id="chatInputContainer">
+                    <input type="text" id="chatInput" placeholder="Type your message...">
+                    <button id="sendMessage">Send</button>
                 </div>
             </div>
-              
-          
+        </div>
+        
+        
+       
+    
+    </div>
 
   
 

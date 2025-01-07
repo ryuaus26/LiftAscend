@@ -20,24 +20,7 @@
     cursor: pointer;
     color: #333; /* Customize the color */
 }
-.media-message {
-    display: flex;
-    justify-content: flex-start;
-    margin: 10px 0;
-}
 
-.media-message.system {
-    justify-content: flex-end;
-}
-
-.chat-image, .chat-video {
-    max-width: 300px;
-    border-radius: 8px;
-}
-
-.chat-video {
-    max-height: 300px;
-}
 .close-button:hover {
     color: #f00; /* Change to a color for hover effect */
 }

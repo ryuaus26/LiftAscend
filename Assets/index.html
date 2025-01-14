@@ -68,9 +68,7 @@
                 <a href="about.html" class="ml-6 px-4 py-2 text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
                     About
                   </a>
-                  <a href="unity.html" class="ml-6 px-4 py-2 text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
-                    Lifting Simulator 🏋️‍♂️🎮💪
-                  </a>
+                 
                   
                   
             </div>
@@ -267,43 +265,48 @@
             </div>
         </div>
        
-        <div class="chat-widget">
-            <button id="chatButton" style="background: none; border: none; padding: 0;">
-                <!-- New Chat Logo SVG -->
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40" fill="#007bff">
-                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
-                    <circle cx="12" cy="10" r="2"/>
-                    <circle cx="16" cy="10" r="2"/>
-                    <circle cx="8" cy="10" r="2"/>
+        <div class="chat-widget fixed bottom-6 right-6">
+            <!-- Chat Button -->
+            <button id="chatButton" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-lg flex items-center justify-center transition-transform duration-300 hover:scale-105">
+                <!-- Chat Icon SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
+                    <circle cx="12" cy="10" r="2" />
+                    <circle cx="16" cy="10" r="2" />
+                    <circle cx="8" cy="10" r="2" />
                 </svg>
             </button>
-          <div id="chatForm">
-    <div id="chatHeader">
-        <div class="header-content">
-            <img src="./Images/Coach.svg" alt="ChatBot Icon" class="chat-icon">
-            <div class="title-status">
-                <div>Chat with an AI Coach</div>
-                <div class="online-status">
-                    <span class="status-dot"></span>
-                    <span>Online</span>
+        
+            <!-- Chat Form -->
+            <div id="chatForm" class="hidden bg-white shadow-lg rounded-lg p-4 fixed bottom-20 right-6 w-80">
+                <!-- Chat Header -->
+                <div id="chatHeader" class="flex items-center justify-between bg-blue-500 text-white p-3 rounded-t-lg">
+                    <div class="header-content flex items-center space-x-3">
+                        <img src="./Images/Coach.png" alt="ChatBot Icon" class="w-10 h-10 rounded-full">
+                        <div>
+                            <div class="text-lg font-bold">Chat with an AI Coach</div>
+                            <div class="flex items-center space-x-1 text-sm">
+                                <span class="w-2 h-2 bg-green-500 rounded-full inline-block"></span>
+                                <span>Online</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="closeChatButton" class="text-white text-lg">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+        
+                <!-- Chat Messages -->
+                <div id="chatMessages" class="h-40 overflow-y-auto bg-gray-100 p-3 rounded-b-lg"></div>
+        
+                <!-- Chat Input Container -->
+                <div id="chatInputContainer" class="mt-3 flex items-center space-x-2">
+                    <input type="text" id="chatInput" placeholder="Type your message..." class="flex-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button id="sendMessage" disabled class="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600 disabled:opacity-50">Send</button>
                 </div>
             </div>
-            <button id="closeChatButton" class="absolute top-2 right-2 text-3xl text-white bg-black p-1 rounded-full">
-                X
-              </button>
-              
-                
-              
         </div>
-    </div>
-    <div id="chatMessages"></div>
-    <div id="typingIndicator" style="display:none">Coach is typing...</div>
-    <div id="chatInputContainer">
-        <input type="text" id="chatInput" placeholder="Type your message...">
-        <button id="sendMessage">Send</button>
-    </div>
-    </div>
-</div>
+        
 
         
         

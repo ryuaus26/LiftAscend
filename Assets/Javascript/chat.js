@@ -2,10 +2,12 @@ class ChatWidget {
     constructor() {
         this.isOpen = false;
         this.messages = [];
+        this.uploadedImageURL = null; // Add this line
         this.initializeFirebase();
         this.setupEventListeners();
         this.loadInitialHistory();
     }
+    
 
     // Scrolls the chat to the bottom
     scrollToBottom() {
@@ -222,60 +224,64 @@ class ChatWidget {
     // Handles uploaded files (images or text)
     // Handles uploaded files (images or text)
       // In ChatWidget class:
-handleFile(file) {
-    const allowedTypes = ['image/png', 'image/jpeg', 'text/plain', 'image/png'];
-    if (!allowedTypes.includes(file.type)) {
-        this.displayMessage(`Unsupported file type: ${file.name}. Please upload an image or a text file.`, 'bot');
-        return;
-    }
+      handleFile(file) {
+        const allowedTypes = ['image/png', 'image/jpeg', 'text/plain', 'image/png'];
+        if (!allowedTypes.includes(file.type)) {
+            this.displayMessage(`Unsupported file type: ${file.name}. Please upload an image or a text file.`, 'bot');
+            return;
+        }
+    
+        const chatMessages = document.getElementById('chatMessages');
+        const messageContainer = document.createElement('div');
+        messageContainer.className = 'message system';
+    
+        if (file.type.startsWith('image/')) {
+            // 1) Upload to Firebase Storage
+            this.uploadImageToFirebase(file)
+                .then((downloadURL) => {
+                    // 2) Show the uploaded image in chat using the public URL
+                    messageContainer.innerHTML = `
+                        <div class="message-content">
+                            <p>📸 Image uploaded: ${file.name}</p>
+                            <div class="image-preview-container">
+                                <img src="${downloadURL}" alt="Image Preview" class="chat-image-preview">
+                            </div>
+                        </div>
+                    `;
+                    chatMessages.appendChild(messageContainer);
+                    this.scrollToBottom();
+    
+                    // 3) **Store** the uploaded image URL for later use
+                    this.uploadedImageURL = downloadURL;
+                    // After setting this.uploadedImageURL = downloadURL in handleFile
+                    this.addSystemMessage('Image uploaded successfully! You can ask me to analyze your form by asking questions like "Is my squat depth good?"');
 
-    const chatMessages = document.getElementById('chatMessages');
-    const messageContainer = document.createElement('div');
-    messageContainer.className = 'message system';
-
-    if (file.type.startsWith('image/')) {
-        // 1) Upload to Firebase Storage
-        this.uploadImageToFirebase(file)
-            .then((downloadURL) => {
-                // 2) Show the uploaded image in chat using the public URL
+                })
+                .catch((error) => {
+                    console.error('Error uploading image to Firebase:', error);
+                    this.addSystemMessage(`Could not upload ${file.name} to Firebase Storage.`);
+                });
+    
+        } else if (file.type === 'text/plain') {
+            // Text files remain the same
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const textContent = e.target.result.length > 100
+                    ? e.target.result.substring(0, 100) + '...'
+                    : e.target.result;
                 messageContainer.innerHTML = `
                     <div class="message-content">
-                        <p>📸 Image uploaded: ${file.name}</p>
-                        <div class="image-preview-container">
-                            <img src="${downloadURL}" alt="Image Preview" class="chat-image-preview">
-                        </div>
+                        <p>📄 Text file uploaded: ${file.name}</p>
+                        <pre class="text-preview">${textContent}</pre>
                     </div>
                 `;
                 chatMessages.appendChild(messageContainer);
                 this.scrollToBottom();
-
-                // 3) Pass that URL to GPT
-                this.processImageURLForGPT(downloadURL, file.name);
-            })
-            .catch((error) => {
-                console.error('Error uploading image to Firebase:', error);
-                this.addSystemMessage(`Could not upload ${file.name} to Firebase Storage.`);
-            });
-
-    } else if (file.type === 'text/plain') {
-        // Text files remain the same
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const textContent = e.target.result.length > 100
-                ? e.target.result.substring(0, 100) + '...'
-                : e.target.result;
-            messageContainer.innerHTML = `
-                <div class="message-content">
-                    <p>📄 Text file uploaded: ${file.name}</p>
-                    <pre class="text-preview">${textContent}</pre>
-                </div>
-            `;
-            chatMessages.appendChild(messageContainer);
-            this.scrollToBottom();
-        };
-        reader.readAsText(file);
+            };
+            reader.readAsText(file);
+        }
     }
-}
+    
 
 
 async uploadImageToFirebase(file) {
@@ -302,24 +308,32 @@ async uploadImageToFirebase(file) {
     async sendMessage() {
         const chatInput = document.getElementById('chatInput');
         const message = chatInput.value.trim();
-
+    
         if (message === '') return;
-
+    
         if (!this.auth.currentUser) {
             this.addSystemMessage('Please log in to send messages');
             return;
         }
-
+    
         const userMessageData = await this.saveUserRequest(message);
         this.addUserMessage(message);
         chatInput.value = '';
         document.getElementById('sendMessage').disabled = true;
-
+    
         const typingIndicator = document.getElementById('typingIndicator');
         typingIndicator.style.display = 'block';
-
+    
         try {
-            const responseMessage = await this.sendToOpenAIAPI(message);
+            // **Check if the user is asking for an analysis**
+            const analysisKeywords = ["form", "squat depth", "deadlift form", "bench press form", "lift"];
+            const isAnalysisRequest = analysisKeywords.some(keyword => message.toLowerCase().includes(keyword));
+    
+            const responseMessage = await this.sendToOpenAIAPI(
+                message,
+                isAnalysisRequest ? this.uploadedImageURL : null // **Only include image if it's an analysis request**
+            );
+    
             if (responseMessage) {
                 await this.saveSystemResponse(responseMessage, userMessageData ? userMessageData.id : null);
                 this.addSystemMessage(responseMessage);
@@ -329,10 +343,10 @@ async uploadImageToFirebase(file) {
             document.getElementById('sendMessage').disabled = false;
         }
     }
-
+    
     // Sends a message to the OpenAI API
    // Sends a message to the OpenAI API
-async sendToOpenAIAPI(userMessage) {
+   async sendToOpenAIAPI(userMessage, imageURL = null) {
     try {
         const apiKeyRef = this.database.ref('APIKEY');
         const snapshot = await apiKeyRef.once('value');
@@ -343,6 +357,35 @@ async sendToOpenAIAPI(userMessage) {
             return null;
         }
 
+        // Construct the messages array
+        const messages = [
+            {
+                role: "system",
+                content: "You are a powerlifting coach chatbot and you sound like an enthusiastic human. You should help the user with their powerlifting questions and ignore all unrelated questions."
+            }
+        ];
+
+        // **Include the image URL if provided**
+        if (imageURL) {
+            messages.push({
+                role: 'user',
+                content: [
+                    {
+                        type: 'image_url',
+                        image_url: {
+                            url: imageURL
+                        }
+                    }
+                ]
+            });
+        }
+
+        // Add the user's message
+        messages.push({
+            role: "user",
+            content: userMessage
+        });
+
         const response = await fetch("https://api.openai.com/v1/chat/completions", {
             headers: {
                 "Content-Type": "application/json",
@@ -350,19 +393,10 @@ async sendToOpenAIAPI(userMessage) {
             },
             method: "POST",
             body: JSON.stringify({
-                model: "gpt-4o", // Corrected model name
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are a powerlifting coach chatbot and you sound like an enthusiastic human. You should help the user with their powerlifting questions and ignore all unrelated questions."
-                    },
-                    {
-                        role: "user",
-                        content: userMessage
-                    }
-                ],
+                model: "gpt-4o-mini", // Ensure the correct model name
+                messages: messages,
                 temperature: 0.7,
-                max_tokens: 150
+                max_tokens: 3000
             }),
         });
 
@@ -380,6 +414,7 @@ async sendToOpenAIAPI(userMessage) {
         return null;
     }
 }
+
 
 
     // Saves the image analysis result to Firebase

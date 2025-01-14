@@ -141,20 +141,38 @@ class ChatWidget {
     }
 
     // Processes image files for GPT analysis
-    async processImageForGPT(imageFile) {
-        const base64Image = await this.convertImageToBase64(imageFile);
-
+    // Processes image files for GPT analysis
+    async processImageURLForGPT(imageURL, fileName) {
         try {
             this.showTypingIndicator(true);
-
+    
             const apiKeyRef = this.database.ref('APIKEY');
             const snapshot = await apiKeyRef.once('value');
             const apiKey = snapshot.val();
-
+    
             if (!apiKey) {
                 throw new Error('API key not found');
             }
-
+    
+            // Construct the messages array per your doc example
+            const messages = [
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'text',
+                            text: "What's in this image?"
+                        },
+                        {
+                            type: 'image_url',
+                            image_url: {
+                                url: imageURL // Our new public URL from Firebase
+                            }
+                        }
+                    ]
+                }
+            ];
+    
             const response = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -162,97 +180,123 @@ class ChatWidget {
                     'Authorization': `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: 'gpt-4-vision-preview',
-                    messages: [
-                        {
-                            role: 'system',
-                            content: 'You are a powerlifting coach chatbot. Analyze the image and provide feedback related to powerlifting technique, form, and safety.'
-                        },
-                        {
-                            role: 'user',
-                            content: `Please analyze this lifting image: ${base64Image}`
-                        }
-                    ],
+                    model: 'gpt-4o', // or whichever model supports image_url
+                    messages: messages,
                     max_tokens: 300
                 })
             });
-
+    
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Error processing image');
             }
-
+    
             const data = await response.json();
             const gptResponse = data.choices[0].message.content;
-
-            await this.saveImageAnalysis(imageFile.name, gptResponse);
+    
+            // Save + Display the analysis
+            await this.saveImageAnalysis(fileName, gptResponse);
             this.addSystemMessage(gptResponse);
-
+    
         } catch (error) {
-            console.error('Error processing image:', error);
+            console.error('Error processing image URL:', error);
             this.addSystemMessage('Sorry, there was an error analyzing the image. Please try again.');
         } finally {
             this.showTypingIndicator(false);
         }
     }
+    
+      
 
     // Converts an image file to a Base64 string
     async convertImageToBase64(imageFile) {
         return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
-            reader.readAsDataURL(imageFile);
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = (error) => reject(error);
+          reader.readAsDataURL(imageFile); // returns data:*/*;base64, ...
         });
-    }
+      }
+      
 
     // Handles uploaded files (images or text)
-    le(file) {
-        conhandleFist allowedTypes = ['image/png', 'image/jpeg', 'text/plain'];
-        if (!allowedTypes.includes(file.type)) {
-            this.displayMessage(`Unsupported file type: ${file.name}. Please upload an image or a text file.`, 'bot');
-            return;
-        }
+    // Handles uploaded files (images or text)
+      // In ChatWidget class:
+handleFile(file) {
+    const allowedTypes = ['image/png', 'image/jpeg', 'text/plain', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+        this.displayMessage(`Unsupported file type: ${file.name}. Please upload an image or a text file.`, 'bot');
+        return;
+    }
 
-        const chatMessages = document.getElementById('chatMessages');
-        const messageContainer = document.createElement('div');
-        messageContainer.className = 'message system';
+    const chatMessages = document.getElementById('chatMessages');
+    const messageContainer = document.createElement('div');
+    messageContainer.className = 'message system';
 
-        if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
+    if (file.type.startsWith('image/')) {
+        // 1) Upload to Firebase Storage
+        this.uploadImageToFirebase(file)
+            .then((downloadURL) => {
+                // 2) Show the uploaded image in chat using the public URL
                 messageContainer.innerHTML = `
                     <div class="message-content">
                         <p>📸 Image uploaded: ${file.name}</p>
                         <div class="image-preview-container">
-                            <img src="${e.target.result}" alt="Image Preview" class="chat-image-preview">
+                            <img src="${downloadURL}" alt="Image Preview" class="chat-image-preview">
                         </div>
                     </div>
                 `;
                 chatMessages.appendChild(messageContainer);
                 this.scrollToBottom();
 
-                this.processImageForGPT(file);
-            };
-            reader.readAsDataURL(file);
-        } else if (file.type === 'text/plain') {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const textContent = e.target.result.length > 100 ?
-                    e.target.result.substring(0, 100) + '...' :
-                    e.target.result;
-                messageContainer.innerHTML = `
-                    <div class="message-content">
-                        <p>📄 Text file uploaded: ${file.name}</p>
-                        <pre class="text-preview">${textContent}</pre>
-                    </div>
-                `;
-                chatMessages.appendChild(messageContainer);
-                this.scrollToBottom();
-            };
-            reader.readAsText(file);
-        }
+                // 3) Pass that URL to GPT
+                this.processImageURLForGPT(downloadURL, file.name);
+            })
+            .catch((error) => {
+                console.error('Error uploading image to Firebase:', error);
+                this.addSystemMessage(`Could not upload ${file.name} to Firebase Storage.`);
+            });
+
+    } else if (file.type === 'text/plain') {
+        // Text files remain the same
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const textContent = e.target.result.length > 100
+                ? e.target.result.substring(0, 100) + '...'
+                : e.target.result;
+            messageContainer.innerHTML = `
+                <div class="message-content">
+                    <p>📄 Text file uploaded: ${file.name}</p>
+                    <pre class="text-preview">${textContent}</pre>
+                </div>
+            `;
+            chatMessages.appendChild(messageContainer);
+            this.scrollToBottom();
+        };
+        reader.readAsText(file);
     }
+}
+
+
+async uploadImageToFirebase(file) {
+    // Create a reference to your bucket
+    const storageRef = firebase.storage().ref();
+  
+    // Construct a unique path for the image (optional, but recommended)
+    const uniqueFileName = `images/${Date.now()}_${file.name}`; // e.g. "images/1692815534000_myImage.png"
+  
+    // Create a reference inside Storage
+    const fileRef = storageRef.child(uniqueFileName);
+  
+    // Upload the file
+    const snapshot = await fileRef.put(file);
+  
+    // Get the public download URL
+    const downloadURL = await snapshot.ref.getDownloadURL();
+  
+    return downloadURL;
+  }
+  
 
     // Sends a user message
     async sendMessage() {
@@ -287,54 +331,56 @@ class ChatWidget {
     }
 
     // Sends a message to the OpenAI API
-    async sendToOpenAIAPI(userMessage) {
-        try {
-            const apiKeyRef = this.database.ref('APIKEY');
-            const snapshot = await apiKeyRef.once('value');
-            const apiKey = snapshot.val();
+   // Sends a message to the OpenAI API
+async sendToOpenAIAPI(userMessage) {
+    try {
+        const apiKeyRef = this.database.ref('APIKEY');
+        const snapshot = await apiKeyRef.once('value');
+        const apiKey = snapshot.val();
 
-            if (!apiKey) {
-                console.error('API key not found in Firebase');
-                return null;
-            }
-
-            const response = await fetch("https://api.openai.com/v1/chat/completions", {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: 'Bearer ' + apiKey,
-                },
-                method: "POST",
-                body: JSON.stringify({
-                    model: "gpt-4o",
-                    messages: [
-                        {
-                            role: "system",
-                            content: "You are a powerlifting coach chatbot and you sound like an enthusiastic human. You should help the user with their powerlifting questions and ignore all unrelated questions."
-                        },
-                        {
-                            role: "user",
-                            content: userMessage
-                        }
-                    ],
-                    temperature: 0.7,
-                    max_tokens: 150
-                }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error('Error from OpenAI API:', errorData);
-                return null;
-            }
-
-            const data = await response.json();
-            return data.choices[0].message.content;
-
-        } catch (error) {
-            console.error('Error connecting to OpenAI API:', error);
+        if (!apiKey) {
+            console.error('API key not found in Firebase');
             return null;
         }
+
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`,
+            },
+            method: "POST",
+            body: JSON.stringify({
+                model: "gpt-4o", // Corrected model name
+                messages: [
+                    {
+                        role: "system",
+                        content: "You are a powerlifting coach chatbot and you sound like an enthusiastic human. You should help the user with their powerlifting questions and ignore all unrelated questions."
+                    },
+                    {
+                        role: "user",
+                        content: userMessage
+                    }
+                ],
+                temperature: 0.7,
+                max_tokens: 150
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Error from OpenAI API:', errorData);
+            return null;
+        }
+
+        const data = await response.json();
+        return data.choices[0].message.content;
+
+    } catch (error) {
+        console.error('Error connecting to OpenAI API:', error);
+        return null;
     }
+}
+
 
     // Saves the image analysis result to Firebase
     async saveImageAnalysis(imageName, analysis) {

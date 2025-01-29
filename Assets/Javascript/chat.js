@@ -1,3 +1,7 @@
+/*
+    Austin Ryu (1/25/2025)
+    This javascript file provides functioanlity to the chatbot as well as process images taken from the user and send it to firebase storage
+*/
 class ChatWidget {
     constructor() {
         this.isOpen = false;

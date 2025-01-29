@@ -1,3 +1,10 @@
+"""
+Austin Ryu (1/25/2025)
+This script processes the OpenPowerlifting dataset to calculate lift percentiles by 
+weight class and age group, filtering for raw lifts, handling missing data, 
+and saving the results as a JSON file.
+"""
+
 import pandas as pd
 import json
 

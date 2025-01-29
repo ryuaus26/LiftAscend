@@ -1,3 +1,9 @@
+/**
+ * Austin Ryu (1/25/2025)
+ * This script handles Firebase authentication, user login/register, weightlifting data entry, 
+ * percentile calculations, unit conversions, and leaderboard functionality for Lift Ascend.
+ */
+
 const firebaseConfig = {
     apiKey: "AIzaSyB5pHK1U6Oy5Ta9oPOcL5LfWXGP_U3838E",
     authDomain: "liftascend.firebaseapp.com",

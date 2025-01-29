@@ -1,3 +1,12 @@
+/*  
+   Austin Ryu 1/28/2025  
+   
+   This JavaScript file initializes Firebase, manages user authentication,  
+   handles user search and friend system, fetches and displays lifting data,  
+   calculates percentiles using OpenPowerlifting data, and updates  
+   UI components dynamically based on user interactions.  
+*/
+
 const firebaseConfig = {
     apiKey: "AIzaSyB5pHK1U6Oy5Ta9oPOcL5LfWXGP_U3838E",
     authDomain: "liftascend.firebaseapp.com",

@@ -1,3 +1,10 @@
+"""
+Austin Ryu (1/25/2025)
+This script processes an OpenPowerlifting dataset by filtering relevant columns, 
+handling missing values, calculating total lifts if needed, and saving the 
+cleaned data to a new CSV file.
+"""
+
 import pandas as pd
 
 # Load the CSV file

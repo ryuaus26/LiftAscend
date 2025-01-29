@@ -1,3 +1,9 @@
+"""
+Austin Ryu (1/25/2025)
+This script calculates a user's lift percentiles by comparing their lifts to 
+precomputed percentile data from OpenPowerlifting, using interpolation for accuracy.
+"""
+
 import json
 
 # Function to load the JSON data

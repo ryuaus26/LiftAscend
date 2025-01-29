@@ -1,3 +1,13 @@
+/*  
+   Austin Ryu 1/28/2025  
+   
+   This JavaScript file initializes Firebase and handles user authentication,  
+   leaderboard population, and weightlifting data management. It allows users  
+   to track their lifts, compare performance with friends, and toggle between  
+   different ranking criteria. The script also ensures accurate unit conversion,  
+   calculates lifting percentiles, and updates UI elements dynamically.  
+*/
+
 const firebaseConfig = {
     apiKey: "AIzaSyB5pHK1U6Oy5Ta9oPOcL5LfWXGP_U3838E",
     authDomain: "liftascend.firebaseapp.com",

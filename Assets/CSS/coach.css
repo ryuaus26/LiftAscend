@@ -1,10 +1,9 @@
 /* =========================================================
-   Chat Widget CSS
+   Austin Ryu (1/25/2025)
+   This CSS styles a floating chat widget, including the chat 
+   button, message container, input field, and file upload preview.
    ========================================================= */
 
-/* =========================================================
-   1. Chat Widget Positioning
-   ========================================================= */
    .chat-widget {
     position: fixed;
     bottom: 20px;

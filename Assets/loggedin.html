@@ -109,7 +109,14 @@
                         <p class="text-gray-700 text-base"><strong>Squat:</strong> <span id="user-squat"> N/A</span></p>
                         <p class="text-gray-700 text-base"><strong>Bench:</strong> <span id="user-bench"> N/A</span></p>
                         <p class="text-gray-700 text-base"><strong>Deadlift:</strong> <span id="user-deadlift"> N/A</span></p>
+                        
                         <p class="text-gray-700 text-base"><strong>Gender:</strong> <span id="user-gender"> N/A</span></p>
+                        
+                        <!-- New Fields Added Below -->
+                        <p class="text-gray-700 text-base"><strong>Bodyweight:</strong> <span id="bodyweight"> N/A</span></p>
+                        <p class="text-gray-700 text-base"><strong>Age:</strong> <span id="age"> N/A</span></p>
+                        <p class="text-gray-700 text-base"><strong>DOTS Score:</strong> <span id="dots"> N/A</span></p>
+                        <p class="text-gray-700 text-base"><strong>Total:</strong> <span id="total"> N/A</span></p>
                     </div>
                 </div>
                 
@@ -147,26 +154,13 @@
             <div class="container mx-auto px-4 py-3">
                 <div class="container mx-auto px-4 py-5">
                     <div class="flex flex-wrap md:flex-nowrap justify-between gap-6 items-center">
-                        <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
-                            <span class="font-bold text-gray-800 text-lg">Total:</span>
-                            <span id="total" class="text-blue-700 font-semibold text-lg"> N/A</span>
-                        </div>
-                        <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
-                            <span class="font-bold text-gray-800 text-lg">DOTS:</span>
-                            <span id="dots" class="text-blue-700 font-semibold text-lg"> N/A</span>
-                        </div>
+                       
+                       
                         <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
                             <span class="font-bold text-gray-800 text-lg">ID:</span>
                             <span id="user-id" class="text-blue-700 font-semibold text-lg"></span>
                         </div>
-                        <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
-                            <span class="font-bold text-gray-800 text-lg">Age:</span>
-                            <span id="age" class="text-blue-700 font-semibold text-lg"> N/A</span>
-                        </div>
-                        <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
-                            <span class="font-bold text-gray-800 text-lg">Bodyweight:</span>
-                            <span id="bodyweight" class="text-blue-700 font-semibold text-lg"> N/A</span>
-                        </div>
+                        
                         <div class="flex items-center justify-center mt-6">
                             <div id="instagramContainer" class="relative flex items-center space-x-2">
                                 <!-- Instagram Icon -->
@@ -533,7 +527,7 @@
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
-  
+    <script src="./Javascript/chat.js"></script>
 
     <script src="./Javascript/utils.js"></script>
     <script src="./Javascript/loggedin.js"></script>

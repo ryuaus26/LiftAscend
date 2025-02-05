@@ -10,7 +10,11 @@
     right: 20px;
     z-index: 1000; /* Ensures the widget stays on top */
 }
-
+.chat-image-preview {
+    max-width: 200px; /* or 100% of container */
+    height: auto;
+  }
+  
 /* =========================================================
    2. Chat Button Styling
    ========================================================= */

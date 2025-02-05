@@ -156,71 +156,135 @@ function displayLiftData(data, name) {
     document.getElementById('user-gender').textContent = `${data.gender}`;
 }
 
-function fetchLiftData(uid, name) {
-    const liftDataRef = firebase.database().ref(`users/${uid}/liftData`);
-    const userId = getUserIdFromUrl();
-  
-    document.getElementById('user-full-name').textContent = name;
-    document.getElementById('user-id').textContent = userId;
-  
-    liftDataRef.once('value')
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          firebase.database().ref('users/' + uid + '/liftData').limitToLast(1).once('value')
-            .then((snapshot) => {
-              const userData = snapshot.val();
-  
-              if (userData) {
-                const lastEntry = Object.values(userData)[0];
-  
-                // Store original values and unit when data is first loaded
-                originalSquatValue = parseFloat(lastEntry.squat);
-                originalBenchValue = parseFloat(lastEntry.bench);
-                originalDeadliftValue = parseFloat(lastEntry.deadlift);
-                originalWeightValue = parseFloat(lastEntry.weight);
-                
-                currentWeightUnit = lastEntry.unit;
-                // Display initial values
-                const total = originalSquatValue + originalBenchValue + originalDeadliftValue;
-                document.getElementById("total").innerHTML =
-                  total.toFixed(1) + " <strong>" + currentWeightUnit + "</strong>";
-  
-                document.getElementById('bodyweight').textContent = originalWeightValue + " " + currentWeightUnit;
-                document.getElementById('age').textContent = lastEntry.age;
-                updateProfileDisplay(lastEntry)
-                const dotsScore = calculateLifterDOTS(
-                  lastEntry.weight,
-                  lastEntry.squat,
-                  lastEntry.bench,
-                  lastEntry.deadlift,
-                  lastEntry.gender.toLowerCase() === 'male',
-                  currentWeightUnit
-                );
-              
-               
-                // Update UI with DOTS score
-                document.getElementById('dots').textContent = ` ${dotsScore}`;
-  
-                displayUserStrengthComparison(
-                  originalSquatValue,
-                  originalBenchValue,
-                  originalDeadliftValue,
-                  {
-                    gender: lastEntry.gender.trim(),
-                    weightClass: lastEntry.weightClass,
-                    ageGroup: getAgeGroup(parseInt(lastEntry.age))
-                  }
-                );
-                selectWeightUnit(currentWeightUnit)
-                displayLiftData(lastEntry, name);
-              }
-            })
+/**
+ * Function to fetch user data from the database and update the profile display.
+ */
+async function fetchLiftData(uid, name) {
+    try {
+        // Update Full Name and User ID
+        document.getElementById('user-full-name').textContent = name;
+        document.getElementById('user-id').textContent = uid.slice(-5);
+        
+        // Create references
+        const liftDataRef = db.ref(`users/${uid}/liftData`);
+        const instagramRef = db.ref(`users/${uid}/instagram`);
+        
+        // Fetch lift data and Instagram link concurrently
+        const [liftSnapshot, instagramSnapshot] = await Promise.all([
+            liftDataRef.limitToLast(1).once('value'),
+            instagramRef.once('value')
+        ]);
+
+        const liftData = liftSnapshot.val();
+        const instagramLink = instagramSnapshot.val();
+
+        if (liftData) {
+            const lastEntry = Object.values(liftData)[0];
+            
+            // Update profile display with lift data
+            displayLiftData(lastEntry, name);
+
+            // Store original values and unit when data is first loaded
+            const originalSquatValue = parseFloat(lastEntry.squat);
+            const originalBenchValue = parseFloat(lastEntry.bench);
+            const originalDeadliftValue = parseFloat(lastEntry.deadlift);
+            const originalWeightValue = parseFloat(lastEntry.weight);
+            
+            currentWeightUnit = lastEntry.unit || 'lbs';
+            
+            // Calculate and update total
+            const total = originalSquatValue + originalBenchValue + originalDeadliftValue;
+            document.getElementById("total").innerHTML =
+                `${total.toFixed(1)} <strong>${currentWeightUnit}</strong>`;
+            
+            // Update bodyweight and age
+            document.getElementById('bodyweight').textContent = `${originalWeightValue} ${currentWeightUnit}`;
+            document.getElementById('age').textContent = lastEntry.age || 'N/A';
+            document.getElementById('user-gender').textContent = lastEntry.gender || 'N/A';
+
+            // Calculate DOTS score
+            const dotsScore = calculateLifterDOTS(
+                originalWeightValue, 
+                originalSquatValue, 
+                originalBenchValue, 
+                originalDeadliftValue, 
+                normalizeGender(lastEntry.gender) === 'male',
+                currentWeightUnit
+            );
+            document.getElementById('dots').textContent = dotsScore;
+
+            // Set up user category for percentile calculation
+            const userCategory = {
+                gender: normalizeGender(lastEntry.gender),
+                weightClass: getWeightClass(originalWeightValue, lastEntry.gender, currentWeightUnit),
+                ageGroup: getAgeGroup(lastEntry.age)
+            };
+
+            // Calculate and display percentiles
+            const userPercentiles = await calculateUserPercentile(
+                originalSquatValue,
+                originalBenchValue,
+                originalDeadliftValue,
+                userCategory
+            );
+            
+            displayPercentiles(userPercentiles);
+            
+            // Calculate average percentile and update rank
+            const avgPercentile = (userPercentiles.squat + userPercentiles.bench + userPercentiles.deadlift) / 3;
+            const rank = updateRank(avgPercentile);
+            displayRank(rank);
         } else {
-          console.log("No lift data found for this user.");
+            setDefaultValues();
         }
-      });
-  }
-  function calculateLifterDOTS(weight, squat, bench, deadlift, isMale, unit) {
+
+        // Update Instagram display
+        updateInstagramDisplay(instagramLink);
+
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        setDefaultValues();
+    }
+}
+
+/**
+ * Function to initialize and load all user data when the DOM is loaded.
+ */
+function loadAllUsers() {
+    const userId = getUserIdFromUrl();
+    if (!userId) {
+        console.error('No user ID found in URL');
+        return;
+    }
+
+    db.ref('users').once('value')
+        .then((snapshot) => {
+            if (!snapshot.exists()) {
+                console.log('No users found in database');
+                return;
+            }
+
+            const usersData = snapshot.val();
+            for (const uid in usersData) {
+                if (uid.slice(-5) === userId) {
+                    const user = usersData[uid];
+                    console.log(`User Found: ${user.name}`);
+                    return fetchLiftData(uid, user.name);
+                }
+            }
+            console.log('User not found with ID:', userId);
+        })
+        .catch((error) => {
+            console.error('Error loading users:', error);
+        });
+}
+
+// Initialize event listeners after DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    loadAllUsers();
+});
+
+function calculateLifterDOTS(weight, squat, bench, deadlift, isMale, unit) {
     const maleCoeff = [-307.75076, 24.0900756, -0.1918759221, 0.0007391293, -0.000001093];
     const femaleCoeff = [-57.96288, 13.6175032, -0.1126655495, 0.0005158568, -0.0000010706];
 

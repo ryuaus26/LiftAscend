@@ -122,7 +122,86 @@ async function calculateUserPercentile(squat, bench, deadlift, userCategory) {
             deadlift: 0
         };
     }
-
+    document.addEventListener('DOMContentLoaded', function() {
+        const instagramContainer = document.getElementById('instagramContainer');
+        const popup = document.getElementById('instagramPopup');
+        const closeBtn = document.getElementById('closePopup');
+        const saveBtn = document.getElementById('saveInstagram');
+        const input = document.getElementById('instagramInput');
+        let instagramLink = '';
+    
+        // Function to fetch Instagram link from Firebase
+        async function fetchInstagramLink() {
+            try {
+                const userId = firebase.auth().currentUser?.uid;
+                if (userId) {
+                    const snapshot = await firebase.database().ref(`users/${userId}/instagramLink`).once('value');
+                    instagramLink = snapshot.val() || '';
+                    // Update input value if popup is open
+                    input.value = instagramLink;
+                }
+            } catch (error) {
+                console.error('Error fetching Instagram link:', error);
+            }
+        }
+    
+        // Function to save Instagram link to Firebase
+        async function saveInstagramLink(link) {
+            try {
+                const userId = firebase.auth().currentUser?.uid;
+                if (!userId) throw new Error('User not authenticated');
+    
+                // Save to Firebase
+                await firebase.database().ref(`users/${userId}`).update({
+                    instagramLink: link
+                });
+                
+                instagramLink = link;
+                popup.classList.add('hidden');
+            } catch (error) {
+                console.error('Error saving Instagram link:', error);
+                alert('Failed to save Instagram link. Please try again.');
+            }
+        }
+    
+        // Event listener for Instagram icon click
+        instagramContainer.querySelector('.fa-instagram').addEventListener('click', function() {
+            if (instagramLink) {
+                window.open(instagramLink, '_blank');
+            } else {
+                popup.classList.remove('hidden');
+            }
+        });
+    
+        // Event listener for close button
+        closeBtn.addEventListener('click', function() {
+            popup.classList.add('hidden');
+        });
+    
+        // Event listener for save button
+        saveBtn.addEventListener('click', function() {
+            const link = input.value.trim();
+            if (link) {
+                saveInstagramLink(link);
+            } else {
+                alert('Please enter a valid Instagram profile link');
+            }
+        });
+    
+        // Close popup when clicking outside
+        popup.addEventListener('click', function(e) {
+            if (e.target === popup) {
+                popup.classList.add('hidden');
+            }
+        });
+    
+        // Fetch Instagram link when user logs in
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                fetchInstagramLink();
+            }
+        });
+    });
     function findPercentileFromBrackets(value, brackets) {
         // Convert brackets to arrays for easier manipulation
         const percentiles = Object.keys(brackets).map(Number).sort((a, b) => a - b);
@@ -954,7 +1033,116 @@ function toggleColumns() {
         deadliftSpans.forEach(span => span.style.display = "inline"); // Show deadlift columns
     }
 }
+function validateInstagramLink(url) {
+    const instagramRegex = /^https?:\/\/(www\.)?instagram\.com\/[A-Za-z0-9_.]+\/?$/;
+    return instagramRegex.test(url);
+}
 
+// Function to update the Instagram icon with the saved link
+function updateInstagramLinkDisplay(link) {
+    const instagramIcon = document.getElementById('instagramIcon');
+    const updateButton = document.getElementById('updateInstagram');
+    const displayInstagramLink = document.getElementById('displayInstagramLink');
+
+    // Remove existing event listeners to prevent multiple bindings
+    const newInstagramIcon = instagramIcon.cloneNode(true);
+    instagramIcon.parentNode.replaceChild(newInstagramIcon, instagramIcon);
+
+    if (link) {
+        // Show the Update button
+        updateButton.style.display = 'block';
+
+        // Update Instagram Icon Click to Open Link
+        newInstagramIcon.addEventListener('click', () => {
+            window.open(link, '_blank');
+        });
+
+        // Update Button Click to Open Popup
+        updateButton.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent triggering the icon's click event
+            document.getElementById('instagramPopup').classList.remove('hidden');
+        });
+
+        // Update the display link
+        displayInstagramLink.href = link;
+        displayInstagramLink.textContent = link;
+    } else {
+        // Hide the Update button
+        updateButton.style.display = 'none';
+
+        // Update Instagram Icon Click to Open Popup
+        newInstagramIcon.addEventListener('click', () => {
+            document.getElementById('instagramPopup').classList.remove('hidden');
+        });
+
+        // Update the display link
+        displayInstagramLink.href = "#";
+        displayInstagramLink.textContent = "Not Set";
+    }
+}
+
+// Function to save Instagram link to Firebase
+function saveInstagramLink(link) {
+    const user = auth.currentUser;
+
+    if (user) {
+        const uid = user.uid;
+        database.ref('users/' + uid + '/instagram').set(link)
+            .then(() => {
+                alert('Instagram profile link saved successfully!');
+                document.getElementById('instagramPopup').classList.add('hidden');
+                document.getElementById('instagramInput').value = '';
+                updateInstagramLinkDisplay(link);
+            })
+            .catch((error) => {
+                console.error('Error saving Instagram link:', error);
+                alert('Failed to save Instagram profile link. Please try again.');
+            });
+    } else {
+        alert('No user is currently logged in.');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const instagramIcon = document.getElementById('instagramIcon');
+    const instagramPopup = document.getElementById('instagramPopup');
+    const closePopupButton = document.getElementById('closePopup');
+    const saveInstagramButton = document.getElementById('saveInstagram');
+    const displayInstagramLink = document.getElementById('displayInstagramLink');
+
+    // Close Instagram popup when the close button is clicked
+    closePopupButton.addEventListener('click', () => {
+        instagramPopup.classList.add('hidden');
+    });
+
+    // Save Instagram link when the save button is clicked
+    saveInstagramButton.addEventListener('click', () => {
+        const instagramInput = document.getElementById('instagramInput').value.trim();
+
+        if (validateInstagramLink(instagramInput)) {
+            saveInstagramLink(instagramInput);
+        } else {
+            alert('Please enter a valid Instagram profile link.');
+        }
+    });
+});
+
+// Load Instagram link on user authentication
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        const uid = user.uid;
+        database.ref('users/' + uid + '/instagram').once('value')
+            .then((snapshot) => {
+                const instagramLink = snapshot.val();
+                updateInstagramLinkDisplay(instagramLink);
+            })
+            .catch((error) => {
+                console.error('Error loading Instagram link:', error);
+            });
+    } else {
+        // Handle user not logged in if necessary
+    }
+});
 
 
 

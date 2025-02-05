@@ -1,7 +1,3 @@
-/*
-    Austin Ryu (1/25/2025)
-    This javascript file provides functioanlity to the chatbot as well as process images taken from the user and send it to firebase storage
-*/
 class ChatWidget {
     constructor() {
         this.isOpen = false;
@@ -229,62 +225,244 @@ class ChatWidget {
     // Handles uploaded files (images or text)
       // In ChatWidget class:
       handleFile(file) {
-        const allowedTypes = ['image/png', 'image/jpeg', 'text/plain', 'image/png'];
+        const allowedTypes = [
+          'image/png',
+          'image/jpeg',
+          'text/plain',
+          'video/mp4',
+          'video/quicktime'
+        ];
+        
+        // Only proceed if file type is supported
         if (!allowedTypes.includes(file.type)) {
-            this.displayMessage(`Unsupported file type: ${file.name}. Please upload an image or a text file.`, 'bot');
-            return;
+          this.addSystemMessage(
+            `Unsupported file type: ${file.name}. Please upload an image, text file, or video.`,
+          );
+          return;
         }
-    
-        const chatMessages = document.getElementById('chatMessages');
-        const messageContainer = document.createElement('div');
-        messageContainer.className = 'message system';
-    
+      
+        // If it's an image (existing logic)
         if (file.type.startsWith('image/')) {
-            // 1) Upload to Firebase Storage
-            this.uploadImageToFirebase(file)
-                .then((downloadURL) => {
-                    // 2) Show the uploaded image in chat using the public URL
-                    messageContainer.innerHTML = `
-                        <div class="message-content">
-                            <p>📸 Image uploaded: ${file.name}</p>
-                            <div class="image-preview-container">
-                                <img src="${downloadURL}" alt="Image Preview" class="chat-image-preview">
-                            </div>
-                        </div>
-                    `;
-                    chatMessages.appendChild(messageContainer);
-                    this.scrollToBottom();
-    
-                    // 3) **Store** the uploaded image URL for later use
-                    this.uploadedImageURL = downloadURL;
-                    // After setting this.uploadedImageURL = downloadURL in handleFile
-                    this.addSystemMessage('Image uploaded successfully! You can ask me to analyze your form by asking questions like "Is my squat depth good?"');
-
-                })
-                .catch((error) => {
-                    console.error('Error uploading image to Firebase:', error);
-                    this.addSystemMessage(`Could not upload ${file.name} to Firebase Storage.`);
-                });
-    
-        } else if (file.type === 'text/plain') {
-            // Text files remain the same
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const textContent = e.target.result.length > 100
-                    ? e.target.result.substring(0, 100) + '...'
-                    : e.target.result;
-                messageContainer.innerHTML = `
-                    <div class="message-content">
-                        <p>📄 Text file uploaded: ${file.name}</p>
-                        <pre class="text-preview">${textContent}</pre>
-                    </div>
-                `;
-                chatMessages.appendChild(messageContainer);
-                this.scrollToBottom();
-            };
-            reader.readAsText(file);
+          this.uploadImageToFirebase(file)
+            .then((downloadURL) => {
+              // Show the uploaded image in chat
+              const chatMessages = document.getElementById('chatMessages');
+              const messageContainer = document.createElement('div');
+              messageContainer.className = 'message system';
+              messageContainer.innerHTML = `
+                <div class="message-content">
+                  <p>📸 Image uploaded: ${file.name}</p>
+                  <div class="image-preview-container">
+                    <img src="${downloadURL}" alt="Image Preview" class="chat-image-preview">
+                  </div>
+                </div>
+              `;
+              chatMessages.appendChild(messageContainer);
+              this.scrollToBottom();
+      
+              // Store just the single URL for analysis
+              this.uploadedImageURL = downloadURL;
+              this.addSystemMessage(
+                'Image uploaded successfully! You can ask me to analyze your form by asking questions like "Is my squat depth good?"'
+              );
+            })
+            .catch((error) => {
+              console.error('Error uploading image to Firebase:', error);
+              this.addSystemMessage(`Could not upload ${file.name} to Firebase Storage.`);
+            });
+          return; // Stop here for images
         }
-    }
+      
+        // If it's a text file (existing logic)
+        if (file.type === 'text/plain') {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const textContent = e.target.result.length > 100
+              ? e.target.result.substring(0, 100) + '...'
+              : e.target.result;
+              
+            const chatMessages = document.getElementById('chatMessages');
+            const messageContainer = document.createElement('div');
+            messageContainer.className = 'message system';
+            messageContainer.innerHTML = `
+              <div class="message-content">
+                <p>📄 Text file uploaded: ${file.name}</p>
+                <pre class="text-preview">${textContent}</pre>
+              </div>
+            `;
+            chatMessages.appendChild(messageContainer);
+            this.scrollToBottom();
+          };
+          reader.readAsText(file);
+          return;
+        }
+      
+        // --- VIDEO HANDLING (Capture ALL FRAMES or Frequent Frames) ---
+        if (file.type.startsWith('video/')) {
+          const chatMessages = document.getElementById('chatMessages');
+      
+          // 1) Display some status in chat
+          const messageContainer = document.createElement('div');
+          messageContainer.className = 'message system';
+          messageContainer.innerHTML = `
+            <div class="message-content">
+              <p>🎥 Video detected: ${file.name}</p>
+              <p>Extracting **many frames** from the video. This can take a while.</p>
+            </div>
+          `;
+          chatMessages.appendChild(messageContainer);
+          this.scrollToBottom();
+      
+          // Create a <video> element for processing
+          const videoElement = document.createElement('video');
+          videoElement.src = URL.createObjectURL(file);
+          videoElement.crossOrigin = 'anonymous';
+          videoElement.style.display = 'none';
+          document.body.appendChild(videoElement);
+      
+          // A container to show small previews of extracted frames
+          const previewContainer = document.createElement('div');
+          previewContainer.className = 'message system frames-container';
+          previewContainer.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+            padding: 10px;
+            max-height: 70vh;
+            overflow-y: auto;
+          `;
+          chatMessages.appendChild(previewContainer);
+      
+          // A place to show progress
+          const progressContainer = document.createElement('div');
+          progressContainer.className = 'message system';
+          progressContainer.innerHTML = '<p>Initializing video processing...</p>';
+          chatMessages.appendChild(progressContainer);
+      
+          // We'll store all frames' URLs in an array for context
+          this.uploadedFrameURLs = [];
+      
+          // Wait until the video metadata loads to know the duration
+          videoElement.addEventListener('loadedmetadata', async () => {
+            const duration = videoElement.duration;
+      
+            // For example, capture frames ~25 times per second => 0.04
+            // (Adjust as needed. If you do literally EVERY frame of 30 fps video, it's huge!)
+            const captureInterval = 1 / 5; // ~0.04
+      
+            // We'll do an asynchronous loop from 0 to the end
+            let currentTime = 0;
+            let processedFrames = 0;
+      
+            // Prepare a canvas for drawing frames
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+      
+            // We'll set the canvas to the video's resolution
+            // (Alternatively, you could scale down for performance)
+            let vidWidth = videoElement.videoWidth;
+            let vidHeight = videoElement.videoHeight;
+            canvas.width = vidWidth;
+            canvas.height = vidHeight;
+      
+            while (currentTime <= duration) {
+              await new Promise((resolve) => {
+                // Seek to the desired time
+                videoElement.currentTime = currentTime;
+                
+                const onSeeked = async () => {
+                  videoElement.removeEventListener('seeked', onSeeked);
+      
+                  // Draw the frame
+                  context.drawImage(videoElement, 0, 0, vidWidth, vidHeight);
+      
+                  // Convert to Blob (PNG)
+                  canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                      resolve(null);
+                      return;
+                    }
+      
+                    // Upload to Firebase
+                    const frameFileName = `videoFrames/${Date.now()}_${file.name}_${currentTime.toFixed(2)}.png`;
+                    try {
+                      const storageRef = firebase.storage().ref();
+                      const fileRef = storageRef.child(frameFileName);
+                      await fileRef.put(blob);
+                      const downloadURL = await fileRef.getDownloadURL();
+      
+                      // Show in chat (small preview)
+                      const frameDiv = document.createElement('div');
+                      frameDiv.style.cssText = `
+                        border: 1px solid #ccc;
+                        padding: 4px;
+                        background: white;
+                        border-radius: 4px;
+                      `;
+                      frameDiv.innerHTML = `
+                        <img src="${downloadURL}" alt="Frame" 
+                             style="width:100%; height:auto; border-radius:4px;"/>
+                        <p style="margin:4px 0; font-size:10px; color:#666;">
+                          Time: ${currentTime.toFixed(2)}s
+                        </p>
+                      `;
+                      previewContainer.appendChild(frameDiv);
+      
+                      // Store the URL in an array if you want further reference
+                      this.uploadedFrameURLs.push(downloadURL);
+      
+                      processedFrames++;
+                      // Update progress
+                      const progressPercent = ((currentTime / duration) * 100).toFixed(1);
+                      progressContainer.innerHTML = `<p>Extracting frames: ${progressPercent}% done</p>`;
+      
+                      if (processedFrames % 5 === 0) {
+                        this.scrollToBottom();
+                      }
+      
+                      resolve(downloadURL);
+                    } catch (err) {
+                      console.error('Error uploading frame:', err);
+                      resolve(null);
+                    }
+                  }, 'image/png', 0.9);
+                };
+                
+                videoElement.addEventListener('seeked', onSeeked, { once: true });
+              });
+      
+              // Go to the next frame time
+              currentTime += captureInterval;
+            }
+      
+            // Cleanup
+            document.body.removeChild(videoElement);
+            URL.revokeObjectURL(videoElement.src);
+      
+            this.addSystemMessage(
+              `Video processing complete! ${processedFrames} frames extracted (interval: ${captureInterval.toFixed(2)}s)`
+            );
+      
+            // If you want a single "main" frame for analysis:
+            // e.g. pick the final or middle one:
+            if (this.uploadedFrameURLs.length > 0) {
+              this.uploadedImageURL = this.uploadedFrameURLs[
+                Math.floor(this.uploadedFrameURLs.length / 2)
+              ];
+      
+              this.addSystemMessage(
+                'I set one representative frame to "uploadedImageURL". Ask "Analyze my form" to reference that frame.'
+              );
+            }
+          });
+      
+          videoElement.addEventListener('error', (err) => {
+            console.error('Video element error:', err);
+            this.addSystemMessage(`Could not load video: ${file.name}`);
+          });
+        }
+      }
+      
     
 
 
@@ -365,7 +543,7 @@ async uploadImageToFirebase(file) {
         const messages = [
             {
                 role: "system",
-                content: "You are a powerlifting coach chatbot and you sound like an enthusiastic human. You should help the user with their powerlifting questions and ignore all unrelated questions."
+                content: "You are a powerlifting coach chatbot and you sound like an enthusiastic human. You should help the user with their powerlifting questions and ignore all unrelated questions. Even when image views are obscure provide feedback"
             }
         ];
 

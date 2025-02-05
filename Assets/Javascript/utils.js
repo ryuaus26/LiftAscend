@@ -134,13 +134,16 @@ function normalizeGender(gender) {
  * @returns {string} - The weight class.
  */
 function getWeightClass(weight, gender, unit) {
-    if (gender === 'male') {
+    // Normalize gender input
+    const normalizedGender = gender.toLowerCase();
+
+    if (normalizedGender === 'male') {
         return getWeightClassMale(weight, unit);
-    } else if (gender === 'female') {
+    } else if (normalizedGender === 'female') {
         return getWeightClassFemale(weight, unit);
     } else {
-        console.error('Unknown gender:', gender);
-        return 'Unknown';
+        console.error(`Unknown gender: ${gender}`);
+        return null; // or handle the error as needed
     }
 }
 
@@ -239,4 +242,38 @@ function updateInstagramDisplay(instagramLink) {
         userInstagramLink.href = '#';
         instagramStatus.textContent = 'Not Set';
     }
+}
+
+async function fetchLiftData(uid, name) {
+    try {
+        // ... existing code ...
+
+        // Normalize gender input to lowercase
+        const normalizedGender = lastEntry.gender ? lastEntry.gender.toLowerCase() : 'unknown';
+
+        // Set up user category for percentile calculation
+        const userCategory = {
+            gender: normalizedGender,
+            weightClass: getWeightClass(originalWeightValue, normalizedGender, currentWeightUnit),
+            ageGroup: getAgeGroup(lastEntry.age)
+        };
+
+        // ... existing code ...
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        setDefaultValues();
+    }
+}
+
+function updateProfileDisplay(data) {
+    if (!data) return;
+    
+    // Update full name if available
+    document.getElementById("user-full-name").textContent = data.full_name || "N/A";
+    document.getElementById("user-squat").textContent = data.squat || "N/A";
+    document.getElementById("user-bench").textContent = data.bench || "N/A";
+    document.getElementById("user-deadlift").textContent = data.deadlift || "N/A";
+    document.getElementById("bodyweight").textContent = data.weight ? `${data.weight} ${data.unit || 'lbs'}` : "N/A";
+    document.getElementById("age").textContent = data.age || "N/A";
+    document.getElementById("user-gender").textContent = data.gender || "N/A";
 } 

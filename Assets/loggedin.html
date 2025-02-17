@@ -1,536 +1,478 @@
-<!--  
-    Austin Ryu (1/25/2025)  
-    This HTML file serves as the main interface for Lift Ascend, displaying user statistics,  
-    a chat widget, leaderboard, and interactive elements for tracking lifting progress.  
+<!-- 
+    Austin Ryu (1/25/2025)
+    Improved Layout for Lift Ascend
+    Demonstrates consistent spacing, a sticky header, collapsible sections, a pinned chat widget,
+    a hidden leaderboard that appears on click, and percentiles updated via JavaScript.
 -->
-
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lift Ascend</title>
-    <link rel="icon" href="./Images/android-chrome-512x512.png" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap" rel="stylesheet">
-    <link href="./CSS/coach.css" rel="stylesheet">
-
-    <style>
-         #mobileWarning {
-            display: none; /* Initially hidden */
-            background-color: yellow;
-            color: red;
-            padding: 10px;
-            text-align: center;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-    </style>
-    <link rel="icon" href="./Images/Logo.PNG" type="image/png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lift Ascend</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="./Images/android-chrome-512x512.png" type="image/x-icon"/>
+  
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;900&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap"
+    rel="stylesheet"
+  />
+  
+  <!-- Custom CSS (Optional) -->
+  <link href="./CSS/coach.css" rel="stylesheet" />
+  
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+    }
+    .hidden {
+      display: none;
+    }
+    /* Additional custom styles as needed */
+    #dragOverlay {
+      top: 0;
+      left: 0;
+      transform: none;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
 </head>
 
-<body class="font-montserrat bg-gray-100">
-    <div id="mobileWarning">Enhance your experience by running the app on pc!</div>
-    <script>
-        function checkDevice() {
-            // Check if screen width is less than 768px (considered mobile)
-            if (window.innerWidth < 768) {
-                // Display the message for mobile users
-                document.getElementById("mobileWarning").style.display = "block";
-            }
-        }
+<body class="bg-gray-100">
 
-        // Run the check when the page loads
-        window.onload = checkDevice;
-    </script>
-     <div id="notification-banner" style="background-color: #fff3cd; padding: 12px; text-align: center; position: relative; border-bottom: 1px solid #ffeeba;">
-     <!---  <span style="color: #856404; font-family: Arial, sans-serif;">
-            User data may not accurately reflect real-life information. Future updates will introduce an additional page displaying accurate data.
-        </span>
-        <button onclick="this.parentElement.style.display='none'" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 5px;">
-            ✕
-        </button> -->
-        <a href="./Simulator_Website/index.html" class="ml-6 px-4 py-2 text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg hover:shadow-xl transition duration-300" style="display: inline-block; margin-top: 20px;">
-            Lifting Simulator 
-        </a>
-    </div>  
-   
-    
-    <header class="bg-white shadow-md">
-        <div class="max-w-full mx-auto px-4 sm:px-8 lg:px-16 py-6 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-8">
-            <div class="flex-shrink-0">
-                <a href="loggedin.html" class="inline-block">
-                    <img class="h-24 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-lg rounded-lg" src="./Images/Logo.PNG"  alt="Lift Ascend logo">
-                </a>
-            </div>
-        
-            <div id="percentile-content-container" class="flex-1">
-                <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500 mb-4 tracking-wide drop-shadow-md bg-gray-900 p-4 rounded-lg">
-                    Your Percentiles
-                </h2>
-                
-                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-8 justify-between">
-                    <div class="flex-1 flex items-center bg-white shadow-md p-4 rounded-lg transition-transform duration-300 hover:scale-105">
-                        <span class="text-3xl mr-3">🏋️‍♂️</span>
-                        <p class="text-lg">Your squat is <span id="squat-percentile" class="text-blue-600 font-semibold text-lg">0 % better than others</span></p>
-                    </div>
-                    <div class="flex-1 flex items-center bg-white shadow-md p-4 rounded-lg transition-transform duration-300 hover:scale-105">
-                        <span class="text-3xl mr-3">🏋️‍♀️</span>
-                        <p class="text-lg">Your bench is <span id="bench-percentile" class="text-blue-600 font-semibold text-lg">0 % better than others</span></p>
-                    </div>
-                    <div class="flex-1 flex items-center bg-white shadow-md p-4 rounded-lg transition-transform duration-300 hover:scale-105">
-                        <span class="text-3xl mr-3">🏋️‍♂️</span>
-                        <p class="text-lg">Your deadlift is <span id="deadlift-percentile" class="text-blue-600 font-semibold text-lg">0 % better than others</span></p>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="profile-content-container" class="flex flex-col sm:flex-row items-start bg-gray-50 p-6 rounded-lg shadow-lg space-y-4 sm:space-y-0 sm:space-x-6 flex-1">
-                <div class="flex-grow">
-                    <div class="flex items-center gap-3 mb-4">
-                        <h2 id="profile-header" class="text-2xl font-extrabold text-gray-800">Profile</h2>
-                        <button 
-                        onclick="logout()" 
-                        class="bg-red-500 text-white font-semibold py-2 px-4 rounded shadow hover:bg-blue-600 transition duration-200 flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h6a2 2 0 012 2v1" />
-                        </svg>
-                        <span>Logout</span>
-                    </button>
-                    
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-                        <p class="text-gray-700 text-base"><strong>Full Name:</strong> <span id="user-full-name"></span></p>
-                        <p class="text-gray-700 text-base"><strong>Squat:</strong> <span id="user-squat"> N/A</span></p>
-                        <p class="text-gray-700 text-base"><strong>Bench:</strong> <span id="user-bench"> N/A</span></p>
-                        <p class="text-gray-700 text-base"><strong>Deadlift:</strong> <span id="user-deadlift"> N/A</span></p>
-                        
-                        <p class="text-gray-700 text-base"><strong>Gender:</strong> <span id="user-gender"> N/A</span></p>
-                        
-                        <!-- New Fields Added Below -->
-                        <p class="text-gray-700 text-base"><strong>Bodyweight:</strong> <span id="bodyweight"> N/A</span></p>
-                        <p class="text-gray-700 text-base"><strong>Age:</strong> <span id="age"> N/A</span></p>
-                        <p class="text-gray-700 text-base"><strong>DOTS Score:</strong> <span id="dots"> N/A</span></p>
-                        <p class="text-gray-700 text-base"><strong>Total:</strong> <span id="total"> N/A</span></p>
-                    </div>
-                </div>
-                
-                <div class="flex-shrink-0">
-                    <div class="rank-container" id="rankContainer">
-                        <h2 class="text-base font-bold">Your Rank:</h2>
-                        <img 
-                        src="./Images/Unranked.png" 
+  <!-- Mobile Warning (optional) -->
+  <div id="mobileWarning" class="hidden bg-yellow-200 text-red-700 p-2 text-center">
+    Enhance your experience by running the app on PC!
+  </div>
+  <script>
+    function checkDevice() {
+      if (window.innerWidth < 768) {
+        document.getElementById("mobileWarning").style.display = "block";
+      }
+    }
+    window.onload = checkDevice;
+  </script>
 
-                        class="rank-image w-32 h-32 border border-gray-300 rounded-full transition-transform duration-200 hover:scale-110 shadow-md" 
-                        id="rankImage" 
-                        alt="Rank Image">
-                        
-                    </div>
-                </div>
-            </div>
-            <div class="weight-unit relative flex-shrink-0">
-               
-                <button class="weight-unit-btn bg-gray-200 hover:bg-gray-300 font-bold py-2 px-4 rounded inline-flex items-center" onclick="toggleWeightUnit()">
-                    <span id="weightUnitButton">lbs ▼</span>
-                </button>
-                
-                <div class="weight-unit-content absolute right-0 mt-2 w-24 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden">
-                    <a href="#" onclick="selectWeightUnit('lbs')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">lbs</a>
-                    <a href="#" onclick="selectWeightUnit('kgs')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">kgs</a>
-                </div>
-            </div>
-        </div>
-        
-        
-          
-        </div>
-
-        <div id="additional-info" class="bg-gradient-to-r from-gray-100 to-gray-200 shadow-md border-t border-b border-gray-300">
-            <div class="container mx-auto px-4 py-3">
-                <div class="container mx-auto px-4 py-5">
-                    <div class="flex flex-wrap md:flex-nowrap justify-between gap-6 items-center">
-                       
-                       
-                        <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
-                            <span class="font-bold text-gray-800 text-lg">ID:</span>
-                            <span id="user-id" class="text-blue-700 font-semibold text-lg"></span>
-                        </div>
-                        
-                        <div class="flex items-center justify-center mt-6">
-                            <div id="instagramContainer" class="relative flex items-center space-x-2">
-                                <!-- Instagram Icon -->
-                                <i 
-                                    class="fab fa-instagram fa-3x text-blue-600 hover:text-blue-800 transition duration-300 cursor-pointer" 
-                                    title="Add Instagram Profile"
-                                    id="instagramIcon"
-                                ></i>
-                                
-                                <!-- Update Button (Always Visible) -->
-                                <button 
-                                    id="updateInstagram" 
-                                    class="bg-blue-500 text-white px-2 py-1 rounded transition-opacity duration-300"
-                                >
-                                    Update
-                                </button>
-                                
-                                <!-- Popup Form -->
-                                <div id="instagramPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                                    <div class="bg-white rounded-lg p-6 w-96 relative">
-                                        <!-- Close Button -->
-                                        <button 
-                                            id="closePopup"
-                                            class="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-                                        >
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                            
-                                        <!-- Popup Header -->
-                                        <h3 class="text-xl font-bold mb-4">Instagram Profile</h3>
-                                        
-                                        <!-- Instagram Input Field -->
-                                        <input
-                                            type="text"
-                                            id="instagramInput"
-                                            placeholder="Paste your Instagram profile link"
-                                            class="w-full p-2 border rounded mb-4 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                                        />
-                            
-                                        <!-- Save Button -->
-                                        <button
-                                            id="saveInstagram"
-                                            class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition duration-200"
-                                        >
-                                            Save
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            
-</div>
-
-<div class="container mx-auto px-4 py-4 flex justify-between items-center">
-    <div class="right-section flex items-center">
-        <div id="profile-container" class="hidden"></div>
-
-        <div class="friend-list-wrapper ml-4">
-            <button id="toggle-friend-list" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200">Show Friends</button>
-            <div id="friend-list-container" class="hidden mt-2 bg-white shadow-md rounded-lg p-4 border border-gray-400">
-                <ul id="friend-list" class="space-y-3">
-                    <!-- Friends will be added here via JS -->
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-    </header>
-
-    <div class="container mx-auto px-4 py-8">
-        <div class="search-bar-container mb-8">
-            <div class="relative">
-                <input type="text" class="search-bar w-full px-4 py-2 pr-16 rounded-lg border border-gray-700 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search for lifters..." id="searchInput">
-                <div class="suggestions-container absolute w-full bg-white shadow-md rounded-lg mt-1 hidden border border-gray-300" id="suggestionsContainer">
-                    <ul id="suggestionsList"></ul>
-                </div>
-                <button class="search-button absolute right-0 top-0 bg-blue-500 text-white px-4 py-2 h-full rounded-r-lg hover:bg-blue-600">
-                    <i class="fas fa-search"></i> Search
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    
-    <div class="flex flex-col items-center max-w-3xl mx-auto p-6">
-        <!-- Toggle Button -->
-        <button onclick="toggleRankExplanation()" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold text-lg px-6 py-3 rounded-full shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl mb-4 focus:outline-none focus:ring-4 focus:ring-purple-300">
-            What does my rank mean?
-        </button>
-    
-        <!-- Rank Explanation Section -->
-        <div id="rankExplanation" class="hidden flex flex-col items-center max-w-3xl mx-auto p-6">
-            <!-- Header Section -->
-            <div class="text-center mb-8">
-                <h2 class="text-4xl font-bold text-gray-800 mb-4">Rank Explanation</h2>
-                <div class="w-24 h-1 bg-gradient-to-r from-blue-500 via-yellow-500 to-yellow-800 mx-auto rounded-full mb-4"></div>
-                <p class="text-gray-600 text-lg mb-6">Our ranking system shows where you stand among fellow lifters. Each tier represents your progress and dedication.</p>
-            </div>
-    
-            <div class="flex flex-col space-y-8">
-                <!-- Diamond Rank -->
-                <div class="flex items-center space-x-6 hover:transform hover:scale-105 transition-transform duration-300">
-                    <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-blue-500 shadow-lg hover:shadow-blue-200">
-                        <img src="./Images/Diamond.png" alt="Diamond Rank" class="w-full h-full object-cover">
-                    </div>
-                    <div class="text-left">
-                        <p class="text-3xl font-extrabold text-blue-500 tracking-wide mb-2">Diamond</p>
-                        <p class="text-gray-600 text-lg leading-snug">
-                            You're in the <span class="text-blue-500 font-bold">top 20%</span> of all lifters!
-                            <br/>
-                            <span class="text-sm text-gray-500">Elite level strength achievement</span>
-                        </p>
-                    </div>
-                </div>
-    
-                <!-- Gold Rank -->
-                <div class="flex items-center space-x-6 hover:transform hover:scale-105 transition-transform duration-300">
-                    <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-yellow-500 shadow-lg hover:shadow-yellow-200">
-                        <img src="./Images/Gold.png" alt="Gold Rank" class="w-full h-full object-cover">
-                    </div>
-                    <div class="text-left">
-                        <p class="text-3xl font-extrabold text-yellow-500 tracking-wide mb-2">Gold</p>
-                        <p class="text-gray-600 text-lg leading-snug">
-                            You're in the <span class="text-yellow-500 font-bold">top 35%</span> of all lifters!
-                            <br/>
-                            <span class="text-sm text-gray-500">Advanced strength level</span>
-                        </p>
-                    </div>
-                </div>
-    
-                <!-- Silver Rank -->
-                <div class="flex items-center space-x-6 hover:transform hover:scale-105 transition-transform duration-300">
-                    <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-400 shadow-lg hover:shadow-gray-200">
-                        <img src="./Images/Silver.png" alt="Silver Rank" class="w-full h-full object-cover">
-                    </div>
-                    <div class="text-left">
-                        <p class="text-3xl font-extrabold text-gray-400 tracking-wide mb-2">Silver</p>
-                        <p class="text-gray-600 text-lg leading-snug">
-                            You're in the <span class="text-gray-400 font-bold">top 55%</span> of all lifters!
-                            <br/>
-                            <span class="text-sm text-gray-500">Intermediate strength level</span>
-                        </p>
-                    </div>
-                </div>
-    
-                <!-- Bronze Rank -->
-                <div class="flex items-center space-x-6 hover:transform hover:scale-105 transition-transform duration-300">
-                    <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-yellow-800 shadow-lg hover:shadow-yellow-100">
-                        <img src="./Images/Bronze.png" alt="Bronze Rank" class="w-full h-full object-cover">
-                    </div>
-                    <div class="text-left">
-                        <p class="text-3xl font-extrabold text-yellow-800 tracking-wide mb-2">Bronze</p>
-                        <p class="text-gray-600 text-lg leading-snug">
-                            You're in the <span class="text-yellow-800 font-bold">top 75%</span> of all lifters!
-                            <br/>
-                            <span class="text-sm text-gray-500">Beginner strength level</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-        <div id="liftDataInput" class="bg-white shadow-md rounded-lg p-6 max-w-7xl mx-auto">
-            <h2 class="text-2xl font-bold mb-4">Enter Your Lift Data</h2>
-            <table id="liftDataTable" class="w-full">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-4 py-2">Age</th>
-                        <th id="weightHeader" class="px-4 py-2">Weight (lbs)</th>
-                        <th class="px-4 py-2">Gender</th>
-                        <th id="squatHeader" class="px-4 py-2">Squat (lbs)</th>
-                        <th id="benchHeader" class="px-4 py-2">Bench (lbs)</th>
-                        <th id="deadliftHeader" class="px-4 py-2">Deadlift (lbs)</th>
-                        <th class="px-4 py-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="liftDataBody">
-                    <tr>
-                        <td><input inputmode="numeric" type="number" class="age w-full px-2 py-1 border rounded" placeholder="Age"></td>
-                        <td><input inputmode="numeric" type="number" class="weight w-full px-2 py-1 border rounded" placeholder="Weight"></td>
-                        <td>
-                            <select class="gender w-full p-2 border rounded">
-                                <option value="" disabled selected>Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                            </select>
-                        </td>
-                        <td><input inputmode="numeric" type="number" class="squat w-full px-2 py-1 border rounded" placeholder="Squat"></td>
-                        <td><input inputmode="numeric" type="number" class="bench w-full px-2 py-1 border rounded" placeholder="Bench"></td>
-                        <td><input inputmode="numeric" type="number" class="deadlift w-full px-2 py-1 border rounded" placeholder="Deadlift"></td>
-                        <td><button onclick="removeRow(this)" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Remove</button></td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="mt-4 space-x-4">
-                <button onclick="addRow()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Add Row</button>
-                <button onclick="submitLiftData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit Lift Data</button>
-            </div>
-        </div>
-        
-        <div id="leaderboard" class="bg-white shadow-md rounded-lg p-6 mt-8 max-w-7xl mx-auto">
-            <div class="relative inline-block text-left">
-                <div>
-                    <button id="modeButton" class="inline-flex justify-center w-full rounded-md border border-indigo-500 shadow-sm px-4 py-2 bg-indigo-500 text-sm font-medium text-white hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" aria-expanded="true" aria-haspopup="true" onclick="toggleDropdown()">
-                        Sort Options
-                        <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                      </button>
-                </div>
-                
-                <div
-                    id="dropdownContent"
-                    class="hidden absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
-                >
-                    <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="modeButton">
-                        <a
-                            href="#"
-                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            onclick="sortLeaderboard('By Total')"
-                            role="menuitem"
-                        >
-                            By Total
-                        </a>
-                        <a
-                            href="#"
-                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            onclick="sortLeaderboard('By Dots')"
-                            role="menuitem"
-                        >
-                            By Dots
-                        </a>
-                        <a
-                            href="#"
-                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            onclick="sortLeaderboard('By Squat')"
-                            role="menuitem"
-                        >
-                            By Squat
-                        </a>
-                        <a
-                            href="#"
-                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            onclick="sortLeaderboard('By Bench')"
-                            role="menuitem"
-                        >
-                            By Bench
-                        </a>
-                        <a
-                            href="#"
-                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            onclick="sortLeaderboard('By Deadlift')"
-                            role="menuitem"
-                        >
-                            By Deadlift
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">Leaderboard</h2>
-            <table class="w-full text-center bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
-                <thead>
-                    <tr class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-lg font-semibold">
-                        <th class="px-4 py-3 text-left">Place</th>
-                        <th class="px-4 py-3 text-left" style="padding-left: 3rem;">Lifter</th>
-                        <th class="px-4 py-3 text-left" data-column="total" id ='totalHeader'>Total</th>
-                        <th class="px-4 py-3 text-left" style="padding-left: 1rem;">Rank</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboardBody" class="text-gray-700">
-                    <!-- Dynamic content will be populated here -->
-                </tbody>
-            </table>
-        </div>
-        
-              
-              
-           
-      
-        <div class="chat-widget fixed bottom-6 right-6">
-            <!-- Chat Button -->
-            <button id="chatButton" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-lg flex items-center justify-center transition-transform duration-300 hover:scale-105">
-                <!-- Chat Icon SVG -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
-                    <circle cx="12" cy="10" r="2" />
-                    <circle cx="16" cy="10" r="2" />
-                    <circle cx="8" cy="10" r="2" />
-                </svg>
-            </button>
-        
-            <!-- Chat Form -->
-            <div id="chatForm" class="hidden bg-white shadow-lg rounded-lg p-4 fixed bottom-20 right-6 w-80">
-                <!-- Chat Header -->
-                <div id="chatHeader" class="flex items-center justify-between bg-blue-500 text-white p-3 rounded-t-lg">
-                    <div class="header-content flex items-center space-x-3">
-                        <img src="./Images/Coach.svg" alt="ChatBot Icon" class="w-10 h-10 rounded-full">
-                        <div>
-                            <div class="text-lg font-bold">Chat with an AI Coach</div>
-                            <div class="flex items-center space-x-1 text-sm">
-                                <span class="w-2 h-2 bg-green-500 rounded-full inline-block"></span>
-                                <span>Online</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button id="closeChatButton" class="text-white text-lg">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <!-- Chat Messages -->
-                <div id="chatMessages" class="flex-1 overflow-y-auto bg-gray-100 p-6 min-h-[500px]"></div>
-        
-                <!-- Typing Indicator -->
-                <div id="typingIndicator" class="hidden bg-gray-100 text-blue-500 text-base px-6 py-3">
-                    Coach is typing...
-                </div>
-        
-                <!-- Chat Input Container -->
-                <div id="chatInputContainer" class="relative flex items-center space-x-4 p-6 border-t">
-                    <input 
-                        type="text" 
-                        id="chatInput" 
-                        placeholder="Type your message..." 
-                        class="flex-1 p-4 text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button id="sendMessage" disabled class="bg-blue-500 text-white px-8 py-4 text-lg rounded-lg shadow hover:bg-blue-600 disabled:opacity-50">Send</button>
-                
-                    <!-- Drag Overlay -->
-                    <div 
-                        id="dragOverlay" 
-                        class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] z-10 bg-blue-100 bg-opacity-75 flex items-center justify-center rounded-lg border-4 border-dashed border-blue-500 text-blue-700 text-xl font-semibold hidden">
-                        <div class="flex flex-col items-center space-y-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <p class="text-2xl">Drop your image here</p>
-                            <p class="text-lg text-blue-600">Supported formats: JPG, PNG, GIF</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        
-        
-        
-        
-       
-    
-    </div>
-
+  <!-- Notification Banner (optional) -->
   
 
-    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-storage-compat.js"></script>
+  <!-- Sticky Header -->
+  <header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <!-- Left: Logo -->
+      <a href="loggedin.html" class="inline-flex items-center space-x-2">
+        <img
+          src="./Images/Logo.PNG"
+          alt="Lift Ascend Logo"
+          class="h-16 transform hover:scale-105 transition-transform duration-300 rounded-lg"
+        />
+      </a>
+      
+      <!-- Nav Links -->
+      <nav class="hidden sm:flex space-x-6">
+        <a
+          href="./Simulator_Website/index.html"
+          class="text-blue-600 hover:text-blue-800 font-medium"
+        >
+          Simulator
+        </a>
+        <!-- Note: The Leaderboard link now has an ID and will toggle the leaderboard section -->
+        <a
+          href="#"
+          id="leaderboardNavLink"
+          class="text-gray-700 hover:text-gray-900 font-medium"
+        >
+          Leaderboard
+        </a>
+      </nav>
+      
+      <!-- Right: Utility Buttons -->
+      <div class="flex items-center space-x-4">
+        <!-- Weight Unit Toggle -->
+        <div class="relative">
+          <button
+            class="bg-gray-200 hover:bg-gray-300 font-bold py-2 px-4 rounded inline-flex items-center"
+            onclick="toggleWeightUnit()"
+          >
+            <span id="weightUnitButton">lbs ▼</span>
+          </button>
+          <div
+            class="weight-unit-content hidden absolute right-0 mt-2 w-24 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+          >
+            <a
+              href="#"
+              onclick="selectWeightUnit('lbs')"
+              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              lbs
+            </a>
+            <a
+              href="#"
+              onclick="selectWeightUnit('kgs')"
+              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              kgs
+            </a>
+          </div>
+        </div>
+        
+        <!-- Logout Button -->
+        <button
+          onclick="logout()"
+          class="bg-red-500 text-white font-semibold py-2 px-4 rounded shadow hover:bg-red-600 transition duration-200 flex items-center space-x-2"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h6a2 2 0 012 2v1"
+            />
+          </svg>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </header>
 
-    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
-    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
-    <script src="./Javascript/chat.js"></script>
-
-    <script src="./Javascript/utils.js"></script>
-    <script src="./Javascript/loggedin.js"></script>
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    
+    <!-- Percentiles Section (Vertical Layout) -->
+    <section class="max-w-xl mx-auto px-4 py-6">
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Percentiles</h2>
+          <!-- SQUAT -->
+          <div class="mb-4">
+            <div class="flex items-center mb-1">
+              <span class="text-2xl mr-2">🏋️‍♂️</span>
+              <span class="font-semibold">Squat</span>
+            </div>
+            <div class="relative w-full h-3 bg-gray-200 rounded-full">
+              <div
+                id="squat-progress"
+                class="absolute left-0 top-0 h-3 bg-blue-500 rounded-full"
+                style="width: 0%;">
+              </div>
+            </div>
+            <p class="text-sm text-gray-600 mt-1">
+              <span id="squat-percentile" class="text-blue-600 font-bold">70%</span>
+              better than others
+            </p>
+          </div>
+          
+          <!-- BENCH -->
+          <div class="mb-4">
+            <div class="flex items-center mb-1">
+              <span class="text-2xl mr-2">🏋️‍♀️</span>
+              <span class="font-semibold">Bench</span>
+            </div>
+            <div class="relative w-full h-3 bg-gray-200 rounded-full">
+              <div
+                id="bench-progress"
+                class="absolute left-0 top-0 h-3 bg-green-500 rounded-full"
+                style="width: 55%;"
+              ></div>
+            </div>
+            <p class="text-sm text-gray-600 mt-1">
+              <span id="bench-percentile" class="text-green-600 font-bold">55%</span>
+              better than others
+            </p>
+          </div>
+          
+          <!-- DEADLIFT -->
+          <div>
+            <div class="flex items-center mb-1">
+              <span class="text-2xl mr-2">🏋️‍♂️</span>
+              <span class="font-semibold">Deadlift</span>
+            </div>
+            <div class="relative w-full h-3 bg-gray-200 rounded-full">
+              <div
+                id="deadlift-progress"
+                class="absolute left-0 top-0 h-3 bg-pink-500 rounded-full"
+                style="width: 90%;"
+              ></div>
+            </div>
+            <p class="text-sm text-gray-600 mt-1">
+              <span id="deadlift-percentile" class="text-pink-600 font-bold">90%</span>
+              better than others
+            </p>
+          </div>
+        </div>
+      </section>
+      
+    
+    <!-- Profile & Rank Section -->
+    <section class="bg-gray-50 p-6 rounded-lg shadow-lg">
+      <div class="flex flex-col sm:flex-row space-y-6 sm:space-y-0 sm:space-x-6">
+        <!-- Left Column: Lifts -->
+        <div class="flex-1 space-y-4">
+          <div class="flex items-center bg-white shadow-md p-4 rounded-lg">
+            <img src="./Images/Squat.svg" alt="Squat Icon" class="w-16 h-16 mr-3" />
+            <p class="text-lg"><strong>Squat:</strong> <span id="user-squat">N/A</span></p>
+          </div>
+          <div class="flex items-center bg-white shadow-md p-4 rounded-lg">
+            <img src="./Images/Bench.svg" alt="Bench Icon" class="w-16 h-16 mr-3" />
+            <p class="text-lg"><strong>Bench:</strong> <span id="user-bench">N/A</span></p>
+          </div>
+          <div class="flex items-center bg-white shadow-md p-4 rounded-lg">
+            <img src="./Images/Deadlift.svg" alt="Deadlift Icon" class="w-16 h-16 mr-3" />
+            <p class="text-lg"><strong>Deadlift:</strong> <span id="user-deadlift">N/A</span></p>
+          </div>
+        </div>
+        
+        <!-- Middle Column: Personal Info -->
+        <div class="flex-1 space-y-4">
+          <div class="bg-white shadow-md p-4 rounded-lg">
+            <p class="text-gray-700 text-base"><strong>Full Name:</strong> <span id="user-full-name">N/A</span></p>
+            <p class="text-gray-700 text-base"><strong>Gender:</strong> <span id="user-gender">N/A</span></p>
+            <p class="text-gray-700 text-base"><strong>Bodyweight:</strong> <span id="bodyweight">N/A</span></p>
+            <p class="text-gray-700 text-base"><strong>Age:</strong> <span id="age">N/A</span></p>
+          </div>
+          <div class="bg-white shadow-md p-4 rounded-lg">
+            <p class="text-gray-700 text-base"><strong>Total:</strong> <span id="total">N/A</span></p>
+            <p class="text-gray-700 text-base"><strong>DOTS Score:</strong> <span id="dots">N/A</span></p>
+          </div>
+        </div>
+        
+        <!-- Right Column: Rank -->
+        <div class="flex-shrink-0 flex flex-col items-center">
+          <h2 class="text-base font-bold mb-2">Your Rank:</h2>
+          <img src="./Images/Unranked.png" class="w-32 h-32 border border-gray-300 rounded-full shadow-md" id="rankImage" alt="Rank Image" />
+        </div>
+      </div>
+      
+      <!-- ID & Instagram / Social Info -->
+      <div class="mt-6 flex flex-wrap items-center gap-6">
+        <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transition-transform duration-300 hover:scale-105">
+          <span class="font-bold text-gray-800 text-lg">ID:</span>
+          <span id="user-id" class="text-blue-700 font-semibold text-lg"></span>
+        </div>
+        <!-- Instagram Section -->
+        <div class="relative flex items-center space-x-2">
+          <i class="fab fa-instagram fa-3x text-blue-600 hover:text-blue-800 transition duration-300 cursor-pointer" title="Add Instagram Profile" id="instagramIcon"></i>
+          <button id="updateInstagram" class="bg-blue-500 text-white px-2 py-1 rounded transition-opacity duration-300">Update</button>
+          <!-- Popup Form -->
+          <div id="instagramPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 w-96 relative">
+              <button id="closePopup" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+              </button>
+              <h3 class="text-xl font-bold mb-4">Instagram Profile</h3>
+              <input type="text" id="instagramInput" placeholder="Paste your Instagram profile link" class="w-full p-2 border rounded mb-4 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+              <button id="saveInstagram" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition duration-200">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Friend List Toggle & Search (Optional) -->
+    <section class="flex flex-col md:flex-row justify-between items-center gap-6">
+      <!-- Friend List -->
+      <div class="flex items-center">
+        <button id="toggle-friend-list" class="flex items-center bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full hover:from-purple-600 hover:to-blue-500 transition duration-300 shadow-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+       
+          </svg>
+          Show Friends
+        </button>
+        <div id="friend-list-container" class="hidden mt-6 bg-white shadow-xl rounded-lg p-6 border border-gray-300 max-h-80 overflow-y-auto">
+          <ul id="friend-list" class="space-y-4">
+            <li class="flex items-center space-x-3">
+              <img src="./Images/default-avatar.png" alt="Friend Avatar" class="w-10 h-10 rounded-full object-cover" />
+              <span class="text-gray-800 font-semibold">John Doe</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Search Bar -->
+      <div class="container mx-auto px-4 py-8">
+        <div class="search-bar-container mb-8">
+          <div class="relative">
+            <input type="text" id="searchInput" class="search-bar w-full px-4 py-2 pr-16 rounded-lg border border-gray-700 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search for lifters...">
+            <div class="suggestions-container absolute w-full bg-white shadow-md rounded-lg mt-1 hidden border border-gray-300" id="suggestionsContainer">
+              <ul id="suggestionsList"></ul>
+            </div>
+            <button class="search-button absolute right-0 top-0 bg-blue-500 text-white px-4 py-2 h-full rounded-r-lg hover:bg-blue-600">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Leaderboard Section (Hidden by default) -->
+    <section id="leaderboardSection" class="bg-white shadow-md rounded-lg p-6 hidden">
+      <div class="relative inline-block text-left mb-4">
+        <button id="modeButton" class="inline-flex justify-center w-full rounded-md border border-indigo-500 shadow-sm px-4 py-2 bg-indigo-500 text-sm font-medium text-white hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" onclick="toggleDropdown()">
+          Sort Options
+          <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+        <!-- Dropdown Content -->
+        <div id="dropdownContent" class="hidden absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+          <div class="py-1" role="menu" aria-orientation="vertical">
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="sortLeaderboard('By Total')" role="menuitem">By Total</a>
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="sortLeaderboard('By Dots')" role="menuitem">By Dots</a>
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="sortLeaderboard('By Squat')" role="menuitem">By Squat</a>
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="sortLeaderboard('By Bench')" role="menuitem">By Bench</a>
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="sortLeaderboard('By Deadlift')" role="menuitem">By Deadlift</a>
+          </div>
+        </div>
+      </div>
+      <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">Leaderboard</h2>
+      <table class="w-full text-center bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
+        <thead>
+          <tr class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-lg font-semibold">
+            <th class="px-4 py-3 text-left">Place</th>
+            <th class="px-4 py-3 text-left" style="padding-left: 3rem;">Lifter</th>
+            <th class="px-4 py-3 text-left" data-column="total" id="totalHeader">Total</th>
+            <th class="px-4 py-3 text-left" style="padding-left: 1rem;">Rank</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardBody" class="text-gray-700">
+          <!-- Dynamic content will be populated here -->
+        </tbody>
+      </table>
+    </section>
+    
+    <!-- Lift Data Input -->
+    <section class="bg-white shadow-md rounded-lg p-6">
+      <h2 class="text-2xl font-bold mb-4">Enter Your Lift Data</h2>
+      <table id="liftDataTable" class="w-full">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-4 py-2">Age</th>
+            <th id="weightHeader" class="px-4 py-2">Weight (lbs)</th>
+            <th class="px-4 py-2">Gender</th>
+            <th id="squatHeader" class="px-4 py-2">Squat (lbs)</th>
+            <th id="benchHeader" class="px-4 py-2">Bench (lbs)</th>
+            <th id="deadliftHeader" class="px-4 py-2">Deadlift (lbs)</th>
+            <th class="px-4 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="liftDataBody">
+          <tr>
+            <td>
+              <input inputmode="numeric" type="number" class="age w-full px-2 py-1 border rounded" placeholder="Age" />
+            </td>
+            <td>
+              <input inputmode="numeric" type="number" class="weight w-full px-2 py-1 border rounded" placeholder="Weight" />
+            </td>
+            <td>
+              <select class="gender w-full p-2 border rounded">
+                <option value="" disabled selected>Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </td>
+            <td>
+              <input inputmode="numeric" type="number" class="squat w-full px-2 py-1 border rounded" placeholder="Squat" />
+            </td>
+            <td>
+              <input inputmode="numeric" type="number" class="bench w-full px-2 py-1 border rounded" placeholder="Bench" />
+            </td>
+            <td>
+              <input inputmode="numeric" type="number" class="deadlift w-full px-2 py-1 border rounded" placeholder="Deadlift" />
+            </td>
+            <td>
+              <button onclick="removeRow(this)" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Remove</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="mt-4 space-x-4">
+        <button onclick="addRow()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Add Row</button>
+        <button onclick="submitLiftData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit Lift Data</button>
+      </div>
+    </section>
+  </main>
+  
+  <!-- Chat Widget -->
+  <div class="chat-widget fixed bottom-6 right-6">
+    <button id="chatButton" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-lg flex items-center justify-center transition-transform duration-300 hover:scale-105">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
+        <circle cx="12" cy="10" r="2" />
+        <circle cx="16" cy="10" r="2" />
+        <circle cx="8" cy="10" r="2" />
+      </svg>
+    </button>
+    
+    <div id="chatForm" class="hidden bg-white shadow-lg rounded-lg p-4 fixed bottom-20 right-6 w-80 flex flex-col" style="max-height: 600px;">
+      <div id="chatHeader" class="flex items-center justify-between bg-blue-500 text-white p-3 rounded-t-lg">
+        <div class="header-content flex items-center space-x-3">
+          <img src="./Images/Coach.svg" alt="ChatBot Icon" class="w-10 h-10 rounded-full" />
+          <div>
+            <div class="text-lg font-bold">Chat with an AI Coach</div>
+            <div class="flex items-center space-x-1 text-sm">
+              <span class="w-2 h-2 bg-green-500 rounded-full inline-block"></span>
+              <span>Online</span>
+            </div>
+          </div>
+        </div>
+        <button id="closeChatButton" class="text-white text-lg"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="chatMessages" class="flex-1 overflow-y-auto bg-gray-100 p-6" style="min-height: 200px;"></div>
+      <div id="typingIndicator" class="hidden bg-gray-100 text-blue-500 text-base px-6 py-3">Coach is typing...</div>
+      <div class="relative flex items-center space-x-4 p-6 border-t">
+        <input type="text" id="chatInput" placeholder="Type your message..." class="flex-1 p-4 text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <button id="sendMessage" disabled class="bg-blue-500 text-white px-8 py-4 text-lg rounded-lg shadow hover:bg-blue-600 disabled:opacity-50">Send</button>
+        <div id="dragOverlay" class="hidden absolute z-10 bg-blue-100 bg-opacity-75 flex items-center justify-center rounded-lg border-4 border-dashed border-blue-500 text-blue-700 text-xl font-semibold">
+          <div class="flex flex-col items-center space-y-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <p class="text-2xl">Drop your image here</p>
+            <p class="text-lg text-blue-600">Supported formats: JPG, PNG, GIF</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Firebase & Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
+  
+  <!-- Your Custom Scripts -->
+  <script src="./Javascript/chat.js"></script>
+  <script src="./Javascript/utils.js"></script>
+  <script src="./Javascript/loggedin.js"></script>
+  
+ 
 </body>
 </html>

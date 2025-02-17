@@ -161,127 +161,98 @@ function displayLiftData(data, name) {
  */
 async function fetchLiftData(uid, name) {
     try {
-        // Update Full Name and User ID
-        document.getElementById('user-full-name').textContent = name;
-        document.getElementById('user-id').textContent = uid.slice(-5);
-        
-        // Create references
-        const liftDataRef = db.ref(`users/${uid}/liftData`);
-        const instagramRef = db.ref(`users/${uid}/instagram`);
-        
-        // Fetch lift data and Instagram link concurrently
-        const [liftSnapshot, instagramSnapshot] = await Promise.all([
-            liftDataRef.limitToLast(1).once('value'),
-            instagramRef.once('value')
-        ]);
+        // Fetch basic user info and update UI elements (e.g., full name)
+        const userInfoSnapshot = await firebase.database().ref('users/' + uid).once('value');
+        const userInfo = userInfoSnapshot.val();
+        if (userInfo) {
+            document.getElementById('user-full-name').textContent = userInfo.name;
+            // Display the user ID (you can use the Firebase uid or a stored field)
+            document.getElementById('user-id').textContent = uid.slice(-5);
+            // Update Instagram display if the instagram field exists
+            console.log(userInfo.instagram)
+            if (userInfo.instagram) {
+                updateInstagramDisplay(userInfo.instagram);
+            }
+        }
 
-        const liftData = liftSnapshot.val();
-        const instagramLink = instagramSnapshot.val();
-
+        // Fetch the most recent lift data
+        const liftDataSnapshot = await firebase.database().ref('users/' + uid + '/liftData').limitToLast(1).once('value');
+        const liftData = liftDataSnapshot.val();
+        console.log(liftData)
         if (liftData) {
             const lastEntry = Object.values(liftData)[0];
-            
-            // Update profile display with lift data
+            // Update the profile display with lift data
             displayLiftData(lastEntry, name);
+            currentWeightUnit = lastEntry.unit || "lbs";
 
-            // Store original values and unit when data is first loaded
+            // Parse lift values and other details
             const originalSquatValue = parseFloat(lastEntry.squat);
             const originalBenchValue = parseFloat(lastEntry.bench);
             const originalDeadliftValue = parseFloat(lastEntry.deadlift);
             const originalWeightValue = parseFloat(lastEntry.weight);
-            
-            currentWeightUnit = lastEntry.unit || 'lbs';
-            
-            // Calculate and update total
+
+            // Update additional UI elements (total, bodyweight, age, gender, etc.)
             const total = originalSquatValue + originalBenchValue + originalDeadliftValue;
             document.getElementById("total").innerHTML =
                 `${total.toFixed(1)} <strong>${currentWeightUnit}</strong>`;
-            
-            // Update bodyweight and age
-            document.getElementById('bodyweight').textContent = `${originalWeightValue} ${currentWeightUnit}`;
-            document.getElementById('age').textContent = lastEntry.age || 'N/A';
-            document.getElementById('user-gender').textContent = lastEntry.gender || 'N/A';
+            document.getElementById("bodyweight").textContent = `${originalWeightValue} ${currentWeightUnit}`;
+            document.getElementById("age").textContent = lastEntry.age || 'N/A';
+            document.getElementById("user-gender").textContent = lastEntry.gender || 'N/A';
 
-            // Calculate DOTS score
+            // Calculate and display DOTS score
             const dotsScore = calculateLifterDOTS(
-                originalWeightValue, 
-                originalSquatValue, 
-                originalBenchValue, 
-                originalDeadliftValue, 
-                normalizeGender(lastEntry.gender) === 'male',
-                currentWeightUnit
+                originalWeightValue,
+                originalSquatValue,
+                originalBenchValue,
+                originalDeadliftValue,
+                normalizeGender(lastEntry.gender) === 'male'
             );
-            document.getElementById('dots').textContent = dotsScore;
+            document.getElementById("dots").textContent = dotsScore;
 
-            // Set up user category for percentile calculation
+            // Build the user category object required for percentile calculation
             const userCategory = {
                 gender: normalizeGender(lastEntry.gender),
                 weightClass: getWeightClass(originalWeightValue, lastEntry.gender, currentWeightUnit),
                 ageGroup: getAgeGroup(lastEntry.age)
             };
 
-            // Calculate and display percentiles
+            // Calculate user percentiles using real lift data
             const userPercentiles = await calculateUserPercentile(
                 originalSquatValue,
                 originalBenchValue,
                 originalDeadliftValue,
                 userCategory
             );
-            
+            console.debug("[profile.js][fetchLiftData] Calculated percentiles:", userPercentiles);
+
+            // Update progress bars & textual displays for the percentiles
             displayPercentiles(userPercentiles);
-            
-            // Calculate average percentile and update rank
+
+            // Calculate the average percentile and determine the rank
             const avgPercentile = (userPercentiles.squat + userPercentiles.bench + userPercentiles.deadlift) / 3;
+            console.debug("[profile.js][fetchLiftData] Average Percentile:", avgPercentile);
             const rank = updateRank(avgPercentile);
+            console.debug("[profile.js][fetchLiftData] Computed Rank:", rank);
+            
+            // Display the rank image based on the computed rank using real data
             displayRank(rank);
+   
         } else {
+            console.warn("[profile.js][fetchLiftData] No lift data available for user.");
             setDefaultValues();
         }
 
-        // Update Instagram display
-        updateInstagramDisplay(instagramLink);
-
+        // Update Instagram or other social displays, if any
+        updateInstagramDisplay(userInfo.instagram);
     } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("[profile.js][fetchLiftData] Error loading user data:", error);
         setDefaultValues();
     }
 }
 
-/**
- * Function to initialize and load all user data when the DOM is loaded.
- */
-function loadAllUsers() {
-    const userId = getUserIdFromUrl();
-    if (!userId) {
-        console.error('No user ID found in URL');
-        return;
-    }
-
-    db.ref('users').once('value')
-        .then((snapshot) => {
-            if (!snapshot.exists()) {
-                console.log('No users found in database');
-                return;
-            }
-
-            const usersData = snapshot.val();
-            for (const uid in usersData) {
-                if (uid.slice(-5) === userId) {
-                    const user = usersData[uid];
-                    console.log(`User Found: ${user.name}`);
-                    return fetchLiftData(uid, user.name);
-                }
-            }
-            console.log('User not found with ID:', userId);
-        })
-        .catch((error) => {
-            console.error('Error loading users:', error);
-        });
-}
-
-// Initialize event listeners after DOM is fully loaded
+// Remove any default displayRank call and rely solely on the fetched data
 document.addEventListener('DOMContentLoaded', () => {
-    loadAllUsers();
+  loadAllUsers(); // This function calls fetchLiftData, which in turn updates the rank image
 });
 
 function calculateLifterDOTS(weight, squat, bench, deadlift, isMale, unit) {
@@ -576,7 +547,7 @@ function getPercentile(lift, liftData) {
     const lowerValue = liftData[lowerWeight];
     const upperValue = liftData[upperWeight];
 
-    const percentile = lowerWeight + ((lift - lowerValue) * (upperWeight - lowerWeight)) / (upperValue - lowerValue);
+    const percentile = lowerWeight + ((lift - lowerValue) / (upperValue - lowerValue));
     
     return Math.round(percentile);
 }
@@ -712,34 +683,32 @@ function updateProfileDisplay(data) {
 
 
 function displayPercentiles(percentiles) {
-    const percentileDisplay = {
-        squat: document.getElementById('user-squat-percentile'),
-        bench: document.getElementById('user-bench-percentile'),
-        deadlift: document.getElementById('user-deadlift-percentile')
-    };
-  
-    for (const [lift, element] of Object.entries(percentileDisplay)) {
-        if (element) {
-            element.textContent = `${percentiles[lift]}%`;
-        } else {
-            console.log(`Element for ${lift} percentile not found. Percentile: ${percentiles[lift]}%`);
-        }
-    }
+  const squatPercent = Math.min(Math.max(parseFloat(percentiles.squat) || 0, 0), 100);
+  const benchPercent = Math.min(Math.max(parseFloat(percentiles.bench) || 0, 0), 100);
+  const deadliftPercent = Math.min(Math.max(parseFloat(percentiles.deadlift) || 0, 0), 100);
 
-    // If none of the elements exist, create a new element to display percentiles
-    if (!percentileDisplay.squat && !percentileDisplay.bench && !percentileDisplay.deadlift) {
-        const percentileContainer = document.getElementById('percentile-content-container');
-        document.getElementById("squat-percentile").textContent = "";
-        document.getElementById("squat-percentile").textContent = " " + percentiles.squat + "%" + " better than others"
-        document.getElementById("bench-percentile").textContent = " " + percentiles.bench + "%" + " better than others"
-        document.getElementById("deadlift-percentile").textContent = " " + percentiles.deadlift + "%" + " better than others"
-    }
+  // Update progress bar widths
+  const squatProgress = document.getElementById('user-squat-progress');
+  const benchProgress = document.getElementById('user-bench-progress');
+  const deadliftProgress = document.getElementById('user-deadlift-progress');
+  if (squatProgress) squatProgress.style.width = `${squatPercent}%`;
+  if (benchProgress) benchProgress.style.width = `${benchPercent}%`;
+  if (deadliftProgress) deadliftProgress.style.width = `${deadliftPercent}%`;
 
-    if(!document.getElementById("squat-percentile").textContent) {
-        document.getElementById("squat-percentile").textContent = " " + 0 + "%" + " better than others"
-        document.getElementById("bench-percentile").textContent = " " + 0 + "%" + " better than others"
-        document.getElementById("deadlift-percentile").textContent = " " + 0 + "%" + " better than others"
+  // Update the textual display
+  const percentileDisplay = {
+    squat: document.getElementById('user-squat-percentile'),
+    bench: document.getElementById('user-bench-percentile'),
+    deadlift: document.getElementById('user-deadlift-percentile')
+  };
+
+  for (const [lift, element] of Object.entries(percentileDisplay)) {
+    if (element) {
+      element.textContent = `${percentiles[lift]}%`;
+    } else {
+      console.log(`Element for ${lift} percentile not found. Percentile: ${percentiles[lift]}%`);
     }
+  }
 }
 
 
@@ -893,7 +862,7 @@ function lbsToKg(lbs) {
 
 // Adjusted rank logic
 function updateRank(percentile) {
-    console.log(percentile)
+    console.log("Computed percentile:", percentile);
     if (percentile >= 80) {
         return "Diamond";
     } else if (percentile >= 65) {
@@ -908,14 +877,37 @@ function updateRank(percentile) {
 // Update the rank image dynamically
 function displayRank(rank) {
     const rankImage = document.getElementById('rankImage');
-    const rankContainer = document.getElementById('rankContainer');
+  
     
-    if (rankImage && rankContainer) {
+    if (rankImage ) {
         // Update the rank image
         rankImage.src = `./Images/${rank}.png`;
         rankImage.alt = rank;
         rankImage.style.visibility = "visible"
-        // Make the rank container visible after user input
-        rankContainer.style.visibility = 'visible';
     }
 }
+
+function updateInstagramDisplay(instagramLink) {
+    const instagramStatus = document.getElementById('instagramStatus');
+    const instaElement = document.getElementById('instagramIcon');
+  
+    if (instagramLink) {
+        instaElement.innerHTML = `<a href="${instagramLink}" target="_blank" class="text-sm">${instagramLink}</a>`;
+        // Update status to Connected
+        if (instagramStatus) {
+            instagramStatus.textContent = 'Connected';
+            instagramStatus.classList.remove('text-red-500', 'text-base');
+            instagramStatus.classList.add('text-green-500', 'text-sm');
+        }
+    } else {
+        instaElement.textContent = 'Instagram link not set';
+        instaElement.classList.add('text-sm');
+        // Update status to Not Connected
+        if (instagramStatus) {
+            instagramStatus.textContent = 'Not Connected';
+            instagramStatus.classList.remove('text-green-500', 'text-base');
+            instagramStatus.classList.add('text-red-500', 'text-sm');
+        }
+    }
+}
+  

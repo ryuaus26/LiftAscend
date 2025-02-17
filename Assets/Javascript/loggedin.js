@@ -720,10 +720,51 @@ function loadUserData() {
 
 
 function displayPercentiles(percentiles) {
+    const squatPercent = Math.min(Math.max(parseFloat(percentiles.squat) || 0, 0), 100);
+    const benchPercent = Math.min(Math.max(parseFloat(percentiles.bench) || 0, 0), 100);
+    const deadliftPercent = Math.min(Math.max(parseFloat(percentiles.deadlift) || 0, 0), 100);
+
+    // Update progress bar widths
+    const squatProgress = document.getElementById('squat-progress');
+    const benchProgress = document.getElementById('bench-progress');
+    const deadliftProgress = document.getElementById('deadlift-progress');
+    
+    // Helper function to get color based on percentile
+    const getColorClass = (percent) => {
+        if (percent >= 80) return 'bg-purple-600';
+        if (percent >= 65) return 'bg-yellow-500';
+        if (percent >= 45) return 'bg-gray-400';
+        return 'bg-red-600';
+    };
+
+    // Update squat progress bar
+    if (squatProgress) {
+        squatProgress.style.width = `${squatPercent}%`;
+        // Remove all possible color classes
+        squatProgress.classList.remove('bg-purple-600', 'bg-yellow-500', 'bg-gray-400', 'bg-red-600');
+        // Add appropriate color class
+        squatProgress.classList.add(getColorClass(squatPercent));
+    }
+
+    // Update bench progress bar
+    if (benchProgress) {
+        benchProgress.style.width = `${benchPercent}%`;
+        benchProgress.classList.remove('bg-purple-600', 'bg-yellow-500', 'bg-gray-400', 'bg-red-600');
+        benchProgress.classList.add(getColorClass(benchPercent));
+    }
+
+    // Update deadlift progress bar
+    if (deadliftProgress) {
+        deadliftProgress.style.width = `${deadliftPercent}%`;
+        deadliftProgress.classList.remove('bg-purple-600', 'bg-yellow-500', 'bg-gray-400', 'bg-red-600');
+        deadliftProgress.classList.add(getColorClass(deadliftPercent));
+    }
+
+    // Update the textual display
     const percentileDisplay = {
-        squat: document.getElementById('user-squat-percentile'),
-        bench: document.getElementById('user-bench-percentile'),
-        deadlift: document.getElementById('user-deadlift-percentile')
+        squat: document.getElementById('squat-percentile'),
+        bench: document.getElementById('bench-percentile'),
+        deadlift: document.getElementById('deadlift-percentile')
     };
 
     for (const [lift, element] of Object.entries(percentileDisplay)) {
@@ -732,17 +773,6 @@ function displayPercentiles(percentiles) {
         } else {
             console.log(`Element for ${lift} percentile not found. Percentile: ${percentiles[lift]}%`);
         }
-    }
-
-    // If none of the elements exist, create a new element to display percentiles
-    if (!percentileDisplay.squat && !percentileDisplay.bench && !percentileDisplay.deadlift) {
-        const percentileContainer = document.getElementById('percentile-content-container');
-        document.getElementById("squat-percentile").textContent = " " + percentiles.squat + "%" + " better than others"
-        document.getElementById("bench-percentile").textContent = " " + percentiles.bench + "%" + " better than others"
-        document.getElementById("deadlift-percentile").textContent = " " + percentiles.deadlift + "%" + " better than others"
-       
-
-     
     }
 }
 
@@ -1094,10 +1124,7 @@ function saveInstagramLink(link) {
                 document.getElementById('instagramInput').value = '';
                 updateInstagramLinkDisplay(link);
             })
-            .catch((error) => {
-                console.error('Error saving Instagram link:', error);
-                alert('Failed to save Instagram profile link. Please try again.');
-            });
+           
     } else {
         alert('No user is currently logged in.');
     }
@@ -1584,16 +1611,16 @@ function updateRank(percentile) {
 // Update the rank image dynamically
 function displayRank(rank) {
     const rankImage = document.getElementById('rankImage');
-    const rankContainer = document.getElementById('rankContainer');
+   
 
-    if (rankImage && rankContainer) {
+    if (rankImage ) {
         // Update the rank image source and visibility
         rankImage.src = `./Images/${rank}.png`;
         rankImage.alt = rank;
         rankImage.style.visibility = "visible"; // Show the image
 
         // Make the rank container visible after user input
-        rankContainer.style.visibility = 'visible';
+       
     }
 }
 

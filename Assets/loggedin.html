@@ -162,69 +162,72 @@
   <!-- Main Content -->
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
     
-    <!-- Percentiles Section (Vertical Layout) -->
+    <!-- Percentiles Section -->
     <section class="max-w-xl mx-auto px-4 py-6">
         <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Percentiles</h2>
-          <!-- SQUAT -->
-          <div class="mb-4">
-            <div class="flex items-center mb-1">
-              <span class="text-2xl mr-2">🏋️‍♂️</span>
-              <span class="font-semibold">Squat</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Percentiles</h2>
+            
+            <!-- SQUAT -->
+            <div class="mb-4">
+                <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-2">🏋️‍♂️</span>
+                        <span class="font-semibold">Squat</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <p class="text-sm text-gray-600">
+                            <span id="squat-percentile" class="text-blue-600 font-bold">0%</span>
+                            better than others
+                        </p>
+                        <img id="squat-rank" src="./Images/Unranked.png" alt="Rank" class="w-12 h-12 rounded-full">
+                    </div>
+                </div>
+                <div class="relative w-full h-3 bg-gray-200 rounded-full">
+                    <div id="squat-progress" class="absolute left-0 top-0 h-3 bg-blue-500 rounded-full" style="width: 0%"></div>
+                </div>
             </div>
-            <div class="relative w-full h-3 bg-gray-200 rounded-full">
-              <div
-                id="squat-progress"
-                class="absolute left-0 top-0 h-3 bg-blue-500 rounded-full"
-                style="width: 0%;">
-              </div>
+            
+            <!-- BENCH -->
+            <div class="mb-4">
+                <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-2">🏋️‍♀️</span>
+                        <span class="font-semibold">Bench</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <p class="text-sm text-gray-600">
+                            <span id="bench-percentile" class="text-green-600 font-bold">0%</span>
+                            better than others
+                        </p>
+                        <img id="bench-rank" src="./Images/Unranked.png" alt="Rank" class="w-12 h-12 rounded-full">
+                    </div>
+                </div>
+                <div class="relative w-full h-3 bg-gray-200 rounded-full">
+                    <div id="bench-progress" class="absolute left-0 top-0 h-3 bg-green-500 rounded-full" style="width: 0%"></div>
+                </div>
             </div>
-            <p class="text-sm text-gray-600 mt-1">
-              <span id="squat-percentile" class="text-blue-600 font-bold">70%</span>
-              better than others
-            </p>
-          </div>
-          
-          <!-- BENCH -->
-          <div class="mb-4">
-            <div class="flex items-center mb-1">
-              <span class="text-2xl mr-2">🏋️‍♀️</span>
-              <span class="font-semibold">Bench</span>
+            
+            <!-- DEADLIFT -->
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-2">🏋️‍♂️</span>
+                        <span class="font-semibold">Deadlift</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <p class="text-sm text-gray-600">
+                            <span id="deadlift-percentile" class="text-pink-600 font-bold">0%</span>
+                            better than others
+                        </p>
+                        <img id="deadlift-rank" src="./Images/Unranked.png" alt="Rank" class="w-12 h-12 rounded-full">
+                    </div>
+                </div>
+                <div class="relative w-full h-3 bg-gray-200 rounded-full">
+                    <div id="deadlift-progress" class="absolute left-0 top-0 h-3 bg-pink-500 rounded-full" style="width: 0%"></div>
+                </div>
             </div>
-            <div class="relative w-full h-3 bg-gray-200 rounded-full">
-              <div
-                id="bench-progress"
-                class="absolute left-0 top-0 h-3 bg-green-500 rounded-full"
-                style="width: 55%;"
-              ></div>
-            </div>
-            <p class="text-sm text-gray-600 mt-1">
-              <span id="bench-percentile" class="text-green-600 font-bold">55%</span>
-              better than others
-            </p>
-          </div>
-          
-          <!-- DEADLIFT -->
-          <div>
-            <div class="flex items-center mb-1">
-              <span class="text-2xl mr-2">🏋️‍♂️</span>
-              <span class="font-semibold">Deadlift</span>
-            </div>
-            <div class="relative w-full h-3 bg-gray-200 rounded-full">
-              <div
-                id="deadlift-progress"
-                class="absolute left-0 top-0 h-3 bg-pink-500 rounded-full"
-                style="width: 90%;"
-              ></div>
-            </div>
-            <p class="text-sm text-gray-600 mt-1">
-              <span id="deadlift-percentile" class="text-pink-600 font-bold">90%</span>
-              better than others
-            </p>
-          </div>
         </div>
-      </section>
-      
+    </section>
     
     <!-- Profile & Rank Section -->
     <section class="bg-gray-50 p-6 rounded-lg shadow-lg">
@@ -261,7 +264,7 @@
         
         <!-- Right Column: Rank -->
         <div class="flex-shrink-0 flex flex-col items-center">
-          <h2 class="text-base font-bold mb-2">Your Rank:</h2>
+          <h2 class="text-base font-bold mb-2">Your Overall Rank:</h2>
           <img src="./Images/Unranked.png" class="w-32 h-32 border border-gray-300 rounded-full shadow-md" id="rankImage" alt="Rank Image" />
         </div>
       </div>

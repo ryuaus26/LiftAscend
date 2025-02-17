@@ -724,56 +724,56 @@ function displayPercentiles(percentiles) {
     const benchPercent = Math.min(Math.max(parseFloat(percentiles.bench) || 0, 0), 100);
     const deadliftPercent = Math.min(Math.max(parseFloat(percentiles.deadlift) || 0, 0), 100);
 
-    // Update progress bar widths
-    const squatProgress = document.getElementById('squat-progress');
-    const benchProgress = document.getElementById('bench-progress');
-    const deadliftProgress = document.getElementById('deadlift-progress');
-    
-    // Helper function to get color based on percentile
-    const getColorClass = (percent) => {
-        if (percent >= 80) return 'bg-purple-600';
-        if (percent >= 65) return 'bg-yellow-500';
-        if (percent >= 45) return 'bg-gray-400';
-        return 'bg-red-600';
-    };
+    // Update progress bar widths and colors
+    updateProgressBar('squat-progress', squatPercent);
+    updateProgressBar('bench-progress', benchPercent);
+    updateProgressBar('deadlift-progress', deadliftPercent);
 
-    // Update squat progress bar
-    if (squatProgress) {
-        squatProgress.style.width = `${squatPercent}%`;
+    // Update percentile text and individual ranks
+    updateLiftDisplay('squat', percentiles.squat);
+    updateLiftDisplay('bench', percentiles.bench);
+    updateLiftDisplay('deadlift', percentiles.deadlift);
+}
+
+function updateProgressBar(elementId, percent) {
+    const progressBar = document.getElementById(elementId);
+    if (progressBar) {
+        progressBar.style.width = `${percent}%`;
         // Remove all possible color classes
-        squatProgress.classList.remove('bg-purple-600', 'bg-yellow-500', 'bg-gray-400', 'bg-red-600');
+        progressBar.classList.remove('bg-purple-600', 'bg-yellow-500', 'bg-gray-400', 'bg-red-600');
         // Add appropriate color class
-        squatProgress.classList.add(getColorClass(squatPercent));
+        progressBar.classList.add(getColorClass(percent));
     }
+}
 
-    // Update bench progress bar
-    if (benchProgress) {
-        benchProgress.style.width = `${benchPercent}%`;
-        benchProgress.classList.remove('bg-purple-600', 'bg-yellow-500', 'bg-gray-400', 'bg-red-600');
-        benchProgress.classList.add(getColorClass(benchPercent));
+function updateLiftDisplay(lift, percentile) {
+    const percentileElement = document.getElementById(`${lift}-percentile`);
+    const rankImage = document.getElementById(`${lift}-rank`);
+    
+    if (percentileElement) {
+        percentileElement.textContent = `${percentile}%`;
     }
-
-    // Update deadlift progress bar
-    if (deadliftProgress) {
-        deadliftProgress.style.width = `${deadliftPercent}%`;
-        deadliftProgress.classList.remove('bg-purple-600', 'bg-yellow-500', 'bg-gray-400', 'bg-red-600');
-        deadliftProgress.classList.add(getColorClass(deadliftPercent));
+    
+    if (rankImage) {
+        const rank = getRankFromPercentile(percentile);
+        rankImage.src = `./Images/${rank}.png`;
+        rankImage.alt = rank;
+        rankImage.style.visibility = "visible";
     }
+}
 
-    // Update the textual display
-    const percentileDisplay = {
-        squat: document.getElementById('squat-percentile'),
-        bench: document.getElementById('bench-percentile'),
-        deadlift: document.getElementById('deadlift-percentile')
-    };
+function getRankFromPercentile(percentile) {
+    if (percentile >= 80) return "Diamond";
+    if (percentile >= 65) return "Gold";
+    if (percentile >= 45) return "Silver";
+    return "Bronze";
+}
 
-    for (const [lift, element] of Object.entries(percentileDisplay)) {
-        if (element) {
-            element.textContent = `${percentiles[lift]}%`;
-        } else {
-            console.log(`Element for ${lift} percentile not found. Percentile: ${percentiles[lift]}%`);
-        }
-    }
+function getColorClass(percent) {
+    if (percent >= 80) return 'bg-purple-600';
+    if (percent >= 65) return 'bg-yellow-500';
+    if (percent >= 45) return 'bg-gray-400';
+    return 'bg-red-600';
 }
 
 // Call loadUserData when the page loads
@@ -1668,7 +1668,7 @@ function searchLifters(query) {
 function selectSuggestion(name) {
     const searchBar = document.querySelector('.search-bar');
     searchBar.value = name; // Set the search bar value to the selected suggestion
-    document.getElementById('suggestionsContainer').style.display = 'none'; // Hide suggestions
+    document.getElementById('suggestionsContainer').style.display = 'none'; // Hide suggestions after selection
 }
 
 // Event listener for input changes in the search bar

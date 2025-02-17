@@ -683,32 +683,60 @@ function updateProfileDisplay(data) {
 
 
 function displayPercentiles(percentiles) {
-  const squatPercent = Math.min(Math.max(parseFloat(percentiles.squat) || 0, 0), 100);
-  const benchPercent = Math.min(Math.max(parseFloat(percentiles.bench) || 0, 0), 100);
-  const deadliftPercent = Math.min(Math.max(parseFloat(percentiles.deadlift) || 0, 0), 100);
+    const squatPercent = Math.min(Math.max(parseFloat(percentiles.squat) || 0, 0), 100);
+    const benchPercent = Math.min(Math.max(parseFloat(percentiles.bench) || 0, 0), 100);
+    const deadliftPercent = Math.min(Math.max(parseFloat(percentiles.deadlift) || 0, 0), 100);
 
-  // Update progress bar widths
-  const squatProgress = document.getElementById('user-squat-progress');
-  const benchProgress = document.getElementById('user-bench-progress');
-  const deadliftProgress = document.getElementById('user-deadlift-progress');
-  if (squatProgress) squatProgress.style.width = `${squatPercent}%`;
-  if (benchProgress) benchProgress.style.width = `${benchPercent}%`;
-  if (deadliftProgress) deadliftProgress.style.width = `${deadliftPercent}%`;
+    // Update progress bar widths and colors
+    updateProgressBar('user-squat-progress', squatPercent);
+    updateProgressBar('user-bench-progress', benchPercent);
+    updateProgressBar('user-deadlift-progress', deadliftPercent);
 
-  // Update the textual display
-  const percentileDisplay = {
-    squat: document.getElementById('user-squat-percentile'),
-    bench: document.getElementById('user-bench-percentile'),
-    deadlift: document.getElementById('user-deadlift-percentile')
-  };
+    // Update percentile text and individual ranks
+    updateLiftDisplay('squat', percentiles.squat);
+    updateLiftDisplay('bench', percentiles.bench);
+    updateLiftDisplay('deadlift', percentiles.deadlift);
+}
 
-  for (const [lift, element] of Object.entries(percentileDisplay)) {
-    if (element) {
-      element.textContent = `${percentiles[lift]}%`;
-    } else {
-      console.log(`Element for ${lift} percentile not found. Percentile: ${percentiles[lift]}%`);
+function updateProgressBar(elementId, percent) {
+    const progressBar = document.getElementById(elementId);
+    if (progressBar) {
+        progressBar.style.width = `${percent}%`;
+        // Remove all possible color classes
+        progressBar.classList.remove('bg-purple-600', 'bg-yellow-500', 'bg-gray-400', 'bg-red-600');
+        // Add appropriate color class
+        progressBar.classList.add(getColorClass(percent));
     }
-  }
+}
+
+function updateLiftDisplay(lift, percentile) {
+    const percentileElement = document.getElementById(`user-${lift}-percentile`);
+    const rankImage = document.getElementById(`user-${lift}-rank`);
+    
+    if (percentileElement) {
+        percentileElement.textContent = `${percentile}%`;
+    }
+    
+    if (rankImage) {
+        const rank = getRankFromPercentile(percentile);
+        rankImage.src = `./Images/${rank}.png`;
+        rankImage.alt = rank;
+        rankImage.style.visibility = "visible";
+    }
+}
+
+function getRankFromPercentile(percentile) {
+    if (percentile >= 80) return "Diamond";
+    if (percentile >= 65) return "Gold";
+    if (percentile >= 45) return "Silver";
+    return "Bronze";
+}
+
+function getColorClass(percent) {
+    if (percent >= 80) return 'bg-purple-600';
+    if (percent >= 65) return 'bg-yellow-500';
+    if (percent >= 45) return 'bg-gray-400';
+    return 'bg-red-600';
 }
 
 

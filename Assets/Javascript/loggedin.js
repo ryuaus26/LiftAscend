@@ -58,25 +58,26 @@ function calculateLifterDOTS(weight, squat, bench, deadlift, isMale, unit) {
     const maleCoeff = [-307.75076, 24.0900756, -0.1918759221, 0.0007391293, -0.000001093];
     const femaleCoeff = [-57.96288, 13.6175032, -0.1126655495, 0.0005158568, -0.0000010706];
 
+    // Convert weight to kilograms if needed
     let bw = unit === 'lbs' ? weight * 0.453592 : weight;
 
+    // Select coefficients based on gender
+    const coeff = isMale ? maleCoeff : femaleCoeff;
 
-    let maxbw = isMale ? 210 : 150;
-    bw = Math.min(Math.max(bw, 40), maxbw);
-
-
-    let coeff = isMale ? maleCoeff : femaleCoeff;
-
+    // Calculate the denominator polynomial
     let denominator = coeff[0];
     for (let i = 1; i < coeff.length; i++) {
         denominator += coeff[i] * Math.pow(bw, i);
     }
 
-    let total = unit === 'lbs' ? 
-        (squat + bench + deadlift) * 0.453592 :
-        squat + bench + deadlift;
+    // Convert total lifted to kilograms if needed
+    let total = unit === 'lbs'
+        ? (squat + bench + deadlift) * 0.453592
+        : (squat + bench + deadlift);
 
+    // Compute the DOTS score
     let score = (500 / denominator) * total;
+
     return score.toFixed(2);
 }
 

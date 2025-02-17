@@ -205,7 +205,8 @@ async function fetchLiftData(uid, name) {
                 originalSquatValue,
                 originalBenchValue,
                 originalDeadliftValue,
-                normalizeGender(lastEntry.gender) === 'male'
+                normalizeGender(lastEntry.gender) === 'male',
+                currentWeightUnit
             );
             document.getElementById("dots").textContent = dotsScore;
 
@@ -259,31 +260,33 @@ function calculateLifterDOTS(weight, squat, bench, deadlift, isMale, unit) {
     const maleCoeff = [-307.75076, 24.0900756, -0.1918759221, 0.0007391293, -0.000001093];
     const femaleCoeff = [-57.96288, 13.6175032, -0.1126655495, 0.0005158568, -0.0000010706];
 
-    // Convert weight to kg if in lbs
+    // Convert weight to kilograms if needed
     let bw = unit === 'lbs' ? weight * 0.453592 : weight;
 
-    // Set the max allowed bodyweight (in kg)
+    // Apply bodyweight limits
     let maxbw = isMale ? 210 : 150;
     bw = Math.min(Math.max(bw, 40), maxbw);
 
-    // Select coefficient set
-    let coeff = isMale ? maleCoeff : femaleCoeff;
+    // Select coefficients based on gender
+    const coeff = isMale ? maleCoeff : femaleCoeff;
 
-    // Calculate denominator
+    // Calculate the denominator polynomial
     let denominator = coeff[0];
     for (let i = 1; i < coeff.length; i++) {
         denominator += coeff[i] * Math.pow(bw, i);
     }
 
-    // Convert lifts to kg if in lbs
+    // Convert total lifted to kilograms if needed
     let total = unit === 'lbs' ? 
         (squat + bench + deadlift) * 0.453592 :
         squat + bench + deadlift;
 
-    // Calculate the DOTS score
+    // Compute the DOTS score
     let score = (500 / denominator) * total;
     return score.toFixed(2);
 }
+
+
 
 firebase.initializeApp(firebaseConfig);
 

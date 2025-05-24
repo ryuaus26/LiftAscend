@@ -1,0 +1,90 @@
+<!-- squat.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Squat Biomechanics Simulator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .container { display: flex; }
+    .control-panel { width: 300px; padding: 20px; border-right: 1px solid #ccc; }
+    .visualization { flex-grow: 1; padding: 20px; }
+    label { font-weight: bold; }
+    input, select, button { width: 100%; margin-top: 5px; margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+  <h1>Squat Biomechanics Simulator</h1>
+  <div class="container">
+    <div class="control-panel">
+      <label for="neuralActivation">Neural Activation:</label>
+      <select id="neuralActivation">
+        <option value="0.6">Beginner</option>
+        <option value="0.8">Intermediate</option>
+        <option value="1.0">Elite</option>
+      </select>
+      <label for="muscleFiber">Muscle Fiber Type (% Type II):</label>
+      <input type="range" id="muscleFiber" min="0" max="100" value="50"><span id="muscleFiberValue">50</span>%
+      <label for="pennationAngle">Pennation Angle (°):</label>
+      <input type="range" id="pennationAngle" min="0" max="30" value="15"><span id="pennationAngleValue">15</span>°
+      <label for="leverArmLength">Lever Arm Length (cm):</label>
+      <input type="number" id="leverArmLength" value="40">
+      <label for="muscleInsertion">Muscle Insertion (cm):</label>
+      <input type="range" id="muscleInsertion" min="0" max="10" value="5" step="0.1"><span id="muscleInsertionValue">5</span> cm
+      <button onclick="simulate()">Simulate</button>
+    </div>
+    <div class="visualization">
+      <canvas id="diagramCanvas" width="400" height="300" style="border:1px solid #ccc;"></canvas>
+      <canvas id="forceGraph"></canvas>
+    </div>
+  </div>
+
+  <script>
+    const fiber = document.getElementById('muscleFiber');
+    const fiberVal = document.getElementById('muscleFiberValue');
+    const penAngle = document.getElementById('pennationAngle');
+    const penVal = document.getElementById('pennationAngleValue');
+    const insert = document.getElementById('muscleInsertion');
+    const insertVal = document.getElementById('muscleInsertionValue');
+
+    fiber.oninput = () => fiberVal.textContent = fiber.value;
+    penAngle.oninput = () => penVal.textContent = penAngle.value;
+    insert.oninput = () => insertVal.textContent = insert.value;
+
+    function simulate() {
+      const activation = parseFloat(document.getElementById('neuralActivation').value);
+      const fiberType = parseFloat(fiber.value);
+      const pennation = parseFloat(penAngle.value);
+      const lever = parseFloat(document.getElementById('leverArmLength').value);
+      const insertion = parseFloat(insert.value);
+
+      const effectiveLever = lever + insertion;
+      const baseForce = 1000;
+      const pennationEffect = Math.cos(pennation * Math.PI / 180);
+      const force = baseForce * activation * pennationEffect * (effectiveLever / lever);
+
+      const angles = [], values = [];
+      for (let angle = 0; angle <= 120; angle += 10) {
+        angles.push(angle);
+        values.push(force * (1 - angle / 150));
+      }
+
+      const ctx = document.getElementById('diagramCanvas').getContext('2d');
+      ctx.clearRect(0, 0, 400, 300);
+      ctx.beginPath(); ctx.arc(200, 150, 40, 0, Math.PI, false); ctx.stroke();
+      ctx.fillText("Squat", 180, 140);
+
+      const graphCtx = document.getElementById('forceGraph').getContext('2d');
+      new Chart(graphCtx, {
+        type: 'line',
+        data: {
+          labels: angles,
+          datasets: [{ label: 'Force vs Joint Angle', data: values, borderColor: 'blue', fill: false }]
+        },
+        options: { scales: { y: { beginAtZero: true } } }
+      });
+    }
+  </script>
+</body>
+</html>

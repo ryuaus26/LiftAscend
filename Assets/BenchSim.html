@@ -1,4 +1,3 @@
-<!-- bench.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,10 +11,63 @@
     .visualization { flex-grow: 1; padding: 20px; }
     label { font-weight: bold; }
     input, select, button { width: 100%; margin-top: 5px; margin-bottom: 15px; }
+
+    .dropbtn {
+      background-color: #3498DB;
+      color: white;
+      padding: 16px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .dropbtn:hover, .dropbtn:focus {
+      background-color: #2980B9;
+    }
+
+    .dropdown {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #f1f1f1;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+    }
+
+    .dropdown-content a {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }
+
+    .dropdown-content a:hover {
+      background-color: #ddd;
+    }
+
+    .show {
+      display: block;
+    }
   </style>
 </head>
 <body>
   <h1>Bench Press Biomechanics Simulator</h1>
+
+  <div class="dropdown">
+    <button onclick="toggleDropdown()" class="dropbtn">Select Lift</button>
+    <div id="myDropdown" class="dropdown-content">
+      <a href="SquatSim.html">Squat</a>
+      <a href="BenchSim.html">Bench</a>
+      <a href="DeadSim.html">Deadlift</a>
+    </div>
+  </div>
+
   <div class="container">
     <div class="control-panel">
       <label for="neuralActivation">Neural Activation:</label>
@@ -98,6 +150,22 @@
           }
         }
       });
+    }
+
+    function toggleDropdown() {
+      document.getElementById("myDropdown").classList.toggle("show");
+    }
+
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropbtn')) {
+        const dropdowns = document.getElementsByClassName("dropdown-content");
+        for (let i = 0; i < dropdowns.length; i++) {
+          const openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
     }
   </script>
 </body>

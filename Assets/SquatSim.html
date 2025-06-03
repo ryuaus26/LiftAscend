@@ -5,17 +5,90 @@
   <meta charset="UTF-8">
   <title>Squat Biomechanics Simulator</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="./CSS/SquatSim.css">
+  <script src="./Javascript/sim.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .container { display: flex; }
-    .control-panel { width: 300px; padding: 20px; border-right: 1px solid #ccc; }
-    .visualization { flex-grow: 1; padding: 20px; }
-    label { font-weight: bold; }
-    input, select, button { width: 100%; margin-top: 5px; margin-bottom: 15px; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .container {
+      display: flex;
+    }
+    .control-panel {
+      width: 300px;
+      padding: 20px;
+      border-right: 1px solid #ccc;
+    }
+    .visualization {
+      flex-grow: 1;
+      padding: 20px;
+    }
+    label {
+      font-weight: bold;
+    }
+    input, select, button {
+      width: 100%;
+      margin-top: 5px;
+      margin-bottom: 15px;
+    }
+
+    /* Dropdown Styles */
+    .dropbtn {
+      background-color: #3498DB;
+      color: white;
+      padding: 16px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .dropbtn:hover, .dropbtn:focus {
+      background-color: #2980B9;
+    }
+
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #f1f1f1;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+    }
+
+    .dropdown-content a {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }
+
+    .dropdown-content a:hover {
+      background-color: #ddd;
+    }
+
+    .show {
+      display: block;
+    }
   </style>
 </head>
 <body>
   <h1>Squat Biomechanics Simulator</h1>
+
+  <div class="dropdown">
+    <button onclick="toggleDropdown()" class="dropbtn">Select Lift</button>
+    <div id="myDropdown" class="dropdown-content">
+      <a href="SquatSim.html">Squat</a>
+      <a href="BenchSim.html">Bench</a>
+      <a href="DeadSim.html">Deadlift</a>
+    </div>
+  </div>
+
   <div class="container">
     <div class="control-panel">
       <label for="neuralActivation">Neural Activation:</label>
@@ -24,16 +97,25 @@
         <option value="0.8">Intermediate</option>
         <option value="1.0">Elite</option>
       </select>
+
       <label for="muscleFiber">Muscle Fiber Type (% Type II):</label>
-      <input type="range" id="muscleFiber" min="0" max="100" value="50"><span id="muscleFiberValue">50</span>%
+      <input type="range" id="muscleFiber" min="0" max="100" value="50">
+      <span id="muscleFiberValue">50</span>%
+
       <label for="pennationAngle">Pennation Angle (°):</label>
-      <input type="range" id="pennationAngle" min="0" max="30" value="15"><span id="pennationAngleValue">15</span>°
+      <input type="range" id="pennationAngle" min="0" max="30" value="15">
+      <span id="pennationAngleValue">15</span>°
+
       <label for="leverArmLength">Lever Arm Length (cm):</label>
       <input type="number" id="leverArmLength" value="40">
+
       <label for="muscleInsertion">Muscle Insertion (cm):</label>
-      <input type="range" id="muscleInsertion" min="0" max="10" value="5" step="0.1"><span id="muscleInsertionValue">5</span> cm
+      <input type="range" id="muscleInsertion" min="0" max="10" value="5" step="0.1">
+      <span id="muscleInsertionValue">5</span> cm
+
       <button onclick="simulate()">Simulate</button>
     </div>
+
     <div class="visualization">
       <canvas id="diagramCanvas" width="400" height="300" style="border:1px solid #ccc;"></canvas>
       <canvas id="forceGraph"></canvas>
@@ -41,6 +123,7 @@
   </div>
 
   <script>
+    // Update displayed values for sliders
     const fiber = document.getElementById('muscleFiber');
     const fiberVal = document.getElementById('muscleFiberValue');
     const penAngle = document.getElementById('pennationAngle');
@@ -52,6 +135,7 @@
     penAngle.oninput = () => penVal.textContent = penAngle.value;
     insert.oninput = () => insertVal.textContent = insert.value;
 
+    // Simulation function
     function simulate() {
       const activation = parseFloat(document.getElementById('neuralActivation').value);
       const fiberType = parseFloat(fiber.value);
@@ -72,7 +156,9 @@
 
       const ctx = document.getElementById('diagramCanvas').getContext('2d');
       ctx.clearRect(0, 0, 400, 300);
-      ctx.beginPath(); ctx.arc(200, 150, 40, 0, Math.PI, false); ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(200, 150, 40, 0, Math.PI, false);
+      ctx.stroke();
       ctx.fillText("Squat", 180, 140);
 
       const graphCtx = document.getElementById('forceGraph').getContext('2d');
@@ -80,10 +166,39 @@
         type: 'line',
         data: {
           labels: angles,
-          datasets: [{ label: 'Force vs Joint Angle', data: values, borderColor: 'blue', fill: false }]
+          datasets: [{
+            label: 'Force vs Joint Angle',
+            data: values,
+            borderColor: 'blue',
+            fill: false
+          }]
         },
-        options: { scales: { y: { beginAtZero: true } } }
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
       });
+    }
+
+    // Dropdown toggle function
+    function toggleDropdown() {
+      document.getElementById("myDropdown").classList.toggle("show");
+    }
+
+    // Close dropdown if clicked outside
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropbtn')) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        for (let i = 0; i < dropdowns.length; i++) {
+          let openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
     }
   </script>
 </body>

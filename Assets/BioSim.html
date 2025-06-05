@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Biomechanics Lift Simulator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .container { display: flex; }
+    .control-panel { width: 300px; padding: 20px; border-right: 1px solid #ccc; }
+    .visualization { flex-grow: 1; padding: 20px; }
+    label { font-weight: bold; }
+    input, select, button { width: 100%; margin-top: 5px; margin-bottom: 15px; }
+    canvas { border: 1px solid #ccc; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Biomechanics Lift Simulator</h1>
+  <div class="container">
+    <div class="control-panel">
+      <label for="liftType">Select Lift Type:</label>
+      <select id="liftType">
+        <option value="bench">Bench Press</option>
+        <option value="squat">Squat</option>
+        <option value="deadlift">Deadlift</option>
+      </select>
+
+      <label for="joint1Angle">Joint 1 Angle (deg):</label>
+      <input type="range" id="joint1Angle" min="0" max="180" value="90">
+      <span id="joint1AngleValue">90</span>
+
+      <label for="joint2Angle">Joint 2 Angle (deg):</label>
+      <input type="range" id="joint2Angle" min="0" max="180" value="90">
+      <span id="joint2AngleValue">90</span>
+
+      <label for="insertion1">Muscle Insertion 1 (cm):</label>
+      <input type="range" id="insertion1" min="1" max="10" value="5">
+      <span id="insertion1Value">5</span>
+
+      <label for="insertion2">Muscle Insertion 2 (cm):</label>
+      <input type="range" id="insertion2" min="1" max="10" value="5">
+      <span id="insertion2Value">5</span>
+
+      <label for="force1">Muscle Force 1 (N):</label>
+      <input type="number" id="force1" value="800">
+
+      <label for="force2">Muscle Force 2 (N):</label>
+      <input type="number" id="force2" value="800">
+
+      <button onclick="simulateLift()">Simulate Lift</button>
+      <button onclick="exportData()">Export Data</button>
+      <button onclick="resetSimulation()">Reset Simulation</button>
+    </div>
+
+    <div class="visualization">
+      <canvas id="animationCanvas" width="400" height="300"></canvas>
+      <div id="resultPanel">
+        <canvas id="resultGraph" width="400" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Define joints and lever arms for each lift type
+    const liftJoints = {
+      bench: ['Shoulder', 'Elbow'],
+      squat: ['Hip', 'Knee'],
+      deadlift: ['Hip', 'Back']
+    };
+
+    const leverArms = {
+      bench: { Shoulder: 0.3, Elbow: 0.2 },
+      squat: { Hip: 0.4, Knee: 0.3 },
+      deadlift: { Hip: 0.5, Back: 0.4 }
+    };
+
+    // Update slider labels based on lift type
+    const liftTypeSelect = document.getElementById("liftType");
+    liftTypeSelect.onchange = () => {
+      const lift = liftTypeSelect.value;
+      const joints = liftJoints[lift];
+      document.querySelector("label[for='joint1Angle']").textContent = `${joints[0]} Angle (deg):`;
+      document.querySelector("label[for='joint2Angle']").textContent = `${joints[1]} Angle (deg):`;
+      document.querySelector("label[for='insertion1']").textContent = `${joints[0]} Insertion (cm):`;
+      document.querySelector("label[for='insertion2']").textContent = `${joints[1]} Insertion (cm):`;
+      document.querySelector("label[for='force1']").textContent = `${joints[0]} Muscle Force (N):`;
+      document.querySelector("label[for='force2']").textContent = `${joints[1]} Muscle Force (N):`;
+    };
+
+    // Update slider value displays
+    ['joint1Angle', 'joint2Angle', 'insertion1', 'insertion2'].forEach(id => {
+      const slider = document.getElementById(id);
+      const valueSpan = document.getElementById(`${id}Value`);
+      slider.oninput = () => valueSpan.textContent = slider.value;
+    });
+
+    // Main simulation function
+    function simulateLift() {
+      const lift = document.getElementById("liftType").value;
+      const joints = liftJoints[lift];
+      const angle1 = parseFloat(document.getElementById("joint1Angle").value);
+      const angle2 = parseFloat(document.getElementById("joint2Angle").value);
+      const insertion1 = parseFloat(document.getElementById("insertion1").value) / 100; // cm to m
+      const insertion2 = parseFloat(document.getElementById("insertion2").value) / 100;
+      const force1 = parseFloat(document.getElementById("force1").value);
+      const force2 = parseFloat(document.getElementById("force2").value);
+
+      // Input validation
+      if (angle1 < 0 || angle1 > 180 || angle2 < 0 || angle2 > 180) {
+        alert("Joint angles must be between 0° and 180°.");
+        return;
+      }
+      if (insertion1 <= 0 || insertion2 <= 0) {
+        alert("Insertion points must be positive.");
+        return;
+      }
+      if (force1 < 0 || force2 < 0) {
+        alert("Muscle forces must be non-negative.");
+        return;
+      }
+
+      // Compute torques
+      const torque1 = force1 * insertion1;
+      const torque2 = force2 * insertion2;
+
+      // Get lever arms
+      const lever1 = leverArms[lift][joints[0]];
+      const lever2 = leverArms[lift][joints[1]];
+
+      // Compute max weight based on limiting joint
+      const maxWeight1 = torque1 / lever1;
+      const maxWeight2 = torque2 / lever2;
+      const maxWeight = Math.min(maxWeight1, maxWeight2);
+
+      // Generate data for graph (torque vs angle for joint1)
+      const angles = Array.from({length: 19}, (_, i) => i * 10);
+      const torques = angles.map(a => force1 * insertion1 * Math.cos(a * Math.PI / 180));
+      simulationData = angles.map((angle, idx) => ({angle, torque: torques[idx]}));
+
+      // Draw stick figure based on lift type
+      const canvas = document.getElementById("animationCanvas");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (lift === 'bench') {
+        drawBenchPress(ctx, angle1, angle2);
+      } else if (lift === 'squat') {
+        drawSquat(ctx, angle1, angle2);
+      } else if (lift === 'deadlift') {
+        drawDeadlift(ctx, angle1, angle2);
+      }
+
+      // Draw graph
+      drawGraph(angles, torques, `${joints[0]} Torque vs Angle`);
+
+      // Display results
+      document.getElementById("resultPanel").innerHTML = `
+        <h3>Results</h3>
+        <p>${joints[0]} Torque: ${torque1.toFixed(2)} Nm</p>
+        <p>${joints[1]} Torque: ${torque2.toFixed(2)} Nm</p>
+        <p>Predicted Max Weight: ${maxWeight.toFixed(2)} kg</p>
+        <canvas id="resultGraph" width="400" height="200"></canvas>
+     `;
+    }
+
+    // Animation functions
+    function drawBenchPress(ctx, angleShoulder, angleElbow) {
+      ctx.beginPath();
+      ctx.moveTo(200, 250); // Torso
+      ctx.lineTo(200, 150);
+      ctx.stroke();
+      const elbowX = 200 + 50 * Math.cos((angleShoulder) * Math.PI / 180);
+      const elbowY = 150 - 50 * Math.sin((angleShoulder) * Math.PI / 180);
+      ctx.beginPath();
+      ctx.moveTo(200, 150);
+      ctx.lineTo(elbowX, elbowY);
+      ctx.stroke();
+      const handX = elbowX + 40 * Math.cos((angleShoulder + angleElbow) * Math.PI / 180);
+      const handY = elbowY - 40 * Math.sin((angleShoulder + angleElbow) * Math.PI / 180);
+      ctx.beginPath();
+      ctx.moveTo(elbowX, elbowY);
+      ctx.lineTo(handX, handY);
+      ctx.stroke();
+    }
+
+    function drawSquat(ctx, angleHip, angleKnee) {
+      ctx.beginPath();
+      ctx.moveTo(200, 250); // Hip
+      ctx.lineTo(200, 150); // Torso
+      ctx.stroke();
+      const kneeX = 200 + 50 * Math.cos((180 - angleKnee) * Math.PI / 180);
+      const kneeY = 250 + 50 * Math.sin((180 - angleKnee) * Math.PI / 180);
+      ctx.beginPath();
+      ctx.moveTo(200, 250);
+      ctx.lineTo(kneeX, kneeY);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(kneeX, kneeY);
+      ctx.lineTo(kneeX, 300);
+      ctx.stroke();
+    }
+
+    function drawDeadlift(ctx, angleHip, angleBack) {
+      ctx.beginPath();
+      ctx.moveTo(200, 250); // Hip
+      ctx.lineTo(200, 300); // Legs
+      ctx.stroke();
+      const backX = 200 + 50 * Math.sin(angleHip * Math.PI / 180);
+      const backY = 250 - 50 * Math.cos(angleHip * Math.PI / 180);
+      ctx.beginPath();
+      ctx.moveTo(200, 250);
+      ctx.lineTo(backX, backY);
+      ctx.stroke();
+    }
+
+    // Graph drawing function
+    function drawGraph(labels, data, title) {
+      const ctx = document.getElementById("resultGraph").getContext("2d");
+      if (window.myChart) window.myChart.destroy();
+      window.myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: title,
+            data: data,
+            borderColor: 'blue',
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { title: { display: true, text: 'Angle (°)' } },
+            y: { title: { display: true, text: 'Torque (Nm)' }, beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    // Export simulation data
+    function exportData() {
+      const lift = document.getElementById("liftType").value;
+      const joints = liftJoints[lift];
+      let csv = "Lift Type,Joint 1,Joint 2,Angle 1,Angle 2,Insertion 1,Insertion 2,Force 1,Force 2,Torque 1,Torque 2,Max Weight\n";
+      const angle1 = document.getElementById("joint1Angle").value;
+      const angle2 = document.getElementById("joint2Angle").value;
+      const insertion1 = document.getElementById("insertion1").value;
+      const insertion2 = document.getElementById("insertion2").value;
+      const force1 = document.getElementById("force1").value;
+      const force2 = document.getElementById("force2").value;
+      const torque1 = (force1 * (insertion1 / 100)).toFixed(2);
+      const torque2 = (force2 * (insertion2 / 100)).toFixed(2);
+      const maxWeight = Math.min(torque1 / leverArms[lift][joints[0]], torque2 / leverArms[lift][joints[1]]).toFixed(2);
+      csv += `${lift},${joints[0]},${joints[1]},${angle1},${angle2},${insertion1},${insertion2},${force1},${force2},${torque1},${torque2},${maxWeight}\n`;
+      const blob = new Blob([csv], {type: 'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "simulation_data.csv";
+      a.click();
+    }
+
+    // Reset simulation
+    function resetSimulation() {
+      document.getElementById("liftType").value = "bench";
+      document.getElementById("joint1Angle").value = 90;
+      document.getElementById("joint2Angle").value = 90;
+      document.getElementById("insertion1").value = 5;
+      document.getElementById("insertion2").value = 5;
+      document.getElementById("force1").value = 800;
+      document.getElementById("force2").value = 800;
+      document.getElementById("joint1AngleValue").textContent = "90";
+      document.getElementById("joint2AngleValue").textContent = "90";
+      document.getElementById("insertion1Value").textContent = "5";
+      document.getElementById("insertion2Value").textContent = "5";
+      const canvas = document.getElementById("animationCanvas");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      document.getElementById("resultPanel").innerHTML = "";
+    }
+  </script>
+</body>
+</html>

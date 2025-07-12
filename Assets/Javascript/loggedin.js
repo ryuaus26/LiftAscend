@@ -413,7 +413,7 @@ async function submitLiftData() {
 
                 // Calculate the average percentile to determine the rank
                 const avgPercentile = (userPercentiles.squat + userPercentiles.bench + userPercentiles.deadlift) / 3;
-                const userRank = updateRank(avgPercentile); // Get the rank based on average percentile
+                const userRank = updateUserRank(avgPercentile); // Get the rank based on average percentile
 
                 // Wrap lift object in an array to create 0 index
                 const liftObject = {
@@ -607,11 +607,37 @@ function loadUserData() {
 
         // Load user data
         firebase.database().ref('users/' + uid).once('value').then((snapshot) => {
-            const fullName = snapshot.val().name;
-            const uniqueId = snapshot.val().unique_id;
-
-            document.getElementById('user-full-name').textContent = fullName;
-            document.getElementById('user-id').textContent = lastFiveChars;
+            const userData = snapshot.val();
+            console.log('Loading user data from Firebase:', userData); // Debug log
+            if (userData) {
+                // Update name - prioritize saved custom name over Google display name
+                const displayName = userData.name || userData.displayName || user.displayName || 'N/A';
+                console.log('Loading name from Firebase:', { 
+                    savedName: userData.name, 
+                    displayName: userData.displayName, 
+                    googleName: user.displayName,
+                    finalName: displayName 
+                });
+                document.getElementById('user-full-name').textContent = displayName;
+                document.getElementById('user-id').textContent = lastFiveChars;
+                
+                // Update age and bodyweight if available (read-only now)
+                if (userData.age) {
+                    document.getElementById('age').textContent = userData.age;
+                }
+                if (userData.bodyweight) {
+                    let displayWeight = userData.bodyweight;
+                    if (currentWeightUnit === 'kgs' && userData.unit === 'lbs') {
+                        displayWeight = lbsToKg(userData.bodyweight).toFixed(1);
+                    } else if (currentWeightUnit === 'lbs' && userData.unit === 'kgs') {
+                        displayWeight = kgToLbs(userData.bodyweight).toFixed(1);
+                    }
+                    document.getElementById('bodyweight').textContent = `${displayWeight} ${currentWeightUnit}`;
+                }
+                if (userData.gender) {
+                    document.getElementById('user-gender').textContent = userData.gender;
+                }
+            }
         }).catch((error) => {
             console.error(error);
         });
@@ -649,7 +675,7 @@ function loadUserData() {
 
                         // Calculate average percentile and rank
                         const avgPercentile = (userPercentiles.squat + userPercentiles.bench + userPercentiles.deadlift) / 3;
-                        const userRank = updateRank(avgPercentile); // Calculate rank based on average percentile
+                        const userRank = updateUserRank(avgPercentile); // Calculate rank based on average percentile
                         const dotsScore = calculateLifterDOTS(
                             userWeight,
                             userSquat,
@@ -1587,7 +1613,7 @@ async function displayUserStrengthComparison(squat, bench, deadlift, userCategor
    
 
     const avgPercentile = (userPercentiles.squat + userPercentiles.bench + userPercentiles.deadlift) / 3;
-    const userRank = updateRank(avgPercentile);
+    const userRank = updateUserRank(avgPercentile);
 
     console.log(avgPercentile)
     displayRank(userRank);
@@ -1596,7 +1622,7 @@ function keepRank(userRank) {
     return userRank;
 }
 // Adjusted rank logic
-function updateRank(percentile) {
+function updateUserRank(percentile) {
     console.log(percentile)
     if (percentile >= 80) {
         return "Diamond";
@@ -1794,3 +1820,197 @@ function toggleRankExplanation() {
     const explanationDiv = document.getElementById("rankExplanation");
     explanationDiv.classList.toggle("hidden");
 }
+
+// Edit Profile Functions
+let currentEditField = null;
+let currentEditValue = null;
+
+function editField(fieldType) {
+    console.log('editField called with:', fieldType); // Debug log
+    
+    // Only allow name editing
+    if (fieldType !== 'name') {
+        console.log('Only name editing is allowed');
+        return;
+    }
+    
+    currentEditField = fieldType;
+    
+    // Get current name value
+    const nameElement = document.getElementById('user-full-name');
+    console.log('Name element found:', nameElement); // Debug log
+    
+    // Set current value in input
+    const currentName = nameElement.textContent !== 'N/A' ? nameElement.textContent : '';
+    document.getElementById('editNameInput').value = currentName;
+    currentEditValue = currentName;
+    
+    // Show modal
+    const modal = document.getElementById('editModal');
+    console.log('Modal element:', modal); // Debug log
+    modal.classList.remove('hidden');
+    console.log('Modal should now be visible'); // Debug log
+}
+
+function closeEditModal() {
+    console.log('closeEditModal called'); // Debug log
+    document.getElementById('editModal').classList.add('hidden');
+    currentEditField = null;
+    currentEditValue = null;
+}
+
+async function saveEdit() {
+    console.log('saveEdit called with field:', currentEditField); // Debug log
+    const user = firebase.auth().currentUser;
+    if (!user) {
+        alert('You must be logged in to edit your profile.');
+        return;
+    }
+    
+    // Only handle name editing
+    if (currentEditField !== 'name') {
+        console.log('Only name editing is supported');
+        return;
+    }
+    
+    const newName = document.getElementById('editNameInput').value.trim();
+    
+    if (!newName) {
+        alert('Please enter a valid name.');
+        return;
+    }
+    
+    console.log('Saving name:', newName); // Debug log
+    
+    try {
+        // Update Firebase database with both name and full_name
+        const updates = {
+            'name': newName,
+            'full_name': newName + " " + user.uid.slice(-5)
+        };
+        
+        console.log('Firebase updates:', updates); // Debug log
+        console.log('User UID:', user.uid); // Debug log
+        console.log('Saving to path: users/' + user.uid); // Debug log
+        
+        // Save to Firebase
+        await firebase.database().ref('users/' + user.uid).update(updates);
+        
+        console.log('Name saved successfully to Firebase'); // Debug log
+        
+        // Verify the save by reading back from Firebase
+        const verificationSnapshot = await firebase.database().ref('users/' + user.uid).once('value');
+        const verificationData = verificationSnapshot.val();
+        console.log('Verification - saved data:', verificationData); // Debug log
+        
+        // Update UI immediately
+        document.getElementById('user-full-name').textContent = newName;
+        
+        // Close modal
+        closeEditModal();
+        
+        // Show success message
+        alert('Name updated successfully!');
+        
+    } catch (error) {
+        console.error('Error updating name:', error);
+        alert('Error updating name. Please try again.');
+    }
+}
+
+// Update profile display function (enhanced)
+function updateProfileDisplayFromEdit() {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+    
+    // Load user data from Firebase
+    firebase.database().ref('users/' + user.uid).once('value')
+        .then((snapshot) => {
+            const userData = snapshot.val();
+            if (userData) {
+                // Update name
+                if (userData.name) {
+                    document.getElementById('user-full-name').textContent = userData.name;
+                }
+                
+                // Update age
+                if (userData.age) {
+                    document.getElementById('age').textContent = userData.age;
+                }
+                
+                // Update bodyweight
+                if (userData.bodyweight) {
+                    let displayWeight = userData.bodyweight;
+                    if (currentWeightUnit === 'kgs' && userData.unit === 'lbs') {
+                        displayWeight = lbsToKg(userData.bodyweight).toFixed(1);
+                    } else if (currentWeightUnit === 'lbs' && userData.unit === 'kgs') {
+                        displayWeight = kgToLbs(userData.bodyweight).toFixed(1);
+                    }
+                    document.getElementById('bodyweight').textContent = `${displayWeight} ${currentWeightUnit}`;
+                }
+                
+                // Update gender if available
+                if (userData.gender) {
+                    document.getElementById('user-gender').textContent = userData.gender;
+                }
+            }
+        })
+        .catch((error) => {
+            console.error('Error loading user data:', error);
+        });
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('editModal');
+    if (event.target === modal) {
+        closeEditModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeEditModal();
+    }
+});
+
+// Make functions globally accessible for onclick handlers
+window.editField = editField;
+window.closeEditModal = closeEditModal;
+window.saveEdit = saveEdit;
+
+// Test function to verify the script is loading
+console.log('loggedin.js loaded successfully');
+console.log('editField function available:', typeof editField);
+
+// Test the edit functionality
+function testEditFunctionality() {
+    console.log('Testing edit functionality...');
+    console.log('Modal element exists:', !!document.getElementById('editModal'));
+    console.log('Name input exists:', !!document.getElementById('editNameInput'));
+    console.log('Edit button exists:', !!document.querySelector('button[onclick="editField(\'name\')"]'));
+}
+
+// Run test when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(testEditFunctionality, 1000); // Wait 1 second for everything to load
+});
+
+// Function to check current Firebase data
+async function checkFirebaseData() {
+    const user = firebase.auth().currentUser;
+    if (user) {
+        try {
+            const snapshot = await firebase.database().ref('users/' + user.uid).once('value');
+            const userData = snapshot.val();
+            console.log('Current Firebase data:', userData);
+            return userData;
+        } catch (error) {
+            console.error('Error checking Firebase data:', error);
+        }
+    }
+}
+
+// Make checkFirebaseData globally accessible for debugging
+window.checkFirebaseData = checkFirebaseData;

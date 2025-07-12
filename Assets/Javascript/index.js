@@ -141,13 +141,22 @@ async function signInWithGoogle() {
 // Save user data to database
 async function saveUserData(user) {
     const lastFiveChars = user.uid.slice(-5);
+    
+    // First, check if user already exists and has a custom name
+    const existingUserRef = database.ref('users/' + user.uid);
+    const existingSnapshot = await existingUserRef.once('value');
+    const existingUserData = existingSnapshot.val();
+    
+    // If user exists and has a custom name, preserve it; otherwise use Google display name
+    const displayName = existingUserData && existingUserData.name ? existingUserData.name : user.displayName;
+    
     const userData = {
         email: user.email,
-        full_name: user.displayName + " " + lastFiveChars,
-        name: user.displayName,
+        full_name: displayName + " " + lastFiveChars,
+        name: displayName,
         photoURL: user.photoURL,
         last_login: Date.now(),
-        created_at: Date.now(),
+        created_at: existingUserData ? existingUserData.created_at : Date.now(),
         provider: 'google'
     };
 

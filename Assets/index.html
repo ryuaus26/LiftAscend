@@ -46,6 +46,34 @@
             width: 100%;
             z-index: 1000;
         }
+        .google-signin-button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .google-signin-button:hover {
+            background-color: #357abd;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transform: translateY(-1px);
+        }
+        .google-signin-button:active {
+            transform: translateY(0);
+        }
+        .google-icon {
+            width: 18px;
+            height: 18px;
+        }
     </style>
         <link rel="icon" href="./Images/Logo.PNG" type="image/png" />
 </head>
@@ -81,9 +109,7 @@
                 <a href="about.html" class="ml-6 px-4 py-2 text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
                     About
                   </a>
-                 <a href="SquatSim.html" class="ml-6 px-4 py-2 text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
-                  Biomechanics Analysis
-                 </a>
+                 
                   
                   
             </div>
@@ -116,54 +142,22 @@
                         alt="Rank Image">
                 </div>
                 
-                <div id="login-dropdown" class="dropdown relative">
-                    <div class="dropdown-content bg-white text-gray-800 rounded-lg shadow-lg p-6 max-w-md mx-auto" id="form_container">
-                        <div id="form_header_container" class="mb-4">
-                            <h2 id="form_header" class="text-2xl font-bold">Login</h2>
-                        </div>
-                
-                        <div id="form_content_container">
-                            <!-- Login Form -->
-                            <div id="login-form" class="space-y-4">
-                                <input type="email" id="login-email" placeholder="Email" class="w-full px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <input type="password" id="login-password" placeholder="Password" class="w-full px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                
-                                <div class="flex justify-between text-sm">
-                                    <a href="#" onclick="showResetPassword()" class="text-blue-500 hover:text-blue-600">Forgot password?</a>
-                                    <a href="#" onclick="showRegister()" class="text-blue-500 hover:text-blue-600">Don't have an account? Sign up!</a>
-                                </div>
-                
-                                <button onclick="login()" id="login-btn" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">Login</button>
-                            </div>
-                
-                            <!-- Register Form (Hidden by default) -->
-                            <div id="register-form" class="space-y-4 hidden">
-                                <input type="text" id="full_name" placeholder="Full name" class="w-full px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <input type="email" id="email" placeholder="Email" class="w-full px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <input type="password" id="password" placeholder="New Password" class="w-full px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                
-                                <div class="text-sm">
-                                    <a href="#" onclick="showLogin()" class="text-blue-500 hover:text-blue-600">Already have an account? Login!</a>
-                                </div>
-                
-                                <button onclick="register()" class="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">Register</button>
-                            </div>
-                
-                            <!-- Reset Password Form (Hidden by default) -->
-                            <div id="reset-password-form" class="space-y-4 hidden">
-                                <form id="reset-password-form">
-                                    <input type="email" id="reset-email" placeholder="Enter your email" required class="w-full px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                
-                                    <div class="text-sm">
-                                        <a href="#" onclick="showLogin()" class="text-blue-500 hover:text-blue-600">Back to Login</a>
-                                    </div>
-                
-                                    <button type="submit" class="w-full bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition duration-300">Reset Password</button>
-                                </form>
-                            </div>
-                
-                        </div>
+                <!-- Google Sign-In Container -->
+                <div id="google-signin-container" class="flex flex-col items-center space-y-4">
+                    <div class="text-center">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Welcome to Lift Ascend</h2>
+                        <p class="text-gray-600 mb-4">Sign in with your Google account to get started</p>
                     </div>
+                    
+                    <button id="googleSignInBtn" class="google-signin-button">
+                        <svg class="google-icon" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        Sign in with Google
+                    </button>
                 </div>
                 
                 

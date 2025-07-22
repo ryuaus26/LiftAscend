@@ -1,6 +1,6 @@
 /**
  * Austin Ryu (1/25/2025)
- * This script handles Firebase authentication with Google Sign-In, user login/register, weightlifting data entry, 
+ * This script handles Firebase authentication, user login/register, weightlifting data entry, 
  * percentile calculations, unit conversions, and leaderboard functionality for Lift Ascend.
  */
 
@@ -13,232 +13,12 @@ const firebaseConfig = {
     appId: "1:403461421933:web:52452b598fb853c3cb3864",
     measurementId: "G-RFR3H01R2N"
 };
-
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
 // Initialize variables
 const auth = firebase.auth();
 const database = firebase.database();
-
-// Google Sign-In Provider
-const googleProvider = new firebase.auth.GoogleAuthProvider();
-
-// Configure Google provider
-googleProvider.addScope('email');
-googleProvider.addScope('profile');
-googleProvider.setCustomParameters({
-    prompt: 'select_account'
-});
-
-// DOM elements
-let googleSignInBtn, signOutBtn, userInfo, googleSigninContainer;
-
-// Initialize Google Sign-In
-function initializeGoogleSignIn() {
-    console.log('Initializing Google Sign-In...');
-    
-    googleSignInBtn = document.getElementById('googleSignInBtn');
-    signOutBtn = document.getElementById('signOutBtn');
-    userInfo = document.getElementById('userInfo');
-    googleSigninContainer = document.getElementById('google-signin-container');
-
-    console.log('Google Sign-In elements found:', {
-        googleSignInBtn: !!googleSignInBtn,
-        signOutBtn: !!signOutBtn,
-        userInfo: !!userInfo,
-        googleSigninContainer: !!googleSigninContainer
-    });
-
-    if (googleSignInBtn) {
-        googleSignInBtn.addEventListener('click', signInWithGoogle);
-        console.log('Google Sign-In button event listener attached');
-    } else {
-        console.error('Google Sign-In button not found!');
-    }
-
-    if (signOutBtn) {
-        signOutBtn.addEventListener('click', signOut);
-    }
-
-    // Listen for auth state changes
-    auth.onAuthStateChanged((user) => {
-        console.log('Auth state changed:', user ? 'User signed in' : 'User signed out');
-        if (user) {
-            // User is signed in
-            handleUserSignIn(user);
-        } else {
-            // User is signed out
-            handleUserSignOut();
-        }
-    });
-    
-    console.log('Google Sign-In initialization complete');
-}
-
-// Sign in with Google
-async function signInWithGoogle() {
-    try {
-        googleSignInBtn.disabled = true;
-        googleSignInBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
-        
-        const result = await auth.signInWithPopup(googleProvider);
-        const user = result.user;
-        
-        // Save user data to database
-        await saveUserData(user);
-        
-        // Redirect to loggedin.html
-        window.location.href = 'loggedin.html';
-        
-    } catch (error) {
-        console.error('Error signing in with Google:', error);
-        
-        // Provide more specific error messages
-        let errorMessage = 'Error signing in with Google. Please try again.';
-        
-        if (error.code) {
-            switch (error.code) {
-                case 'auth/popup-closed-by-user':
-                    errorMessage = 'Sign-in was cancelled. Please try again.';
-                    break;
-                case 'auth/popup-blocked':
-                    errorMessage = 'Pop-up was blocked by your browser. Please allow pop-ups for this site and try again.';
-                    break;
-                case 'auth/cancelled-popup-request':
-                    errorMessage = 'Sign-in was cancelled. Please try again.';
-                    break;
-                case 'auth/network-request-failed':
-                    errorMessage = 'Network error. Please check your internet connection and try again.';
-                    break;
-                case 'auth/unauthorized-domain':
-                    errorMessage = 'This domain is not authorized for Google Sign-In. Please contact support.';
-                    break;
-                case 'auth/operation-not-allowed':
-                    errorMessage = 'Google Sign-In is not enabled. Please contact support.';
-                    break;
-                default:
-                    errorMessage = `Sign-in error: ${error.message}`;
-            }
-        }
-        
-        alert(errorMessage);
-        
-        // Reset button
-        googleSignInBtn.disabled = false;
-        googleSignInBtn.innerHTML = `
-            <svg class="google-icon" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-            </svg>
-            Sign in with Google
-        `;
-    }
-}
-
-// Save user data to database
-async function saveUserData(user) {
-    const lastFiveChars = user.uid.slice(-5);
-    
-    // First, check if user already exists and has a custom name
-    const existingUserRef = database.ref('users/' + user.uid);
-    const existingSnapshot = await existingUserRef.once('value');
-    const existingUserData = existingSnapshot.val();
-    
-    // If user exists and has a custom name, preserve it; otherwise use Google display name
-    const displayName = existingUserData && existingUserData.name ? existingUserData.name : user.displayName;
-    
-    const userData = {
-        email: user.email,
-        full_name: displayName + " " + lastFiveChars,
-        name: displayName,
-        photoURL: user.photoURL,
-        last_login: Date.now(),
-        created_at: existingUserData ? existingUserData.created_at : Date.now(),
-        provider: 'google'
-    };
-
-    try {
-        await database.ref('users/' + user.uid).set(userData);
-        console.log('User data saved successfully');
-    } catch (error) {
-        console.error('Error saving user data:', error);
-        throw error;
-    }
-}
-
-// Handle user sign in
-function handleUserSignIn(user) {
-    if (googleSigninContainer) {
-        googleSigninContainer.innerHTML = `
-            <div class="text-center">
-                <h2 class="text-2xl font-bold text-gray-800 mb-2">Welcome back!</h2>
-                <p class="text-gray-600 mb-4">You're signed in as ${user.displayName}</p>
-            </div>
-            
-            <div class="flex items-center space-x-3 mb-4">
-                <img src="${user.photoURL}" alt="User Photo" class="w-10 h-10 rounded-full">
-                <div>
-                    <p class="font-semibold text-gray-800">${user.displayName}</p>
-                    <p class="text-sm text-gray-600">${user.email}</p>
-                </div>
-            </div>
-            
-            <button id="signOutBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300">
-                Sign Out
-            </button>
-        `;
-        
-        // Re-attach event listener for sign out
-        const newSignOutBtn = document.getElementById('signOutBtn');
-        if (newSignOutBtn) {
-            newSignOutBtn.addEventListener('click', signOut);
-        }
-    }
-}
-
-// Handle user sign out
-function handleUserSignOut() {
-    if (googleSigninContainer) {
-        googleSigninContainer.innerHTML = `
-            <div class="text-center">
-                <h2 class="text-2xl font-bold text-gray-800 mb-2">Welcome to Lift Ascend</h2>
-                <p class="text-gray-600 mb-4">Sign in with your Google account to get started</p>
-            </div>
-            
-            <button id="googleSignInBtn" class="google-signin-button">
-                <svg class="google-icon" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Sign in with Google
-            </button>
-        `;
-        
-        // Re-attach event listener for sign in
-        const newGoogleSignInBtn = document.getElementById('googleSignInBtn');
-        if (newGoogleSignInBtn) {
-            newGoogleSignInBtn.addEventListener('click', signInWithGoogle);
-        }
-    }
-}
-
-// Sign out function
-function signOut() {
-    auth.signOut()
-        .then(() => {
-            console.log("User signed out successfully");
-            window.location.href = "index.html";
-        })
-        .catch((error) => {
-            console.error("Error signing out:", error);
-            alert("An error occurred while signing out. Please try again.");
-        });
-}
 
 
 
@@ -355,7 +135,261 @@ function clearLiftDataTable() {
     tbody.innerHTML = ''; // Clear all rows
     addRow(); // Add one empty row
 }
+function login() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    
+    
+    // Validate inputs
+    
 
+    if (!validate_email(email) || !validate_password(password)) {
+        alert('Email or Password is invalid!');
+        return;
+    }
+    
+    // Show loading state
+
+    
+    auth.signInWithEmailAndPassword(email, password)
+        .then(function(userCredential) {
+            const user = userCredential.user;
+            const database_ref = database.ref();
+
+            // Update last login
+            const user_data = {
+                last_login: Date.now()
+            };
+
+            // First, update the last login
+            return database_ref.child('users/' + user.uid).update(user_data)
+                .then(() => {
+                    // Then fetch the user data
+                    return database_ref.child('users/' + user.uid).once('value');
+                });
+        })
+        .then(function(snapshot) {
+            const user_info = snapshot.val();
+            const loginBtn = document.getElementById('login-btn');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+            // Check if user info exists
+            if (!user_info || !user_info.name) {
+                window.location.href = "index.html";  // Redirect if user info is incomplete
+                throw new Error('User data not found');
+            }
+
+            // Redirect to loggedin.html if everything is correct
+            window.location.href = "loggedin.html"; // Correct the redirection
+           
+        })
+        .catch(function(error) {
+            console.error("Login error:", error);
+            
+            // Show user-friendly error messages
+            let errorMessage;
+            switch (error.code) {
+                case 'auth/user-not-found':
+                    errorMessage = 'No account found with this email';
+                    window.location.href = "index.html";  // Correct
+                    break;
+                case 'auth/wrong-password':
+                    errorMessage = 'Incorrect password';
+                    window.location.href = "index.html";  // Correct
+                    break;
+                case 'auth/too-many-requests':
+                    errorMessage = 'Too many failed attempts. Please try again later';
+                    window.location.href = "index.html";  // Correct
+                    break;
+                default:
+                    errorMessage = error.message === 'Name verification failed' 
+                    
+                        ? 'The name you entered does not match our records'
+                        : 'An error occurred during login. Please try again';
+                        window.location.href = "index.html";  // Correct
+            }
+            
+
+            alert(errorMessage);
+        })
+        .finally(() => {
+            // Reset button state
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Login';
+            }
+        });
+}
+
+// Helper function to prevent multiple form submissions
+function preventMultipleSubmits(formId) {
+    const form = document.getElementById(formId);
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!this.submitted) {
+                this.submitted = true;
+                login();
+            }
+        });
+    }
+}
+  
+  
+  
+  async function register() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const full_name = document.getElementById('full_name').value;
+      
+      if (!validate_email(email) || !validate_password(password)) {
+          alert('Email or Password is invalid!');
+          return;
+      }
+    
+      if (!validate_field(full_name)) {
+          alert('Full Name is invalid!');
+          return;
+      }
+      
+      try {
+          const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+          const user = userCredential.user;
+          const lastFiveChars = user.uid.slice(-5);
+          const user_data = {
+              email: email,
+              full_name: full_name + " " + lastFiveChars,
+              name: full_name,
+              last_login: Date.now(),
+          };
+  
+          // Save the user data directly under the user's UID in the database
+          await firebase.database().ref('users/' + user.uid).set(user_data);
+          
+          alert('User Created!');
+          window.location.href = "index.html";
+      } catch (error) {
+          console.error("Error during registration:", error);
+          alert(error.message);
+      }
+  }
+  
+  
+  // Validate Functions
+  function validate_email(email) {
+    const expression = /^[^@]+@\w+(\.\w+)+\w$/;
+    return expression.test(email);
+  }
+  
+  function validate_password(password) {
+    return password.length >= 6;
+  }
+  
+  function validate_field(field) {
+    return field != null && field.length > 0;
+  }
+
+const csvFilePath = 'http://localhost/LiftAscend/filtered_lifting_data.csv'; // Replace with your actual CSV file path
+
+function submitLiftData() {
+    const user = firebase.auth().currentUser;
+    const rows = document.querySelectorAll('#liftDataBody tr');
+    const liftData = [];
+    let totalLiftSum = 0;
+    let bodyweight = 0;
+    let age = 0;
+
+    rows.forEach((row, index) => {
+        // Extract input values from the row
+        const ageValue = row.querySelector('.age').value;
+        const weight = row.querySelector('.weight').value;
+        let gender = row.querySelector('.gender').value;
+        const squat = row.querySelector('.squat').value;
+        const bench = row.querySelector('.bench').value;
+        const deadlift = row.querySelector('.deadlift').value;
+
+        // Check if all required fields are filled
+        if (ageValue && weight && gender && squat && bench && deadlift) {
+            const totalLift = parseInt(squat) + parseInt(bench) + parseInt(deadlift);
+            totalLiftSum += totalLift; // Add to total lift sum
+            age = parseInt(ageValue);  // Assign age (assuming one row per session)
+            bodyweight = parseInt(weight); // Assign bodyweight (assuming one row per session)
+            gender = gender.trim().toLowerCase();
+
+            // Determine weight class based on gender
+            let weightClass;
+            if (gender === 'male') {
+                weightClass = getWeightClassMale(bodyweight, currentWeightUnit);
+            } else if (gender === 'female') {
+                weightClass = getWeightClassFemale(bodyweight, currentWeightUnit);
+            } else {
+                alert(`Invalid gender in row ${index + 1}. Please enter 'male' or 'female'.`);
+                return;
+            }
+
+            // Calculate user's percentiles and determine rank
+            const userPercentiles = calculateUserPercentile(
+                parseInt(squat),
+                parseInt(bench),
+                parseInt(deadlift),
+                {
+                    gender: gender,
+                    weightClass: weightClass,
+                    ageGroup: getAgeGroup(age)
+                }
+            );
+
+            // Calculate the average percentile for ranking
+            const avgPercentile = (userPercentiles.squat + userPercentiles.bench + userPercentiles.deadlift) / 3;
+            const userRank = updateRank(avgPercentile);
+            
+            // Create the lift object with all details
+            const liftObject = {
+                age: age,
+                weight: bodyweight,
+                gender: gender,
+                squat: parseInt(squat),
+                bench: parseInt(bench),
+                deadlift: parseInt(deadlift),
+                total: totalLift,
+                timestamp: Date.now(),
+                unit: currentWeightUnit,
+                weightClass: weightClass,
+                ageGroup: getAgeGroup(age),
+                rank: userRank
+            };
+
+            liftData.push(liftObject);
+
+            document.getElementById('total').textContent = totalLiftSum + " " + currentWeightUnit;
+            document.getElementById('age').textContent = age;
+            document.getElementById('bodyweight').textContent = bodyweight + " " + currentWeightUnit;
+        
+            // Calculate and display the DOTS score
+            const dotsScore = calculateDOTS(bodyweight, totalLiftSum, liftObject.gender === 'male', currentWeightUnit);
+            document.getElementById('dots').textContent = dotsScore;
+        
+            document.getElementById('dots').textContent = dotsScore;
+
+            // Display user strength comparison based on the lift data
+            displayUserStrengthComparison(
+                parseInt(squat),
+                parseInt(bench),
+                parseInt(deadlift),
+                {
+                    gender: gender,
+                    weightClass: weightClass,
+                    ageGroup: getAgeGroup(age)
+                }
+            );
+        } else {
+            alert(`Please fill all fields in row ${index + 1}`);
+            return;
+        }
+      
+    });
+
+}
 
 // DOTS Calculation Function
 function calculateDOTS(weight, totalLift, isMale, unit) {
@@ -608,15 +642,15 @@ async function loadPercentileData(filepath) {
 }
 
 
-// Remove the old auth state change listener - Google Sign-In handles this now
-// firebase.auth().onAuthStateChanged((user) => {
-//     if (user) {
-//       // User is signed in, delay redirection by 500 milliseconds
-//       setTimeout(() => {
-//         window.location.href = 'loggedin.html';
-//       }, 1000);
-//     } 
-//   });
+// Check if the user is signed in
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      // User is signed in, delay redirection by 500 milliseconds
+      setTimeout(() => {
+        window.location.href = 'loggedin.html';
+      }, 1000);
+    } 
+  });
   
 
 async function calculateUserPercentile(squat, bench, deadlift, userCategory) {
@@ -927,8 +961,3 @@ function searchForUser(query) {
         }
     });
 }
-
-// Initialize Google Sign-In when the page loads
-document.addEventListener('DOMContentLoaded', function() {
-    initializeGoogleSignIn();
-});

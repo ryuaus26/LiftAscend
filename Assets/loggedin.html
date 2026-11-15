@@ -1,505 +1,242 @@
-<!-- 
-    Austin Ryu (1/25/2025)
-    Improved Layout for Lift Ascend
-    Demonstrates consistent spacing, a sticky header, collapsible sections, a pinned chat widget,
-    a hidden leaderboard that appears on click, and percentiles updated via JavaScript.
--->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lift Ascend</title>
-  
-  <!-- Favicon -->
-  <link rel="icon" href="./Images/android-chrome-512x512.png" type="image/x-icon"/>
-  
-  <!-- Font Awesome -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-  />
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;900&display=swap"
-    rel="stylesheet"
-  />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap"
-    rel="stylesheet"
-  />
-  
-  <!-- Custom CSS (Optional) -->
-  <link href="./CSS/coach.css" rel="stylesheet" />
-  
-  <style>
-    body {
-      font-family: 'Montserrat', sans-serif;
-    }
-    .hidden {
-      display: none;
-    }
-    /* Additional custom styles as needed */
-    #dragOverlay {
-      top: 0;
-      left: 0;
-      transform: none;
-      width: 100%;
-      height: 100%;
-    }
-    .edit-icon {
-      transition: all 0.2s ease;
-      cursor: pointer;
-    }
-    .edit-icon:hover {
-      transform: scale(1.1);
-      color: #1d4ed8 !important;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Your lifts - Lift Ascend</title>
+    <link rel="icon" href="./Images/android-chrome-512x512.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./CSS/site.css?v=2">
 </head>
 
-<body class="bg-gray-100">
-
-  <!-- Mobile Warning (optional) -->
-  <div id="mobileWarning" class="hidden bg-yellow-200 text-red-700 p-2 text-center">
-    Enhance your experience by running the app on PC!
-  </div>
-  <script>
-    function checkDevice() {
-      if (window.innerWidth < 768) {
-        document.getElementById("mobileWarning").style.display = "block";
-      }
-    }
-    window.onload = checkDevice;
-  </script>
-
-  <!-- Notification Banner (optional) -->
-  
-
-  <!-- Sticky Header -->
-  <header class="bg-white shadow sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-      <!-- Left: Logo -->
-      <a href="loggedin.html" class="inline-flex items-center space-x-2">
-        <img
-          src="./Images/Logo.PNG"
-          alt="Lift Ascend Logo"
-          class="h-16 transform hover:scale-105 transition-transform duration-300 rounded-lg"
-        />
-      </a>
-      
-      <!-- Nav Links -->
-     
-      
-      <!-- Right: Utility Buttons -->
-      <div class="flex items-center space-x-4">
-        <!-- Weight Unit Toggle -->
-        <div class="relative">
-          <button
-            class="bg-gray-200 hover:bg-gray-300 font-bold py-2 px-4 rounded inline-flex items-center"
-            onclick="toggleWeightUnit()"
-          >
-            <span id="weightUnitButton">lbs ▼</span>
-          </button>
-          <div
-            class="weight-unit-content hidden absolute right-0 mt-2 w-24 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
-          >
-            <a
-              href="#"
-              onclick="selectWeightUnit('lbs')"
-              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              lbs
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="brand" href="loggedin.html">
+                <img src="./Images/Logo.PNG" alt="" width="44" height="44">
+                Lift Ascend
             </a>
-            <a
-              href="#"
-              onclick="selectWeightUnit('kgs')"
-              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              kgs
-            </a>
-          </div>
+            <nav class="site-nav" aria-label="Main">
+                <a class="nav-link" href="about.html">About</a>
+                <div class="unit-toggle" role="group" aria-label="Weight unit">
+                    <button type="button" data-unit="lbs" aria-pressed="true">lb</button>
+                    <button type="button" data-unit="kgs" aria-pressed="false">kg</button>
+                </div>
+                <button type="button" class="btn btn-secondary" id="logoutButton">Log out</button>
+            </nav>
         </div>
-        
-        <!-- Logout Button -->
-        <button
-          onclick="logout()"
-          class="bg-red-500 text-white font-semibold py-2 px-4 rounded shadow hover:bg-red-600 transition duration-200 flex items-center space-x-2"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h6a2 2 0 012 2v1"
-            />
-          </svg>
-          <span>Logout</span>
-        </button>
-      </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- Main Content -->
-  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-    
-    <!-- Percentiles Section -->
-    <section class="max-w-xl mx-auto px-4 py-6">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Percentiles</h2>
-            
-            <!-- SQUAT -->
-            <div class="mb-4">
-                <div class="flex items-center justify-between mb-1">
-                    <div class="flex items-center">
-                        <span class="text-2xl mr-2">🏋️‍♂️</span>
-                        <span class="font-semibold">Squat</span>
+    <main>
+        <div class="wrap section">
+            <div class="panel" id="usernamePrompt" hidden style="margin-bottom: 1.5rem;">
+                <h2>Choose a username</h2>
+                <p class="muted" style="margin: 0.4rem 0 1rem; max-width: 40rem;">Lift Ascend no longer uses email addresses. Pick a username to log in with from now on, and your email is removed from your account.</p>
+                <form id="usernamePromptForm" novalidate style="max-width: 24rem;">
+                    <div class="form-row">
+                        <label for="prompt-username">New username</label>
+                        <input class="field" type="text" id="prompt-username" autocapitalize="none" spellcheck="false" maxlength="20" autocomplete="off" required>
+                        <span class="hint">3 to 20 letters, numbers or underscores.</span>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <p class="text-sm text-gray-600">
-                            <span id="squat-percentile" class="text-blue-600 font-bold">0%</span>
-                            better than others
-                        </p>
-                        <img id="squat-rank" src="./Images/Unranked.png" alt="Rank" class="w-12 h-12 rounded-full">
+                    <div class="form-row">
+                        <label for="prompt-password">Current password</label>
+                        <input class="field" type="password" id="prompt-password" autocomplete="current-password" required>
                     </div>
-                </div>
-                <div class="relative w-full h-3 bg-gray-200 rounded-full">
-                    <div id="squat-progress" class="absolute left-0 top-0 h-3 bg-blue-500 rounded-full" style="width: 0%"></div>
-                </div>
+                    <p class="form-error" id="promptError" role="alert" hidden></p>
+                    <button type="submit" class="btn btn-primary" id="promptButton">Save username</button>
+                </form>
             </div>
-            
-            <!-- BENCH -->
-            <div class="mb-4">
-                <div class="flex items-center justify-between mb-1">
-                    <div class="flex items-center">
-                        <span class="text-2xl mr-2">🏋️‍♀️</span>
-                        <span class="font-semibold">Bench</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <p class="text-sm text-gray-600">
-                            <span id="bench-percentile" class="text-green-600 font-bold">0%</span>
-                            better than others
-                        </p>
-                        <img id="bench-rank" src="./Images/Unranked.png" alt="Rank" class="w-12 h-12 rounded-full">
+
+            <div class="page-title">
+                <div>
+                    <h1 id="user-full-name">Your lifts</h1>
+                    <div class="meta">
+                        <span id="usernameMeta" hidden>Username <strong id="user-username"></strong></span>
+                        <span>ID <strong id="user-id">-</strong></span>
                     </div>
                 </div>
-                <div class="relative w-full h-3 bg-gray-200 rounded-full">
-                    <div id="bench-progress" class="absolute left-0 top-0 h-3 bg-green-500 rounded-full" style="width: 0%"></div>
+                <div class="actions">
+                    <button type="button" class="btn btn-secondary" id="editNameButton">Edit display name</button>
                 </div>
             </div>
-            
-            <!-- DEADLIFT -->
-            <div>
-                <div class="flex items-center justify-between mb-1">
-                    <div class="flex items-center">
-                        <span class="text-2xl mr-2">🏋️‍♂️</span>
-                        <span class="font-semibold">Deadlift</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <p class="text-sm text-gray-600">
-                            <span id="deadlift-percentile" class="text-pink-600 font-bold">0%</span>
-                            better than others
-                        </p>
-                        <img id="deadlift-rank" src="./Images/Unranked.png" alt="Rank" class="w-12 h-12 rounded-full">
-                    </div>
+
+            <div class="dashboard">
+                <div class="stack">
+                    <section class="scoreboard" aria-label="Your results">
+                        <div class="scoreboard-rank">
+                            <img id="rankImage" src="./Images/Unranked.png" alt="Unranked rank" width="88" height="88">
+                            <div>
+                                <div class="label">Overall rank</div>
+                                <div class="value" id="rankName">Unranked</div>
+                            </div>
+                        </div>
+
+                        <div class="lift-row">
+                            <img id="squat-rank" src="./Images/Unranked.png" alt="Unranked rank" width="40" height="40">
+                            <div class="lift-name">Squat<span class="lift-weight" id="user-squat"></span></div>
+                            <div class="lift-percent" id="squat-percentile">-</div>
+                            <div class="bar"><span id="squat-progress"></span></div>
+                        </div>
+                        <div class="lift-row">
+                            <img id="bench-rank" src="./Images/Unranked.png" alt="Unranked rank" width="40" height="40">
+                            <div class="lift-name">Bench<span class="lift-weight" id="user-bench"></span></div>
+                            <div class="lift-percent" id="bench-percentile">-</div>
+                            <div class="bar"><span id="bench-progress"></span></div>
+                        </div>
+                        <div class="lift-row">
+                            <img id="deadlift-rank" src="./Images/Unranked.png" alt="Unranked rank" width="40" height="40">
+                            <div class="lift-name">Deadlift<span class="lift-weight" id="user-deadlift"></span></div>
+                            <div class="lift-percent" id="deadlift-percentile">-</div>
+                            <div class="bar"><span id="deadlift-progress"></span></div>
+                        </div>
+                        <p class="scoreboard-note" id="scoreboardNote">Save your lifts to see how you rank.</p>
+
+                        <dl class="stats">
+                            <div><dt>Total</dt><dd id="total">-</dd></div>
+                            <div><dt>DOTS</dt><dd id="dots">-</dd></div>
+                            <div><dt>Bodyweight</dt><dd id="bodyweight">-</dd></div>
+                            <div><dt>Age</dt><dd id="age">-</dd></div>
+                            <div><dt>Gender</dt><dd id="user-gender">-</dd></div>
+                        </dl>
+                    </section>
+
+                    <section class="panel" aria-labelledby="instagramTitle">
+                        <div class="panel-head">
+                            <h2 id="instagramTitle">Instagram</h2>
+                            <button type="button" class="btn btn-secondary" id="updateInstagram">Add link</button>
+                        </div>
+                        <p id="instagramDisplay" class="muted">No Instagram profile linked.</p>
+                    </section>
                 </div>
-                <div class="relative w-full h-3 bg-gray-200 rounded-full">
-                    <div id="deadlift-progress" class="absolute left-0 top-0 h-3 bg-pink-500 rounded-full" style="width: 0%"></div>
+
+                <div class="stack">
+                    <section class="panel" aria-labelledby="entryTitle">
+                        <div class="panel-head">
+                            <h2 id="entryTitle">Log your lifts</h2>
+                        </div>
+                        <table class="lift-table" id="liftDataTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Age</th>
+                                    <th scope="col" id="weightHeader">Bodyweight (<span data-unit-label>lb</span>)</th>
+                                    <th scope="col">Gender</th>
+                                    <th scope="col" id="squatHeader">Squat (<span data-unit-label>lb</span>)</th>
+                                    <th scope="col" id="benchHeader">Bench (<span data-unit-label>lb</span>)</th>
+                                    <th scope="col" id="deadliftHeader">Deadlift (<span data-unit-label>lb</span>)</th>
+                                    <th scope="col"><span class="visually-hidden">Remove row</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="liftDataBody"></tbody>
+                        </table>
+                        <div class="table-actions">
+                            <button type="button" class="btn btn-secondary" id="addRowButton">Add row</button>
+                            <button type="button" class="btn btn-primary" id="submitLiftButton">Save lifts</button>
+                        </div>
+                    </section>
+
+                    <section class="panel" aria-labelledby="searchTitle">
+                        <div class="panel-head">
+                            <h2 id="searchTitle">Find a lifter</h2>
+                        </div>
+                        <form class="search search-bar-container" id="searchForm" role="search">
+                            <div class="search-row">
+                                <label class="visually-hidden" for="searchInput">Lifter name</label>
+                                <input type="search" class="field search-bar" id="searchInput" placeholder="Search by name" autocomplete="off" aria-expanded="false" aria-controls="suggestionsContainer">
+                                <button type="submit" class="btn btn-primary search-button">Search</button>
+                            </div>
+                            <div class="suggestions" id="suggestionsContainer" hidden>
+                                <ul id="suggestionsList"></ul>
+                            </div>
+                        </form>
+                    </section>
+
+                    <section class="panel" id="leaderboardSection" aria-labelledby="leaderboardTitle">
+                        <div class="panel-head">
+                            <h2 id="leaderboardTitle">Friends leaderboard</h2>
+                            <div class="segmented" role="group" aria-label="Sort leaderboard" id="sortOptions">
+                                <button type="button" data-sort="By Total" aria-pressed="true">Total</button>
+                                <button type="button" data-sort="By Dots" aria-pressed="false">DOTS</button>
+                                <button type="button" data-sort="By Squat" aria-pressed="false">Squat</button>
+                                <button type="button" data-sort="By Bench" aria-pressed="false">Bench</button>
+                                <button type="button" data-sort="By Deadlift" aria-pressed="false">Deadlift</button>
+                            </div>
+                        </div>
+                        <table class="leaderboard">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Place</th>
+                                    <th scope="col">Lifter</th>
+                                    <th scope="col" id="totalHeader" data-column="total">Total</th>
+                                    <th scope="col"><span class="visually-hidden">Rank</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboardBody"></tbody>
+                        </table>
+                        <p class="empty" id="leaderboardEmpty" hidden>Add friends from their profile pages to compare lifts here.</p>
+                    </section>
+
+                    <section class="panel" aria-labelledby="friendsTitle">
+                        <div class="panel-head">
+                            <h2 id="friendsTitle">Friends</h2>
+                        </div>
+                        <div id="friend-list-container">
+                            <ul class="plain-list" id="friend-list"></ul>
+                            <p class="empty" id="friendsEmpty" hidden>No friends yet. Search for a lifter and add them from their profile.</p>
+                        </div>
+                    </section>
                 </div>
             </div>
         </div>
-    </section>
-    
-    <!-- Profile & Rank Section -->
-    <section class="bg-gray-50 p-6 rounded-lg shadow-lg">
-      <div class="flex flex-col sm:flex-row space-y-6 sm:space-y-0 sm:space-x-6">
-        <!-- Left Column: Lifts -->
-        <div class="flex-1 space-y-4">
-          <div class="flex items-center bg-white shadow-md p-4 rounded-lg">
-            <img src="./Images/Squat.svg" alt="Squat Icon" class="w-16 h-16 mr-3" />
-            <p class="text-lg"><strong>Squat:</strong> <span id="user-squat">N/A</span></p>
-          </div>
-          <div class="flex items-center bg-white shadow-md p-4 rounded-lg">
-            <img src="./Images/Bench.svg" alt="Bench Icon" class="w-16 h-16 mr-3" />
-            <p class="text-lg"><strong>Bench:</strong> <span id="user-bench">N/A</span></p>
-          </div>
-          <div class="flex items-center bg-white shadow-md p-4 rounded-lg">
-            <img src="./Images/Deadlift.svg" alt="Deadlift Icon" class="w-16 h-16 mr-3" />
-            <p class="text-lg"><strong>Deadlift:</strong> <span id="user-deadlift">N/A</span></p>
-          </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <span>&copy; <span id="year">2026</span> Lift Ascend</span>
+            <span>Percentiles use data from <a href="https://www.openpowerlifting.org" target="_blank" rel="noopener">OpenPowerlifting</a>.<span id="datasetDate"></span></span>
         </div>
-        
-        <!-- Middle Column: Personal Info -->
-        <div class="flex-1 space-y-4">
-          <div class="bg-white shadow-md p-4 rounded-lg">
-            <div class="flex items-center justify-between mb-2">
-              <p class="text-gray-700 text-base"><strong>Full Name:</strong> <span id="user-full-name">N/A</span></p>
-              <button onclick="editField('name')" class="edit-icon text-blue-500 hover:text-blue-700 transition-colors duration-200">
-                <i class="fas fa-edit"></i>
-              </button>
+    </footer>
+
+    <dialog id="editModal" aria-labelledby="editModalTitle">
+        <form class="dialog-body" id="editForm" novalidate>
+            <div class="dialog-head">
+                <h2 id="editModalTitle">Edit display name</h2>
+                <button type="button" class="dialog-close" data-close aria-label="Close">&times;</button>
             </div>
-            <p class="text-gray-700 text-base"><strong>Gender:</strong> <span id="user-gender">N/A</span></p>
-            <div class="flex items-center justify-between mb-2">
-              <p class="text-gray-700 text-base"><strong>Bodyweight:</strong> <span id="bodyweight">N/A</span></p>
+            <div class="form-row">
+                <label for="editNameInput">Display name</label>
+                <input class="field" type="text" id="editNameInput" maxlength="40" required>
+                <span class="hint">Shown on your profile and in search. Your username stays the same.</span>
             </div>
-            <div class="flex items-center justify-between">
-              <p class="text-gray-700 text-base"><strong>Age:</strong> <span id="age">N/A</span></p>
+            <div class="dialog-actions">
+                <button type="button" class="btn btn-secondary" data-close>Cancel</button>
+                <button type="submit" class="btn btn-primary">Save name</button>
             </div>
-          </div>
-          <div class="bg-white shadow-md p-4 rounded-lg">
-            <p class="text-gray-700 text-base"><strong>Total:</strong> <span id="total">N/A</span></p>
-            <p class="text-gray-700 text-base"><strong>DOTS Score:</strong> <span id="dots">N/A</span></p>
-          </div>
-        </div>
-        
-        <!-- Right Column: Rank -->
-        <div class="flex-shrink-0 flex flex-col items-center">
-          <h2 class="text-base font-bold mb-2">Your Overall Rank:</h2>
-          <img src="./Images/Unranked.png" class="w-32 h-32 border border-gray-300 rounded-full shadow-md" id="rankImage" alt="Rank Image" />
-        </div>
-      </div>
-      
-      <!-- ID & Instagram / Social Info -->
-      <div class="mt-6 flex flex-wrap items-center gap-6">
-        <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transition-transform duration-300 hover:scale-105">
-          <span class="font-bold text-gray-800 text-lg">ID:</span>
-          <span id="user-id" class="text-blue-700 font-semibold text-lg"></span>
-        </div>
-        <!-- Instagram Section -->
-        <div class="relative flex items-center space-x-2">
-          <i class="fab fa-instagram fa-3x text-blue-600 hover:text-blue-800 transition duration-300 cursor-pointer" title="Add Instagram Profile" id="instagramIcon"></i>
-          <button id="updateInstagram" class="bg-blue-500 text-white px-2 py-1 rounded transition-opacity duration-300">Update</button>
-          <!-- Popup Form -->
-          <div id="instagramPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg p-6 w-96 relative">
-              <button id="closePopup" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
-                <i class="fas fa-times"></i>
-              </button>
-              <h3 class="text-xl font-bold mb-4">Instagram Profile</h3>
-              <input type="text" id="instagramInput" placeholder="Paste your Instagram profile link" class="w-full p-2 border rounded mb-4 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
-              <button id="saveInstagram" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition duration-200">Save</button>
+        </form>
+    </dialog>
+
+    <dialog id="instagramPopup" aria-labelledby="instagramPopupTitle">
+        <form class="dialog-body" id="instagramForm" novalidate>
+            <div class="dialog-head">
+                <h2 id="instagramPopupTitle">Instagram profile</h2>
+                <button type="button" class="dialog-close" data-close aria-label="Close">&times;</button>
             </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    
-    <!-- Friend List Toggle & Search (Optional) -->
-    <section class="flex flex-col md:flex-row justify-between items-center gap-6">
-      <!-- Friend List -->
-      <div class="flex items-center">
-        <button id="toggle-friend-list" class="flex items-center bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full hover:from-purple-600 hover:to-blue-500 transition duration-300 shadow-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-       
-          </svg>
-          Show Friends
-        </button>
-        <div id="friend-list-container" class="hidden mt-6 bg-white shadow-xl rounded-lg p-6 border border-gray-300 max-h-80 overflow-y-auto">
-          <ul id="friend-list" class="space-y-4">
-            <li class="flex items-center space-x-3">
-              <img src="./Images/default-avatar.png" alt="Friend Avatar" class="w-10 h-10 rounded-full object-cover" />
-              <span class="text-gray-800 font-semibold">John Doe</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-      
-      <!-- Search Bar -->
-      <div class="container mx-auto px-4 py-8">
-        <div class="search-bar-container mb-8">
-          <div class="relative">
-            <input type="text" id="searchInput" class="search-bar w-full px-4 py-2 pr-16 rounded-lg border border-gray-700 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search for lifters...">
-            <div class="suggestions-container absolute w-full bg-white shadow-md rounded-lg mt-1 hidden border border-gray-300" id="suggestionsContainer">
-              <ul id="suggestionsList"></ul>
+            <div class="form-row">
+                <label for="instagramInput">Profile link</label>
+                <input class="field" type="url" id="instagramInput" placeholder="https://www.instagram.com/yourname" required>
             </div>
-            <button class="search-button absolute right-0 top-0 bg-blue-500 text-white px-4 py-2 h-full rounded-r-lg hover:bg-blue-600">
-              <i class="fas fa-search"></i> Search
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-    
-    <!-- Leaderboard Section (Hidden by default) -->
-    <section id="leaderboardSection" class="bg-white shadow-md rounded-lg p-6 hidden">
-      <div class="relative inline-block text-left mb-4">
-        <button id="modeButton" class="inline-flex justify-center w-full rounded-md border border-indigo-500 shadow-sm px-4 py-2 bg-indigo-500 text-sm font-medium text-white hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" onclick="toggleDropdown()">
-          Sort Options
-          <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-          </svg>
-        </button>
-        <!-- Dropdown Content -->
-        <div id="dropdownContent" class="hidden absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-          <div class="py-1" role="menu" aria-orientation="vertical">
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="sortLeaderboard('By Total')" role="menuitem">By Total</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="sortLeaderboard('By Dots')" role="menuitem">By Dots</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="sortLeaderboard('By Squat')" role="menuitem">By Squat</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="sortLeaderboard('By Bench')" role="menuitem">By Bench</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="sortLeaderboard('By Deadlift')" role="menuitem">By Deadlift</a>
-          </div>
-        </div>
-      </div>
-      <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">Leaderboard</h2>
-      <table class="w-full text-center bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
-        <thead>
-          <tr class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-lg font-semibold">
-            <th class="px-4 py-3 text-left">Place</th>
-            <th class="px-4 py-3 text-left" style="padding-left: 3rem;">Lifter</th>
-            <th class="px-4 py-3 text-left" data-column="total" id="totalHeader">Total</th>
-            <th class="px-4 py-3 text-left" style="padding-left: 1rem;">Rank</th>
-          </tr>
-        </thead>
-        <tbody id="leaderboardBody" class="text-gray-700">
-          <!-- Dynamic content will be populated here -->
-        </tbody>
-      </table>
-    </section>
-    
-    <!-- Lift Data Input -->
-    <section class="bg-white shadow-md rounded-lg p-6">
-      <h2 class="text-2xl font-bold mb-4">Enter Your Lift Data</h2>
-      <table id="liftDataTable" class="w-full">
-        <thead>
-          <tr class="bg-gray-100">
-            <th class="px-4 py-2">Age</th>
-            <th id="weightHeader" class="px-4 py-2">Weight (lbs)</th>
-            <th class="px-4 py-2">Gender</th>
-            <th id="squatHeader" class="px-4 py-2">Squat (lbs)</th>
-            <th id="benchHeader" class="px-4 py-2">Bench (lbs)</th>
-            <th id="deadliftHeader" class="px-4 py-2">Deadlift (lbs)</th>
-            <th class="px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="liftDataBody">
-          <tr>
-            <td>
-              <input inputmode="numeric" type="number" class="age w-full px-2 py-1 border rounded" placeholder="Age" />
-            </td>
-            <td>
-              <input inputmode="numeric" type="number" class="weight w-full px-2 py-1 border rounded" placeholder="Weight" />
-            </td>
-            <td>
-              <select class="gender w-full p-2 border rounded">
-                <option value="" disabled selected>Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-            </td>
-            <td>
-              <input inputmode="numeric" type="number" class="squat w-full px-2 py-1 border rounded" placeholder="Squat" />
-            </td>
-            <td>
-              <input inputmode="numeric" type="number" class="bench w-full px-2 py-1 border rounded" placeholder="Bench" />
-            </td>
-            <td>
-              <input inputmode="numeric" type="number" class="deadlift w-full px-2 py-1 border rounded" placeholder="Deadlift" />
-            </td>
-            <td>
-              <button onclick="removeRow(this)" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Remove</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="mt-4 space-x-4">
-        <button onclick="addRow()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Add Row</button>
-        <button onclick="submitLiftData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit Lift Data</button>
-      </div>
-    </section>
-  </main>
-  
-  <!-- Chat Widget -->
-  <div class="chat-widget fixed bottom-6 right-6">
-    <button id="chatButton" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-lg flex items-center justify-center transition-transform duration-300 hover:scale-105">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
-        <circle cx="12" cy="10" r="2" />
-        <circle cx="16" cy="10" r="2" />
-        <circle cx="8" cy="10" r="2" />
-      </svg>
-    </button>
-    
-    <div id="chatForm" class="hidden bg-white shadow-lg rounded-lg p-4 fixed bottom-20 right-6 w-80 flex flex-col" style="max-height: 600px;">
-      <div id="chatHeader" class="flex items-center justify-between bg-blue-500 text-white p-3 rounded-t-lg">
-        <div class="header-content flex items-center space-x-3">
-          <img src="./Images/Coach.svg" alt="ChatBot Icon" class="w-10 h-10 rounded-full" />
-          <div>
-            <div class="text-lg font-bold">Chat with an AI Coach</div>
-            <div class="flex items-center space-x-1 text-sm">
-              <span class="w-2 h-2 bg-green-500 rounded-full inline-block"></span>
-              <span>Online</span>
+            <div class="dialog-actions">
+                <button type="button" class="btn btn-secondary" data-close>Cancel</button>
+                <button type="submit" class="btn btn-primary" id="saveInstagram">Save link</button>
             </div>
-          </div>
-        </div>
-        <button id="closeChatButton" class="text-white text-lg"><i class="fas fa-times"></i></button>
-      </div>
-      <div id="chatMessages" class="flex-1 overflow-y-auto bg-gray-100 p-6" style="min-height: 200px;"></div>
-      <div id="typingIndicator" class="hidden bg-gray-100 text-blue-500 text-base px-6 py-3">Coach is typing...</div>
-      <div class="relative flex items-center space-x-4 p-6 border-t">
-        <input type="text" id="chatInput" placeholder="Type your message..." class="flex-1 p-4 text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <button id="sendMessage" disabled class="bg-blue-500 text-white px-8 py-4 text-lg rounded-lg shadow hover:bg-blue-600 disabled:opacity-50">Send</button>
-        <div id="dragOverlay" class="hidden absolute z-10 bg-blue-100 bg-opacity-75 flex items-center justify-center rounded-lg border-4 border-dashed border-blue-500 text-blue-700 text-xl font-semibold">
-          <div class="flex flex-col items-center space-y-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <p class="text-2xl">Drop your image here</p>
-            <p class="text-lg text-blue-600">Supported formats: JPG, PNG, GIF</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Edit Profile Modal -->
-  <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 w-96 relative">
-      <button onclick="closeEditModal()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
-        <i class="fas fa-times"></i>
-      </button>
-      <h3 id="editModalTitle" class="text-xl font-bold mb-4">Edit Name</h3>
-      
-      <div id="editForm" class="space-y-4">
-        <div id="nameEditGroup">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-          <input type="text" id="editNameInput" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Enter your full name">
-        </div>
-      </div>
-      
-      <div class="flex space-x-3 mt-6">
-        <button onclick="saveEdit()" class="flex-1 bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition duration-200">Save</button>
-        <button onclick="closeEditModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400 transition duration-200">Cancel</button>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Firebase & Scripts -->
-  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-storage-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
-  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-  <script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
-  
-  <!-- Your Custom Scripts -->
-  <script src="./Javascript/chat.js"></script>
-  <script src="./Javascript/utils.js"></script>
-  <script src="./Javascript/loggedin.js"></script>
-  
- 
+        </form>
+    </dialog>
+
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
+    <script src="./Javascript/utils.js?v=4"></script>
+    <script src="./Javascript/loggedin.js?v=4"></script>
 </body>
 </html>

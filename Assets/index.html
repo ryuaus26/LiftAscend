@@ -1,415 +1,241 @@
-<!--  
-   Austin Ryu 1/25/2025  
-   
-   This HTML file serves as the main interface for Lift Ascend,  
-   providing powerlifters with tools to track their progress, calculate strength  
-   percentiles, and compare lifting performance. It includes a chat widget,  
-   leaderboard, and interactive UI elements for user engagement.  
--->
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Lift Ascend helps powerlifters track their progress, calculate strength percentiles, and compare lifting performance across different weight classes and age groups.">
-    <link rel="icon" href="./Images/android-chrome-512x512.png" type="image/x-icon">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7951232429730881"
-     crossorigin="anonymous"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7951232429730881"
-    crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Lift Ascend shows powerlifters how their squat, bench press and deadlift rank against lifters of the same gender, weight class and age group.">
     <title>Lift Ascend - Powerlifting Strength Calculator</title>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./CSS/coach.css">
-    <style>
-        body {
-            font-family: 'Montserrat', sans-serif;
-        }
-        .header-title {
-            font-family: 'Bowlby One SC', cursive;
-        }
-        #mobileWarning {
-            display: none; /* Initially hidden */
-            background-color: yellow;
-            color: red;
-            padding: 10px;
-            text-align: center;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-    </style>
-        <link rel="icon" href="./Images/Logo.PNG" type="image/png" />
+    <link rel="icon" href="./Images/android-chrome-512x512.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./CSS/site.css?v=2">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7951232429730881" crossorigin="anonymous"></script>
 </head>
 
-<body class="bg-gray-100">
-    <div id="mobileWarning">Enhance your experience by running the app on pc!</div>
-    <script>
-        function checkDevice() {
-            // Check if screen width is less than 768px (considered mobile)
-            if (window.innerWidth < 768) {
-                // Display the message for mobile users
-                document.getElementById("mobileWarning").style.display = "block";
-            }
-        }
-
-        // Run the check when the page loads
-        window.onload = checkDevice;
-    </script>
-    <!-- <div id="announcement-banner" class="bg-yellow-200 text-center text-yellow-900 font-bold py-2">
-      The website is currently under maintenance
-    </div> -->
-    
-    
-    
-    <header class="header bg-white shadow-md">
-      
-        
-        <div class="header-content container mx-auto px-4 py-6 flex justify-between items-center">
-            <div class="logo">
-                <a href="index.html">
-                    <img src="./Images/Logo.PNG" alt="Lift Ascend logo" class="h-56">
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="brand" href="index.html">
+                <img src="./Images/Logo.PNG" alt="" width="44" height="44">
+                Lift Ascend
+            </a>
+            <nav class="site-nav" aria-label="Main">
+                <a class="nav-link" href="about.html">About</a>
+                <a class="nav-link" href="https://www.instagram.com/lift_ascend/" target="_blank" rel="noopener" aria-label="Lift Ascend on Instagram">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1" fill="currentColor" stroke="none"/></svg>
                 </a>
-                <a href="about.html" class="ml-6 px-4 py-2 text-lg font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
-                    About
-                  </a>
-                 
-                  
-                  
-            </div>
-            
-
-            <div id="percentile-content-container" class="bg-blue-100 rounded-lg p-4 shadow-md">
-                <h2 class="text-2xl font-bold mb-4 text-blue-800">Your Percentiles</h2>
-                <div class="percentile-item flex items-center mb-2">
-                    <span class="icon squat-icon text-3xl mr-2">🏋️‍♂️</span>
-                    <p class="text-lg">Your squat is <span id="squat-percentile" class="font-bold text-blue-600">0 % better than others</span></p>
-                </div>
-                <div class="percentile-item flex items-center mb-2">
-                    <span class="icon bench-icon text-3xl mr-2">🏋️‍♀️</span>
-                    <p class="text-lg">Your bench is <span id="bench-percentile" class="font-bold text-blue-600">0 % better than others</span></p>
-                </div>
-                <div class="percentile-item flex items-center">
-                    <span class="icon deadlift-icon text-3xl mr-2">🏋️‍♂️</span>
-                    <p class="text-lg">Your deadlift is <span id="deadlift-percentile" class="font-bold text-blue-600">0 % better than others</span></p>
-                </div>
-            </div>
-
-            <div id="profile-header-container" class="flex items-center">
-                <div class="rank-container mr-4" id="rankContainer">
-                    <h2 class="text-xl font-bold mb-2">Your Rank:</h2>
-                    <img 
-                        src="./Images/Unranked.png" 
-                      
-                        class="rank-image w-32 h-32 border border-gray-300 rounded-full transition-transform duration-200 hover:scale-110 shadow-md" 
-                        id="rankImage" 
-                        alt="Rank Image">
-                </div>
-                
-                <div id="login-dropdown" class="dropdown relative">
-                    <div class="dropdown-content bg-white text-gray-800 rounded-lg shadow-lg p-6 max-w-md mx-auto" id="form_container">
-                        <div id="form_header_container" class="mb-4">
-                            <h2 id="form_header" class="text-2xl font-bold">Login</h2>
-                        </div>
-                
-                        <div id="form_content_container">
-                            <!-- Login Form -->
-                            <div id="login-form" class="space-y-4">
-                                <input type="email" id="login-email" placeholder="Email" class="w-full px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <input type="password" id="login-password" placeholder="Password" class="w-full px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                
-                                <div class="flex justify-between text-sm">
-                                    <a href="#" onclick="showResetPassword()" class="text-blue-500 hover:text-blue-600">Forgot password?</a>
-                                    <a href="#" onclick="showRegister()" class="text-blue-500 hover:text-blue-600">Don't have an account? Sign up!</a>
-                                </div>
-                
-                                <button onclick="login()" id="login-btn" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">Login</button>
-                            </div>
-                
-                            <!-- Register Form (Hidden by default) -->
-                            <div id="register-form" class="space-y-4 hidden">
-                                <input type="text" id="full_name" placeholder="Full name" class="w-full px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <input type="email" id="email" placeholder="Email" class="w-full px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <input type="password" id="password" placeholder="New Password" class="w-full px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                
-                                <div class="text-sm">
-                                    <a href="#" onclick="showLogin()" class="text-blue-500 hover:text-blue-600">Already have an account? Login!</a>
-                                </div>
-                
-                                <button onclick="register()" class="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">Register</button>
-                            </div>
-                
-                            <!-- Reset Password Form (Hidden by default) -->
-                            <div id="reset-password-form" class="space-y-4 hidden">
-                                <form id="reset-password-form">
-                                    <input type="email" id="reset-email" placeholder="Enter your email" required class="w-full px-4 py-2 bg-white text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                
-                                    <div class="text-sm">
-                                        <a href="#" onclick="showLogin()" class="text-blue-500 hover:text-blue-600">Back to Login</a>
-                                    </div>
-                
-                                    <button type="submit" class="w-full bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition duration-300">Reset Password</button>
-                                </form>
-                            </div>
-                
-                        </div>
-                    </div>
-                </div>
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-
-        <div class="right-section flex items-center">
-            <div class="right-side-icons">
-                <a href="https://www.instagram.com/lift_ascend/" target="_blank" class="text-blue-600 hover:text-blue-800">
-                    <i class="fab fa-instagram fa-2x"></i>
-                </a>
-            </div>
-           
-    </div>
+                <button type="button" class="btn btn-secondary" id="openLogin">Log in</button>
+                <button type="button" class="btn btn-primary" id="openRegister">Create account</button>
+            </nav>
+        </div>
     </header>
-    <div class="container mx-auto px-4 py-8">
-        <div class="search-bar-container mb-8">
-            <div class="relative">
-                <input type="text" class="search-bar w-full px-4 py-2 pr-16 rounded-lg border border-gray-700 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search for lifters..." id="searchInput">
-                <div class="suggestions-container absolute w-full bg-white shadow-md rounded-lg mt-1 hidden border border-gray-300" id="suggestionsContainer">
-                    <ul id="suggestionsList"></ul>
-                </div>
-                <button class="search-button absolute right-0 top-0 bg-blue-500 text-white px-4 py-2 h-full rounded-r-lg hover:bg-blue-600">
-                    <i class="fas fa-search"></i> Search
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    
 
-    </div>
-    <div id="additional-info" class="bg-gradient-to-r from-gray-100 to-gray-200 shadow-md border-t border-b border-gray-300">
-        <div class="container mx-auto px-4 py-3">
-            <div class="container mx-auto px-4 py-5">
-                <div class="flex flex-wrap md:flex-nowrap justify-between gap-6 items-center">
-                    <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
-                        <span class="font-bold text-gray-800 text-lg">Total:</span>
-                        <span id="total" class="text-blue-700 font-semibold text-lg"> N/A</span>
-                    </div>
-                    <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
-                        <span class="font-bold text-gray-800 text-lg">DOTS:</span>
-                        <span id="dots" class="text-blue-700 font-semibold text-lg"> N/A</span>
-                    </div>
-                    
-                    <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
-                        <span class="font-bold text-gray-800 text-lg">Age:</span>
-                        <span id="age" class="text-blue-700 font-semibold text-lg"> N/A</span>
-                    </div>
-                    <div class="bg-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3 transform hover:scale-105 transition-transform duration-300 ease-in-out hover:shadow-2xl">
-                        <span class="font-bold text-gray-800 text-lg">Bodyweight:</span>
-                        <span id="bodyweight" class="text-blue-700 font-semibold text-lg"> N/A</span>
-                    </div>
-                </div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="liftDataInput" class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8 mb-12">
-            <div class="flex justify-end mb-4">
-                <div class="relative">
-                    <button class="weight-unit-btn bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 transition duration-300" onclick="toggleWeightUnit()">
-                        <span id="weightUnitButton" class="font-bold">lbs ▼</span>
-                    </button>
-                    <div class="weight-unit-content hidden absolute right-0 bg-white shadow-md rounded-md mt-2">
-                        <a href="#" onclick="selectWeightUnit('lbs')" class="block px-4 py-2 hover:bg-gray-100">lbs</a>
-                        <a href="#" onclick="selectWeightUnit('kgs')" class="block px-4 py-2 hover:bg-gray-100">kgs</a>
-                    </div>
-                </div>
-            </div>
-            <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Enter Your Lift Data</h2>
-            
-            <table id="liftDataTable" class="w-full border-collapse">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="p-3 text-left">Age</th>
-                        <th id="weightHeader" class="p-3 text-left">Weight (lbs)</th>
-                        <th class="p-3 text-left">Gender</th>
-                        <th id="squatHeader" class="p-3 text-left">Squat (lbs)</th>
-                        <th id="benchHeader" class="p-3 text-left">Bench (lbs)</th>
-                        <th id="deadliftHeader" class="p-3 text-left">Deadlift (lbs)</th>
-                        <th class="p-3 text-left">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="liftDataBody">
-                    <tr>
-                        <td><input type="number" class="age w-full p-2 border rounded" placeholder="Age"></td>
-                        <td><input type="number" class="weight w-full p-2 border rounded" placeholder="Weight"></td>
-                        <td>
-                            <select class="gender w-full p-2 border rounded">
-                                <option value="" disabled selected>Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                            </select>
-                        </td>
-                        <td><input type="number" class="squat w-full p-2 border rounded" placeholder="Squat"></td>
-                        <td><input type="number" class="bench w-full p-2 border rounded" placeholder="Bench"></td>
-                        <td><input type="number" class="deadlift w-full p-2 border rounded" placeholder="Deadlift"></td>
-                        <td><button onclick="removeRow(this)" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300">Remove</button></td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="mt-6 flex justify-between">
-                <button onclick="addRow()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 transition duration-300">Add Row</button>
-                <button onclick="submitLiftData()" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300">Submit Lift Data</button>
-            </div>
-        </div>
-       
-        <div class="chat-widget fixed bottom-6 right-6">
-            <!-- Chat Button -->
-            <button id="chatButton" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-lg flex items-center justify-center transition-transform duration-300 hover:scale-105">
-                <!-- Chat Icon SVG -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
-                    <circle cx="12" cy="10" r="2" />
-                    <circle cx="16" cy="10" r="2" />
-                    <circle cx="8" cy="10" r="2" />
-                </svg>
-            </button>
-        
-            <!-- Chat Form -->
-            <div id="chatForm" class="hidden bg-white shadow-lg rounded-lg p-4 fixed bottom-20 right-6 w-80">
-                <!-- Chat Header -->
-                <div id="chatHeader" class="flex items-center justify-between bg-blue-500 text-white p-3 rounded-t-lg">
-                    <div class="header-content flex items-center space-x-3">
-                        <img src="./Images/Coach.png" alt="ChatBot Icon" class="w-10 h-10 rounded-full">
-                        <div>
-                            <div class="text-lg font-bold">Chat with an AI Coach</div>
-                            <div class="flex items-center space-x-1 text-sm">
-                                <span class="w-2 h-2 bg-green-500 rounded-full inline-block"></span>
-                                <span>Online</span>
+    <main>
+        <section class="section">
+            <div class="wrap hero">
+                <div class="hero-copy">
+                    <h1>How strong are you for your size?</h1>
+                    <p class="lede">Enter your best squat, bench press and deadlift. Lift Ascend compares them with competition results from lifters of your gender, weight class and age group.</p>
+
+                    <div class="panel" id="liftDataInput">
+                        <div class="panel-head">
+                            <h2>Your lifts</h2>
+                            <div class="unit-toggle" role="group" aria-label="Weight unit">
+                                <button type="button" data-unit="lbs" aria-pressed="true">lb</button>
+                                <button type="button" data-unit="kgs" aria-pressed="false">kg</button>
                             </div>
                         </div>
+
+                        <table class="lift-table" id="liftDataTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Age</th>
+                                    <th scope="col" id="weightHeader">Bodyweight (<span data-unit-label>lb</span>)</th>
+                                    <th scope="col">Gender</th>
+                                    <th scope="col" id="squatHeader">Squat (<span data-unit-label>lb</span>)</th>
+                                    <th scope="col" id="benchHeader">Bench (<span data-unit-label>lb</span>)</th>
+                                    <th scope="col" id="deadliftHeader">Deadlift (<span data-unit-label>lb</span>)</th>
+                                    <th scope="col"><span class="visually-hidden">Remove row</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="liftDataBody"></tbody>
+                        </table>
+
+                        <div class="table-actions">
+                            <button type="button" class="btn btn-secondary" id="addRowButton">Add row</button>
+                            <button type="button" class="btn btn-primary" id="submitLiftButton">Calculate percentiles</button>
+                        </div>
                     </div>
-                    <button id="closeChatButton" class="text-white text-lg">
-                        <i class="fas fa-times"></i>
-                    </button>
                 </div>
-        
-                <!-- Chat Messages -->
-                <div id="chatMessages" class="h-40 overflow-y-auto bg-gray-100 p-3 rounded-b-lg"></div>
-        
-                <!-- Chat Input Container -->
-                <div id="chatInputContainer" class="mt-3 flex items-center space-x-2">
-                    <input type="text" id="chatInput" placeholder="Type your message..." class="flex-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button id="sendMessage" disabled class="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600 disabled:opacity-50">Send</button>
-                </div>
+
+                <aside class="scoreboard" id="percentile-content-container" aria-label="Your results" aria-live="polite">
+                    <div class="scoreboard-rank" id="rankContainer">
+                        <img id="rankImage" src="./Images/Unranked.png" alt="Unranked rank" width="88" height="88">
+                        <div>
+                            <div class="label">Overall rank</div>
+                            <div class="value" id="rankName">Unranked</div>
+                        </div>
+                    </div>
+
+                    <div class="lift-row">
+                        <img id="squat-rank" src="./Images/Unranked.png" alt="Unranked rank" width="40" height="40">
+                        <div class="lift-name">Squat<span class="lift-weight" id="user-squat"></span></div>
+                        <div class="lift-percent" id="squat-percentile">-</div>
+                        <div class="bar"><span id="squat-progress"></span></div>
+                    </div>
+                    <div class="lift-row">
+                        <img id="bench-rank" src="./Images/Unranked.png" alt="Unranked rank" width="40" height="40">
+                        <div class="lift-name">Bench<span class="lift-weight" id="user-bench"></span></div>
+                        <div class="lift-percent" id="bench-percentile">-</div>
+                        <div class="bar"><span id="bench-progress"></span></div>
+                    </div>
+                    <div class="lift-row">
+                        <img id="deadlift-rank" src="./Images/Unranked.png" alt="Unranked rank" width="40" height="40">
+                        <div class="lift-name">Deadlift<span class="lift-weight" id="user-deadlift"></span></div>
+                        <div class="lift-percent" id="deadlift-percentile">-</div>
+                        <div class="bar"><span id="deadlift-progress"></span></div>
+                    </div>
+                    <p class="scoreboard-note">Each percentage is the share of lifters in your category that you out-lift.</p>
+
+                    <dl class="stats">
+                        <div><dt>Total</dt><dd id="total">-</dd></div>
+                        <div><dt>DOTS</dt><dd id="dots">-</dd></div>
+                        <div><dt>Bodyweight</dt><dd id="bodyweight">-</dd></div>
+                        <div><dt>Age</dt><dd id="age">-</dd></div>
+                    </dl>
+                </aside>
             </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <div class="section-head">
+                    <div>
+                        <h2>Find a lifter</h2>
+                        <p>Look up a friend by name to see their lifts and rank.</p>
+                    </div>
+                </div>
+                <form class="search search-bar-container" id="searchForm" role="search">
+                    <div class="search-row">
+                        <label class="visually-hidden" for="searchInput">Lifter name</label>
+                        <input type="search" class="field search-bar" id="searchInput" placeholder="Search by name" autocomplete="off" aria-expanded="false" aria-controls="suggestionsContainer">
+                        <button type="submit" class="btn btn-primary search-button">Search</button>
+                    </div>
+                    <div class="suggestions" id="suggestionsContainer" hidden>
+                        <ul id="suggestionsList"></ul>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="wrap">
+                <div class="section-head">
+                    <div>
+                        <h2>How ranks work</h2>
+                        <p>Your overall rank comes from the average of your squat, bench and deadlift percentiles.</p>
+                    </div>
+                </div>
+                <ul class="tiers">
+                    <li class="tier tier-diamond">
+                        <img src="./Images/Diamond.png" alt="" width="60" height="60" loading="lazy">
+                        <div><strong>Diamond</strong><span>80th percentile and above</span></div>
+                    </li>
+                    <li class="tier tier-gold">
+                        <img src="./Images/Gold.png" alt="" width="60" height="60" loading="lazy">
+                        <div><strong>Gold</strong><span>65th to 79th percentile</span></div>
+                    </li>
+                    <li class="tier tier-silver">
+                        <img src="./Images/Silver.png" alt="" width="60" height="60" loading="lazy">
+                        <div><strong>Silver</strong><span>45th to 64th percentile</span></div>
+                    </li>
+                    <li class="tier tier-bronze">
+                        <img src="./Images/Bronze.png" alt="" width="60" height="60" loading="lazy">
+                        <div><strong>Bronze</strong><span>Below the 45th percentile</span></div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <span>&copy; <span id="year">2026</span> Lift Ascend</span>
+            <span>Percentiles use data from <a href="https://www.openpowerlifting.org" target="_blank" rel="noopener">OpenPowerlifting</a>.<span id="datasetDate"></span></span>
         </div>
-        
+    </footer>
 
-        
-        
+    <dialog id="authDialog" aria-labelledby="form_header">
+        <div class="dialog-body" id="form_container">
+            <div class="dialog-head">
+                <h2 id="form_header">Log in</h2>
+                <button type="button" class="dialog-close" id="closeAuth" aria-label="Close">&times;</button>
+            </div>
 
-    <div class="flex flex-col items-center max-w-3xl mx-auto p-6">
-        <!-- Header Section -->
-        <div class="text-center mb-8">
-            <h2 class="text-4xl font-bold text-gray-800 mb-4">Rank Explanation</h2>
-            <div class="w-24 h-1 bg-gradient-to-r from-blue-500 via-yellow-500 to-yellow-800 mx-auto rounded-full mb-4"></div>
-            <p class="text-gray-600 text-lg mb-6">Our ranking system shows where you stand among fellow lifters. Each tier represents your progress and dedication.</p>
+            <div class="tabs" role="tablist" id="authTabs">
+                <button type="button" role="tab" id="tabLogin" aria-selected="true" aria-controls="login-form">Log in</button>
+                <button type="button" role="tab" id="tabRegister" aria-selected="false" aria-controls="register-form">Create account</button>
+            </div>
+
+            <p class="form-error" id="authError" role="alert" hidden></p>
+
+            <form id="login-form" novalidate>
+                <div class="form-row">
+                    <label for="login-username">Username</label>
+                    <input class="field" type="text" id="login-username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+                </div>
+                <div class="form-row">
+                    <label for="login-password">Password</label>
+                    <input class="field" type="password" id="login-password" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" id="login-btn">Log in</button>
+            </form>
+
+            <form id="register-form" novalidate hidden>
+                <div class="form-row">
+                    <label for="register-username">Username</label>
+                    <input class="field" type="text" id="register-username" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20" aria-describedby="usernameHint" required>
+                    <span class="hint" id="usernameHint">3 to 20 letters, numbers or underscores. This is the name other lifters see.</span>
+                </div>
+                <div class="form-row">
+                    <label for="register-password">Password</label>
+                    <input class="field" type="password" id="register-password" autocomplete="new-password" aria-describedby="passwordHint" required>
+                    <span class="hint" id="passwordHint">At least 8 characters.</span>
+                </div>
+                <div class="form-row">
+                    <label for="register-password-confirm">Confirm password</label>
+                    <input class="field" type="password" id="register-password-confirm" autocomplete="new-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" id="register-btn">Create account</button>
+                <p class="dialog-foot">No email is collected, so a forgotten password can't be reset. Save it somewhere safe.</p>
+            </form>
+
+            <form id="migrate-form" novalidate hidden>
+                <p class="hint" style="margin-bottom: 1rem;">Log in with your old email one last time and choose a username. Your lifts and friends stay with your account, and your email is removed from it.</p>
+                <div class="form-row">
+                    <label for="migrate-email">Email you signed up with</label>
+                    <input class="field" type="email" id="migrate-email" autocomplete="email" required>
+                </div>
+                <div class="form-row">
+                    <label for="migrate-password">Password</label>
+                    <input class="field" type="password" id="migrate-password" autocomplete="current-password" required>
+                </div>
+                <div class="form-row">
+                    <label for="migrate-username">New username</label>
+                    <input class="field" type="text" id="migrate-username" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="20" required>
+                    <span class="hint">3 to 20 letters, numbers or underscores.</span>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" id="migrate-btn">Switch to username</button>
+                <p class="dialog-foot"><button type="button" class="link-button" id="backToLogin">Back to log in</button></p>
+            </form>
         </div>
-
-        <div class="flex flex-col space-y-8">
-            <!-- Diamond Rank -->
-            <div class="flex items-center space-x-6 hover:transform hover:scale-105 transition-transform duration-300">
-                <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-blue-500 shadow-lg hover:shadow-blue-200">
-                    <img src="./Images/Diamond.png" alt="Diamond Rank" class="w-full h-full object-cover">
-                </div>
-                <div class="text-left">
-                    <p class="text-3xl font-extrabold text-blue-500 tracking-wide mb-2">Diamond</p>
-                    <p class="text-gray-600 text-lg leading-snug">
-                        You're in the <span class="text-blue-500 font-bold">top 20%</span> of all lifters!
-                        <br/>
-                        <span class="text-sm text-gray-500">Elite level strength achievement</span>
-                    </p>
-                </div>
-            </div>
-
-            <!-- Gold Rank -->
-            <div class="flex items-center space-x-6 hover:transform hover:scale-105 transition-transform duration-300">
-                <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-yellow-500 shadow-lg hover:shadow-yellow-200">
-                    <img src="./Images/Gold.png" alt="Gold Rank" class="w-full h-full object-cover">
-                </div>
-                <div class="text-left">
-                    <p class="text-3xl font-extrabold text-yellow-500 tracking-wide mb-2">Gold</p>
-                    <p class="text-gray-600 text-lg leading-snug">
-                        You're in the <span class="text-yellow-500 font-bold">top 35%</span> of all lifters!
-                        <br/>
-                        <span class="text-sm text-gray-500">Advanced strength level</span>
-                    </p>
-                </div>
-            </div>
-
-            <!-- Silver Rank -->
-            <div class="flex items-center space-x-6 hover:transform hover:scale-105 transition-transform duration-300">
-                <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-400 shadow-lg hover:shadow-gray-200">
-                    <img src="./Images/Silver.png" alt="Silver Rank" class="w-full h-full object-cover">
-                </div>
-                <div class="text-left">
-                    <p class="text-3xl font-extrabold text-gray-400 tracking-wide mb-2">Silver</p>
-                    <p class="text-gray-600 text-lg leading-snug">
-                        You're in the <span class="text-gray-400 font-bold">top 55%</span> of all lifters!
-                        <br/>
-                        <span class="text-sm text-gray-500">Intermediate strength level</span>
-                    </p>
-                </div>
-            </div>
-
-            <!-- Bronze Rank -->
-            <div class="flex items-center space-x-6 hover:transform hover:scale-105 transition-transform duration-300">
-                <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-yellow-800 shadow-lg hover:shadow-yellow-100">
-                    <img src="./Images/Bronze.png" alt="Bronze Rank" class="w-full h-full object-cover">
-                </div>
-                <div class="text-left">
-                    <p class="text-3xl font-extrabold text-yellow-800 tracking-wide mb-2">Bronze</p>
-                    <p class="text-gray-600 text-lg leading-snug">
-                        You're in the <span class="text-yellow-800 font-bold">top 75%</span> of all lifters!
-                        <br/>
-                        <span class="text-sm text-gray-500">Beginner strength level</span>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    
-    
-    
-    <!-- Scripts -->
-    <script src="https://apis.google.com/js/api.js"></script>
+    </dialog>
 
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
-    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
-    <script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
-    <script src="./Javascript/index.js"></script>
-    <script src="./Javascript/resetPass.js"></script>
-    <script src="./Javascript/chat.js"></script>
-
+    <script src="./Javascript/utils.js?v=4"></script>
+    <script src="./Javascript/index.js?v=4"></script>
 </body>
 </html>

@@ -1,944 +1,117 @@
-/*  
-   Austin Ryu 1/28/2025  
-   
-   This JavaScript file initializes Firebase, manages user authentication,  
-   handles user search and friend system, fetches and displays lifting data,  
-   calculates percentiles using OpenPowerlifting data, and updates  
-   UI components dynamically based on user interactions.  
-*/
+/*
+ * Lift Ascend - another lifter's profile.
+ *
+ * Reads the lifter from the ?userId= link, shows their latest lifts and
+ * rank, and lets a signed-in visitor add them as a friend.
+ */
 
-const firebaseConfig = {
-    apiKey: "AIzaSyB5pHK1U6Oy5Ta9oPOcL5LfWXGP_U3838E",
-    authDomain: "liftascend.firebaseapp.com",
-    projectId: "liftascend",
-    storageBucket: "liftascend.appspot.com",
-    messagingSenderId: "403461421933",
-    appId: "1:403461421933:web:52452b598fb853c3cb3864",
-    measurementId: "G-RFR3H01R2N"
-};
-let currentWeightUnit = 'lbs'; // Default unit is pounds
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+let viewer = null;
+let profileResult = null;
 
 function getUserIdFromUrl() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('userId'); // Get the userId from the URL
+    return new URLSearchParams(window.location.search).get('userId');
 }
 
-function returnName(name) {
-    return name;
+auth.onAuthStateChanged((user) => {
+    viewer = user;
+    const home = user ? 'loggedin.html' : 'index.html';
+    $('logoLink').href = home;
+    $('homeLink').href = home;
+    setText('homeLink', user ? 'Your lifts' : 'Log in');
+    updateFriendButton();
+});
+
+function updateFriendButton() {
+    const button = $('add-friend-btn');
+    const ownProfile = viewer && publicId(viewer.uid) === getUserIdFromUrl();
+    button.hidden = Boolean(ownProfile);
 }
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+async function loadProfile() {
+    const profileId = getUserIdFromUrl();
 
-// Initialize variables
+    try {
+        const users = await loadAllUsers();
+        const match = profileId ? findUserByPublicId(users, profileId) : null;
 
-const db = firebase.database();
+        if (!match) {
+            $('profileContent').hidden = true;
+            $('profileMissing').hidden = false;
+            return;
+        }
 
-// Function to search for lifters based on user input
-function searchLifters(query) {
-    const suggestionsContainer = document.getElementById('suggestionsContainer');
-    const suggestionsList = document.getElementById('suggestionsList');
-    suggestionsList.innerHTML = ''; // Clear previous suggestions
+        const name = displayNameOf(match.user);
+        document.title = `${name} - Lift Ascend`;
+        setText('user-full-name', name);
+        setText('user-id', profileId);
+        updateInstagramDisplay(match.user.instagram);
 
-    // Only search if the query has at least 1 character
-    if (query.length < 1) {
-        suggestionsContainer.style.display = 'none'; // Hide suggestions if no input
+        const entry = latestLift(match.user.liftData);
+        if (!entry) {
+            clearScoreboard();
+            setText('scoreboardNote', `${name} hasn't saved any lifts yet.`);
+            return;
+        }
+
+        setWeightUnit(entry.unit === 'kgs' ? 'kgs' : 'lbs');
+        profileResult = await analyseEntry(entry);
+        renderScoreboard(profileResult);
+    } catch (error) {
+        console.error('Could not load profile:', error);
+        showNotice('Could not load this profile. Refresh to try again.', 'error');
+    }
+}
+
+function updateInstagramDisplay(link) {
+    const status = $('instagramStatus');
+    status.textContent = '';
+    if (!isInstagramLink(link)) return;
+
+    const anchor = document.createElement('a');
+    anchor.href = link;
+    anchor.target = '_blank';
+    anchor.rel = 'noopener';
+    anchor.id = 'userInstagramLink';
+    anchor.textContent = 'Instagram';
+    status.appendChild(anchor);
+}
+
+async function addFriend() {
+    if (!viewer) {
+        showNotice('Log in to add friends.', 'error');
         return;
     }
 
-    // Query the database for lifters matching the search query
-    db.ref('users').orderByChild('full_name').startAt(query).endAt(query + '\uf8ff').once('value')
-        .then((snapshot) => {
-            const results = [];
-            snapshot.forEach((childSnapshot) => {
-                const data = childSnapshot.val();
-                results.push(data.full_name); // Assuming 'full_name' is the field to display
-            });
+    const profileId = getUserIdFromUrl();
+    if (publicId(viewer.uid) === profileId) {
+        showNotice("You can't add yourself as a friend.", 'error');
+        return;
+    }
 
-            // Display LOs
-            if (results.length > 0) {
-                suggestionsContainer.style.display = 'block'; // Show suggestions
-                results.forEach((name) => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = name;
-                    listItem.onclick = () => selectSuggestion(name); // Handle suggestion click
-                    suggestionsList.appendChild(listItem);
-                });
-            } else {
-                suggestionsContainer.style.display = 'none'; // Hide if no results
-            }
-        })
-        .catch((error) => {
-            console.error('Error searching lifters:', error);
-        });
-}
+    const friendsRef = database.ref(`users/${viewer.uid}/friends`);
 
-// Function to handle selecting a suggestion
-function selectSuggestion(name) {
-    const searchBar = document.querySelector('.search-bar');
-    searchBar.value = name; // Set the search bar value to the selected suggestion
-    document.getElementById('suggestionsContainer').style.display = 'none'; // Hide suggestions
-}
-
-// Event listener for input changes in the search bar
-document.querySelector('.search-bar').addEventListener('input', (event) => {
-    const query = event.target.value;
-    searchLifters(query); // Call search function with current input
-});
-
-// Mock function to simulate fetching users from Firebase
-// Function to fetch users from Firebase and make it case-insensitive
-function searchUsers(query) {
-  return firebase.database().ref('/users').once('value').then(snapshot => {
-      const users = [];
-      snapshot.forEach(childSnapshot => {
-          const userData = childSnapshot.val();
-          if (userData && userData.full_name) {
-              users.push(userData.full_name);
-          }
-      });
-
-      // Convert both the query and the user names to lowercase for case-insensitive comparison
-      const filteredUsers = users.filter(user => user.toLowerCase().includes(query.toLowerCase()));
-      return filteredUsers;
-  });
-}
-
-document.getElementById('searchInput').addEventListener('input', async function () {
-  const query = this.value;
-
-  if (query.length === 0) {
-      document.getElementById('suggestionsContainer').style.display = 'none';
-      return;
-  }
-
-  // Fetch filtered users based on non-case-sensitive query
-  const results = await searchUsers(query);
-  
-  const suggestionsContainer = document.getElementById('suggestionsContainer');
-  const suggestionsList = document.getElementById('suggestionsList');
-
-  // Clear any previous suggestions
-  suggestionsList.innerHTML = '';
-
-  if (results.length > 0) {
-      suggestionsContainer.style.display = 'block';
-      
-      // Populate the suggestions list
-      results.forEach((user) => {
-          const li = document.createElement('li');
-          li.textContent = user;
-          li.addEventListener('click', () => {
-              // Handle user selection (e.g., filling in the input field)
-              document.getElementById('searchInput').value = user;
-              suggestionsContainer.style.display = 'none'; // Hide suggestions after selection
-          });
-          suggestionsList.appendChild(li);
-      });
-  } else {
-      suggestionsContainer.style.display = 'none';
-  }
-});
-
-
-
-// Initialize variables
-const auth = firebase.auth();
-const database = firebase.database();
-
-function displayLiftData(data, name) {
-    
-    document.getElementById('user-bench').textContent = (data.bench)+ " " + currentWeightUnit;
-    document.getElementById('user-squat').textContent = data.squat + " " + currentWeightUnit;
-    document.getElementById('user-deadlift').textContent = data.deadlift + " " + currentWeightUnit;
-    document.getElementById('user-gender').textContent = `${data.gender}`;
-}
-
-/**
- * Function to fetch user data from the database and update the profile display.
- */
-async function fetchLiftData(uid, name) {
     try {
-        // Fetch basic user info and update UI elements (e.g., full name)
-        const userInfoSnapshot = await firebase.database().ref('users/' + uid).once('value');
-        const userInfo = userInfoSnapshot.val();
-        if (userInfo) {
-            document.getElementById('user-full-name').textContent = userInfo.name;
-            // Display the user ID (you can use the Firebase uid or a stored field)
-            document.getElementById('user-id').textContent = uid.slice(-5);
-            // Update Instagram display if the instagram field exists
-            console.log(userInfo.instagram)
-            if (userInfo.instagram) {
-                updateInstagramDisplay(userInfo.instagram);
-            }
+        const existing = (await friendsRef.once('value')).val() || {};
+        const alreadyFriend = Object.values(existing).some((friend) => friend && friend.friendId === profileId);
+        if (alreadyFriend) {
+            showNotice('This lifter is already in your friends list.', 'info');
+            return;
         }
 
-        // Fetch the most recent lift data
-        const liftDataSnapshot = await firebase.database().ref('users/' + uid + '/liftData').limitToLast(1).once('value');
-        const liftData = liftDataSnapshot.val();
-        console.log(liftData)
-        if (liftData) {
-            const lastEntry = Object.values(liftData)[0];
-            // Update the profile display with lift data
-            displayLiftData(lastEntry, name);
-            currentWeightUnit = lastEntry.unit || "lbs";
-
-            // Parse lift values and other details
-            const originalSquatValue = parseFloat(lastEntry.squat);
-            const originalBenchValue = parseFloat(lastEntry.bench);
-            const originalDeadliftValue = parseFloat(lastEntry.deadlift);
-            const originalWeightValue = parseFloat(lastEntry.weight);
-
-            // Update additional UI elements (total, bodyweight, age, gender, etc.)
-            const total = originalSquatValue + originalBenchValue + originalDeadliftValue;
-            document.getElementById("total").innerHTML =
-                `${total.toFixed(1)} <strong>${currentWeightUnit}</strong>`;
-            document.getElementById("bodyweight").textContent = `${originalWeightValue} ${currentWeightUnit}`;
-            document.getElementById("age").textContent = lastEntry.age || 'N/A';
-            document.getElementById("user-gender").textContent = lastEntry.gender || 'N/A';
-
-            // Calculate and display DOTS score
-            const dotsScore = calculateLifterDOTS(
-                originalWeightValue,
-                originalSquatValue,
-                originalBenchValue,
-                originalDeadliftValue,
-                normalizeGender(lastEntry.gender) === 'male',
-                currentWeightUnit
-            );
-            document.getElementById("dots").textContent = dotsScore;
-
-            // Build the user category object required for percentile calculation
-            const userCategory = {
-                gender: normalizeGender(lastEntry.gender),
-                weightClass: getWeightClass(originalWeightValue, lastEntry.gender, currentWeightUnit),
-                ageGroup: getAgeGroup(lastEntry.age)
-            };
-
-            // Calculate user percentiles using real lift data
-            const userPercentiles = await calculateUserPercentile(
-                originalSquatValue,
-                originalBenchValue,
-                originalDeadliftValue,
-                userCategory
-            );
-            console.debug("[profile.js][fetchLiftData] Calculated percentiles:", userPercentiles);
-
-            // Update progress bars & textual displays for the percentiles
-            displayPercentiles(userPercentiles);
-
-            // Calculate the average percentile and determine the rank
-            const avgPercentile = (userPercentiles.squat + userPercentiles.bench + userPercentiles.deadlift) / 3;
-            console.debug("[profile.js][fetchLiftData] Average Percentile:", avgPercentile);
-            const rank = updateRank(avgPercentile);
-            console.debug("[profile.js][fetchLiftData] Computed Rank:", rank);
-            
-            // Display the rank image based on the computed rank using real data
-            displayRank(rank);
-   
-        } else {
-            console.warn("[profile.js][fetchLiftData] No lift data available for user.");
-            setDefaultValues();
-        }
-
-        // Update Instagram or other social displays, if any
-        updateInstagramDisplay(userInfo.instagram);
+        await friendsRef.push({ friendId: profileId, timestamp: Date.now() });
+        showNotice('Friend added.', 'success');
     } catch (error) {
-        console.error("[profile.js][fetchLiftData] Error loading user data:", error);
-        setDefaultValues();
+        console.error('Could not add friend:', error);
+        showNotice('Could not add this friend. Try again.', 'error');
     }
 }
 
-// Remove any default displayRank call and rely solely on the fetched data
 document.addEventListener('DOMContentLoaded', () => {
-  loadAllUsers(); // This function calls fetchLiftData, which in turn updates the rank image
-});
-
-function calculateLifterDOTS(weight, squat, bench, deadlift, isMale, unit) {
-    const maleCoeff = [-307.75076, 24.0900756, -0.1918759221, 0.0007391293, -0.000001093];
-    const femaleCoeff = [-57.96288, 13.6175032, -0.1126655495, 0.0005158568, -0.0000010706];
-
-    // Convert weight to kilograms if needed
-    let bw = unit === 'lbs' ? weight * 0.453592 : weight;
-
-    // Apply bodyweight limits
-    let maxbw = isMale ? 210 : 150;
-    bw = Math.min(Math.max(bw, 40), maxbw);
-
-    // Select coefficients based on gender
-    const coeff = isMale ? maleCoeff : femaleCoeff;
-
-    // Calculate the denominator polynomial
-    let denominator = coeff[0];
-    for (let i = 1; i < coeff.length; i++) {
-        denominator += coeff[i] * Math.pow(bw, i);
-    }
-
-    // Convert total lifted to kilograms if needed
-    let total = unit === 'lbs' ? 
-        (squat + bench + deadlift) * 0.453592 :
-        squat + bench + deadlift;
-
-    // Compute the DOTS score
-    let score = (500 / denominator) * total;
-    return score.toFixed(2);
-}
-
-
-
-firebase.initializeApp(firebaseConfig);
-
-// Check if user is logged in
-firebase.auth().onAuthStateChanged((user) => {
-    const logoLink = document.getElementById("logoLink");
-
-    if (user) {
-        // User is logged in, set link to loggedin.html
-        logoLink.href = "loggedin.html";
-    } else {
-        // User is not logged in, set link to index.html
-        logoLink.href = "index.html";
-    }
-});
-  
-document.addEventListener('DOMContentLoaded', loadAllUsers);
-function addFriend() {
-    const currentUser = firebase.auth().currentUser;
-    if (!currentUser) {
-        alert("You must be logged in");
-        return;
-    }
-
-    const profileUserId = getUserIdFromUrl();
-
-    if (currentUser.uid.slice(-5) === profileUserId) {
-        alert("You cannot add yourself as a friend.");
-        return;
-    }
-
-    // Reference to the friends node
-    const friendsRef = firebase.database().ref(`users/${currentUser.uid}/friends`);
-
-    // First check if the friend already exists
-    friendsRef.once('value')
-        .then((snapshot) => {
-            const friends = snapshot.val();
-            let isDuplicate = false;
-
-            if (friends) {
-                // Check each existing friend
-                Object.values(friends).forEach(friend => {
-                    if (friend.friendId === profileUserId) {
-                        isDuplicate = true;
-                    }
-                });
-            }
-
-            if (isDuplicate) {
-                alert("This user is already in your friends list.");
-                return;
-            }
-
-            // If not a duplicate, add the friend
-            return friendsRef.push({
-                friendId: profileUserId,
-                timestamp: Date.now()
-            });
-        })
-        .then((result) => {
-            if (result) { // Only show success if we actually added a friend
-                alert("Friend added successfully!");
-            }
-        })
-        .catch((error) => {
-            console.error("Error adding friend:", error);
-            alert("Error adding friend. Please try again.");
-        });
-}
-
-
-function loadAllUsers() {
-    const usersRef = firebase.database().ref('users');
-    const userId = getUserIdFromUrl();
-
-    usersRef.once('value')
-        .then((snapshot) => {
-            if (snapshot.exists()) {
-                const usersData = snapshot.val();
-                const usersList = [];
-
-                // Loop through each user in the users object
-                for (const uid in usersData) {
-                    if (usersData.hasOwnProperty(uid)) {
-                        const user = usersData[uid];
-                        const fullName = user.full_name; // Get the user's full name
-                        const name = user.name;
-                        usersList.push(fullName); // Add to the list of full names
-
-                         // Check if the last 5 characters of the uid match the userId from the URL
-                         if (uid.slice(-5) === userId) {
-                            console.log(`User Found: ${name}`); // Print user's full name
-
-                            fetchLiftData(uid, name); // Call the function to fetch lift data for this user
-                            break; // Exit the loop once the user is found
-
-                        }
-                }
-
-            
-
-                // If you want to display in HTML, uncomment below
-                // document.getElementById('users-list').innerHTML = usersList.map(name => `<li>${name}</li>`).join('');
-            } 
-        }
-    })
-}
-
-
-
-
-async function loadPercentileData(filepath) {
-    try {
-        const response = await fetch(filepath);
-        const data = await response.json();
-        console.log("Loaded JSON data structure:", data); // Debug log
-        return data;
-    } catch (error) {
-        console.error("Error loading percentile data:", error);
-        throw error;
-    }
-}
-
-async function calculateUserPercentile(squat, bench, deadlift, userCategory) {
-    const percentilesData = await loadPercentileData('percentile.json');
-    
-    // Remove 'kg' from weightClass and convert to string with .0
-    const weightClassNum = userCategory.weightClass.replace('kg', '');
-    let formattedWeightClass = weightClassNum.endsWith('.5') ? weightClassNum : weightClassNum + ".0";
-
-    // Map age groups to the categories in your JSON
-    const ageGroupMapping = {
-        'Youth': 'Open',
-        'Teen1': 'Teen1',
-        'Teen2': 'Teen2',
-        'Teen3': 'Teen3',
-        'Sub-Master': 'Sub-Master',
-        'Master I': 'Master I',
-        'Master II': 'Master II'
-    };
-
-    const mappedAgeGroup = ageGroupMapping[userCategory.ageGroup] || 'Open';
-
-    // Access data based on mapped categories
-    const weightClassData = percentilesData[userCategory.gender]?.[formattedWeightClass]?.[mappedAgeGroup];
-
-    if (!weightClassData) {
-        console.error("No data found for the given user category:", {
-            original: userCategory,
-            mapped: {
-                gender: userCategory.gender,
-                weightClass: formattedWeightClass,
-                ageGroup: mappedAgeGroup
-            }
-        });
-        return {
-            squat: 0,
-            bench: 0,
-            deadlift: 0
-        };
-    }
-
-    // Improved helper function for more precise percentile interpolation
-    function findPercentileFromBrackets(value, brackets) {
-        // Convert brackets to arrays for easier manipulation
-        const percentiles = Object.keys(brackets).map(Number).sort((a, b) => a - b);
-        const values = percentiles.map(p => brackets[p]);
-        
-        // If value is less than the lowest bracket
-        if (value < values[0]) {
-            // Interpolate between 0 and first percentile
-            const slope = percentiles[0] / values[0];
-            return Math.max(0, value * slope);
-        }
-        
-        // If value is greater than the highest bracket
-        if (value >= values[values.length - 1]) {
-            // Interpolate between last percentile and 100
-            const lastPercentile = percentiles[percentiles.length - 1];
-            const remainingPercentile = 100 - lastPercentile;
-            const exceedance = value - values[values.length - 1];
-            const scale = remainingPercentile / (values[values.length - 1] * 0.1); // 10% buffer
-            return Math.min(100, lastPercentile + (exceedance * scale));
-        }
-        
-        // Find the bracketing percentiles
-        for (let i = 0; i < values.length - 1; i++) {
-            if (value >= values[i] && value < values[i + 1]) {
-                const lowerValue = values[i];
-                const upperValue = values[i + 1];
-                const lowerPercentile = percentiles[i];
-                const upperPercentile = percentiles[i + 1];
-                
-                // Calculate position within bracket (0 to 1)
-                const position = (value - lowerValue) / (upperValue - lowerValue);
-                
-                // Interpolate between percentiles using cubic easing
-                // This provides smoother transitions between percentile brackets
-                const t = position;
-                const smoothPosition = t * t * (3 - 2 * t);
-                
-                return lowerPercentile + (smoothPosition * (upperPercentile - lowerPercentile));
-            }
-        }
-        
-        return 100;
-    }
-
-    // Calculate percentiles with two decimal precision
-    if (currentWeightUnit == "lbs"){
-
-        squat = lbsToKg(squat); 
-        bench = lbsToKg(bench);
-        deadlift = lbsToKg(deadlift);
-    } 
-    const userPercentiles = {
-        squat: Number(findPercentileFromBrackets(squat, weightClassData.Best3SquatKg).toFixed(2)),
-        bench: Number(findPercentileFromBrackets(bench, weightClassData.Best3BenchKg).toFixed(2)),
-        deadlift: Number(findPercentileFromBrackets(deadlift, weightClassData.Best3DeadliftKg).toFixed(2))
-    };
-
-    return userPercentiles;
-}
-
-// Helper function to format percentile for display
-function formatPercentile(percentile) {
-    return Number(percentile).toFixed(2);
-}
-
-
-// Helper function to determine the user's percentile based on their lift with interpolation
-function getPercentile(lift, liftData) {
-    // Convert liftData keys to integers and sort them
-    const percentiles = Object.keys(liftData).map(Number).sort((a, b) => a - b);
-    
-    // Check if the lift exceeds the highest in the data
-    if (lift >= liftData[percentiles[percentiles.length - 1]]) {
-        return 100; // If the lift exceeds the highest percentile
-    }
-
-    // Find the closest weights below and above the user's lift
-    let lowerWeight = null;
-    let upperWeight = null;
-
-    for (const percentile of percentiles) {
-        if (liftData[percentile] < lift) {
-            lowerWeight = percentile; // this is a lower bound
-        } else if (liftData[percentile] >= lift && upperWeight === null) {
-            upperWeight = percentile; // this is an upper bound
-            break;
-        }
-    }
-
-    // If lowerWeight is null, it means the user's lift is below all
-    if (lowerWeight === null) {
-        return percentiles[0]; // The lowest percentile
-    }
-
-    // Perform linear interpolation to find the exact percentile
-    const lowerValue = liftData[lowerWeight];
-    const upperValue = liftData[upperWeight];
-
-    const percentile = lowerWeight + ((lift - lowerValue) / (upperValue - lowerValue));
-    
-    return Math.round(percentile);
-}
-
-// Function to display the user's percentile
-async function displayUserStrengthComparison(squat, bench, deadlift, userCategory) {
-    const userPercentiles = await calculateUserPercentile(squat, bench, deadlift, userCategory);
-    
-    if (typeof displayPercentiles === 'function') {
-        displayPercentiles(userPercentiles);
-    }
-    const avgPercentile = (userPercentiles.squat + userPercentiles.bench + userPercentiles.deadlift) / 3;
-    const userRank = updateRank(avgPercentile);
-
-    console.log(avgPercentile)
-    displayRank(userRank);
-}
-
-function getWeightClassMale(weight, unit) {
-
-    if (unit == 'kgs'){
-        if (weight <= 52) return '52kg';
-        if (weight > 52 && weight <= 56) return '56kg';
-        if (weight > 56 && weight <= 60) return '60kg';
-        if (weight > 60 && weight <= 67.5) return '67.5kg';
-        if (weight > 67.5 && weight <= 75) return '75kg';
-        if (weight > 75 && weight <= 82.5) return '82.5kg';
-        if (weight > 82.5 && weight <= 90) return '90kg';
-        if (weight > 90 && weight <= 100) return '100kg';
-        if (weight > 100 && weight <= 110) return '110kg';
-        if (weight > 110 && weight <= 125) return '125kg';
-        if (weight > 125 && weight <= 140) return '140kg';
-        if (weight > 140) return '140+kg';
-    } else {
-        weight = lbsToKg(weight)
-        if (weight <= 52) return '52kg';
-        if (weight > 52 && weight <= 56) return '56kg';
-        if (weight > 56 && weight <= 60) return '60kg';
-        if (weight > 60 && weight <= 67.5) return '67.5kg';
-        if (weight > 67.5 && weight <= 75) return '75kg';
-        if (weight > 75 && weight <= 82.5) return '82.5kg';
-        if (weight > 82.5 && weight <= 90) return '90kg';
-        if (weight > 90 && weight <= 100) return '100kg';
-        if (weight > 100 && weight <= 110) return '110kg';
-        if (weight > 110 && weight <= 125) return '125kg';
-        if (weight > 125 && weight <= 140) return '140kg';
-        if (weight > 140) return '140+kg';
-    }
-
-    return '140+kg';
-}
-
-function getWeightClassFemale(weight, unit) {
-    
-    if (unit == 'kgs'){
-        if (weight <= 44) return '44kg';
-        if (weight > 44 && weight <= 48) return '48kg';
-        if (weight > 48 && weight <= 52) return '52kg';
-        if (weight > 52 && weight <= 56) return '56kg';
-        if (weight > 56 && weight <= 60) return '60kg';
-        if (weight > 60 && weight <= 67.5) return '67.5kg';
-        if (weight > 67.5 && weight <= 75) return '75kg';
-        if (weight > 75 && weight <= 82.5) return '82.5kg';
-        if (weight > 82.5 && weight <= 90) return '90kg';
-        if (weight > 90 && weight <= 100) return '100kg';
-        if (weight > 100) return '100+kg';
-    } else {
-        weight = lbsToKg(weight)
-        if (weight <= 44) return '44kg';
-        if (weight > 44 && weight <= 48) return '48kg';
-        if (weight > 48 && weight <= 52) return '52kg';
-        if (weight > 52 && weight <= 56) return '56kg';
-        if (weight > 56 && weight <= 60) return '60kg';
-        if (weight > 60 && weight <= 67.5) return '67.5kg';
-        if (weight > 67.5 && weight <= 75) return '75kg';
-        if (weight > 75 && weight <= 82.5) return '82.5kg';
-        if (weight > 82.5 && weight <= 90) return '90kg';
-        if (weight > 90 && weight <= 100) return '100kg';
-        if (weight > 100) return '100+kg';
-    }
-   
-}
-
-
-function lbsToKg(weight) {
-    // Conversion factor: 1 pound is approximately 0.453592 kilograms
-    const conversionFactor = 0.453592;
-    // Convert the weight
-    const weightInKg = weight * conversionFactor;
-    return weightInKg;
-}
-
-function getAgeGroup(age) {
-    if (age < 14) return "Youth"
-    if (age >= 14 && age <= 15) return 'Teen1'; // Age Range: 14 to 15 years old
-if (age >= 16 && age <= 17) return 'Teen2'; // Age Range: 16 to 17 years old
-if (age >= 18 && age <= 19) return 'Teen3'; // Age Range: 18 to 19 years old
-if (age >= 35 && age <= 39) return 'Sub-Master';        // Age Range: 35 to 39 years old
-if (age >= 40 && age <= 49) return 'Master I';          // Age Range: 40 to 49 years old
-if (age >= 50) return 'Master II';                       // Age Range: 50 years and older
-
-}
-
-
-function updateProfileDisplay(data) {
-    // Update the global unit to match the stored data
-    currentWeightUnit = data.unit || 'lbs';
-    
-    // Update the weight unit button text
-    const weightUnitButton = document.getElementById('weightUnitButton');
-    if (weightUnitButton) {
-        weightUnitButton.textContent = `${currentWeightUnit} ▼`;
-    }
-
-    // Update the display values with the correct unit
-    document.getElementById('user-bench').textContent = `${data.bench} ${data.unit}`;
-    document.getElementById('user-squat').textContent = `${data.squat} ${data.unit}`;
-    document.getElementById('user-deadlift').textContent = `${data.deadlift} ${data.unit}`;
-
-    // Update headers to reflect current unit
-    const weightHeader = document.getElementById('weightHeader');
-    const squatHeader = document.getElementById('squatHeader');
-    const benchHeader = document.getElementById('benchHeader');
-    const deadliftHeader = document.getElementById('deadliftHeader');
-
-    if (weightHeader) weightHeader.textContent = `Weight (${data.unit})`;
-    if (squatHeader) squatHeader.textContent = `Squat (${data.unit})`;
-    if (benchHeader) benchHeader.textContent = `Bench (${data.unit})`;
-    if (deadliftHeader) deadliftHeader.textContent = `Deadlift (${data.unit})`;
-}
-
-
-
-
-function displayPercentiles(percentiles) {
-    const squatPercent = Math.min(Math.max(parseFloat(percentiles.squat) || 0, 0), 100);
-    const benchPercent = Math.min(Math.max(parseFloat(percentiles.bench) || 0, 0), 100);
-    const deadliftPercent = Math.min(Math.max(parseFloat(percentiles.deadlift) || 0, 0), 100);
-
-    // Update progress bar widths and colors
-    updateProgressBar('user-squat-progress', squatPercent);
-    updateProgressBar('user-bench-progress', benchPercent);
-    updateProgressBar('user-deadlift-progress', deadliftPercent);
-
-    // Update percentile text and individual ranks
-    updateLiftDisplay('squat', percentiles.squat);
-    updateLiftDisplay('bench', percentiles.bench);
-    updateLiftDisplay('deadlift', percentiles.deadlift);
-}
-
-function updateProgressBar(elementId, percent) {
-    const progressBar = document.getElementById(elementId);
-    if (progressBar) {
-        progressBar.style.width = `${percent}%`;
-        // Remove all possible color classes
-        progressBar.classList.remove('bg-purple-600', 'bg-yellow-500', 'bg-gray-400', 'bg-red-600');
-        // Add appropriate color class
-        progressBar.classList.add(getColorClass(percent));
-    }
-}
-
-function updateLiftDisplay(lift, percentile) {
-    const percentileElement = document.getElementById(`user-${lift}-percentile`);
-    const rankImage = document.getElementById(`user-${lift}-rank`);
-    
-    if (percentileElement) {
-        percentileElement.textContent = `${percentile}%`;
-    }
-    
-    if (rankImage) {
-        const rank = getRankFromPercentile(percentile);
-        rankImage.src = `./Images/${rank}.png`;
-        rankImage.alt = rank;
-        rankImage.style.visibility = "visible";
-    }
-}
-
-function getRankFromPercentile(percentile) {
-    if (percentile >= 80) return "Diamond";
-    if (percentile >= 65) return "Gold";
-    if (percentile >= 45) return "Silver";
-    return "Bronze";
-}
-
-function getColorClass(percent) {
-    if (percent >= 80) return 'bg-purple-600';
-    if (percent >= 65) return 'bg-yellow-500';
-    if (percent >= 45) return 'bg-gray-400';
-    return 'bg-red-600';
-}
-
-
-document.querySelector('.search-button').addEventListener('click', function () {
-    const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
-   
-
-    if (searchQuery) {
-        searchForUser(searchQuery);
-    } else {
-        alert('Please enter a name to search');
-    }
-});
-
-// Function to search for users by full name (case-insensitive)
-function searchForUser(query) {
-    db.ref('users').once('value', function (snapshot) {
-        let found = false;
-        snapshot.forEach(function (childSnapshot) {
-            const userId = childSnapshot.key; // Get the user's ID (userId)
-            const userData = childSnapshot.val(); // Get the user's data
-            
-            // Check if full_name exists and matches the query (case-insensitive)
-            if (userData && userData.full_name && userData.full_name.toLowerCase() === query.toLowerCase()) {
-                console.log(`User found: ${userData.full_name} (ID: ${userId})`);
-                found = true;
-     
-                // Redirect to the profile page with the user ID
-                window.location.href = `profile.html?userId=${userData.full_name.slice(-5)}`;
-                
-                // Exit the loop since we found a match
-                return true;
-            }
-        });
-        if (!found) {
-            alert('No user found with that name');
-        }
+    setText('year', String(new Date().getFullYear()));
+    initUnitToggle(() => {
+        if (profileResult) renderScoreboard(profileResult);
     });
-}
-
-
-
-// Function to toggle weight unit display
-function toggleWeightUnit() {
-    const content = document.querySelector('.weight-unit-content');
-    content.style.display = content.style.display === 'block' ? 'none' : 'block';
-}
-
-
-// Optional: Click outside to close the dropdown
-document.addEventListener('click', function(event) {
-    const content = document.querySelector('.weight-unit-content');
-    const button = document.querySelector('.weight-unit-btn');
-    
-    if (!button.contains(event.target) && !content.contains(event.target)) {
-        content.style.display = 'none';
-    }
+    initSearch();
+    $('add-friend-btn').addEventListener('click', addFriend);
+    loadProfile();
 });
-
-
-
-function selectWeightUnit(unit) {
-    // Check if the selected unit is the same as the current unit
-    if (unit === currentWeightUnit ){
-        return; // Exit the function to avoid unnecessary conversions
-    }
-    const weightHeader = document.getElementById('weightHeader');
-    const squatHeader = document.getElementById('squatHeader');
-    const benchHeader = document.getElementById('benchHeader');
-    const deadliftHeader = document.getElementById('deadliftHeader');
-
-    const button = document.getElementById('weightUnitButton');
-    button.textContent = `${unit} ▼`;
-
-    // Change headers based on selected unit
-    if (unit === 'kgs' && currentWeightUnit !== 'kgs') {
-        if (((document.getElementById('total').textContent).trim() == "N/A")) {
-            document.getElementById('total').textContent = '0 ' + unit;
-            document.getElementById('bodyweight').textContent = '0 '+ unit;
-            document.getElementById('user-squat').textContent = '0 ' + unit;
-            document.getElementById('user-bench').textContent = '0 ' + unit;
-            document.getElementById('user-deadlift').textContent = '0 ' + unit;
-
-        } 
-
-        // Convert weights from lbs to kgs only if necessary
-        if (currentWeightUnit === 'lbs') {
-            convertToKgs();
-        }
-        button.textContent = `${unit} ▼`;
-    } else if (unit === 'lbs' && currentWeightUnit !== 'lbs') {
-        if (((document.getElementById('total').textContent).trim() == "N/A")){
-            document.getElementById('total').textContent = '0 ' + unit
-            document.getElementById('bodyweight').textContent = '0 '+ unit
-            document.getElementById('user-squat').textContent = '0 ' + unit;
-            document.getElementById('user-bench').textContent = '0 ' + unit;
-            document.getElementById('user-deadlift').textContent = '0 ' + unit;
-        }
-        // Convert weights from kgs to lbs only if necessary
-        if (currentWeightUnit === 'kgs') {
-            convertToLbs();
-        }
-        button.textContent = `${unit} ▼`;
-    }
-
-    currentWeightUnit = unit; // Update the current unit
-    isInitialLoad = false; // Mark that the initial load is done
-}
-
-// Function to convert all weights to kgs
-function convertToKgs() {
-    const squatValue = parseFloat(document.getElementById('user-squat').textContent);
-    const benchValue = parseFloat(document.getElementById('user-bench').textContent);
-    const deadliftValue = parseFloat(document.getElementById('user-deadlift').textContent);
-    const bodyWeight = parseFloat(document.getElementById('bodyweight').textContent);
-    const total = parseFloat(document.getElementById('total').textContent);
-
-    // Convert values from lbs to kgs
-    document.getElementById('user-squat').textContent = Math.round(squatValue * 0.45359237 * 10) / 10 + " kg";
-    document.getElementById('user-bench').textContent = Math.round(benchValue * 0.45359237 * 10) / 10 + " kg";
-    document.getElementById('user-deadlift').textContent = Math.round(deadliftValue * 0.45359237 * 10) / 10 + " kg";
-    document.getElementById('bodyweight').textContent = lbsToKg(bodyWeight).toFixed(1) + " kg";
-    document.getElementById('total').textContent = lbsToKg(total).toFixed(1) + " kg";
-   
-}
-
-// Function to convert all weights to lbs
-function convertToLbs() {
-    const squatValue = parseFloat(document.getElementById('user-squat').textContent);
-    const benchValue = parseFloat(document.getElementById('user-bench').textContent);
-    const deadliftValue = parseFloat(document.getElementById('user-deadlift').textContent);
-    const bodyWeight = parseFloat(document.getElementById('bodyweight').textContent);
-    const total = parseFloat(document.getElementById('total').textContent);
-
-    // Convert values from kgs to lbs
-    document.getElementById('user-squat').textContent = Math.round(squatValue / 0.45359237 * 10) / 10 + " lbs";
-    document.getElementById('user-bench').textContent = Math.round(benchValue / 0.45359237 * 10) / 10 + " lbs";
-    document.getElementById('user-deadlift').textContent = Math.round(deadliftValue / 0.45359237 * 10) / 10 + " lbs";
-    document.getElementById('bodyweight').textContent = kgToLbs(bodyWeight).toFixed(1) + " lbs";
-    document.getElementById('total').textContent = kgToLbs(total).toFixed(1) + " lbs";
-}
-
-function kgToLbs(kg) {
-    return kg * 2.20462;
-}
-
-function lbsToKg(lbs) {
-    return lbs * 0.453592;
-}
-
-
-// Adjusted rank logic
-function updateRank(percentile) {
-    console.log("Computed percentile:", percentile);
-    if (percentile >= 80) {
-        return "Diamond";
-    } else if (percentile >= 65) {
-        return "Gold";
-    } else if (percentile >= 45) {
-        return "Silver";
-    } else {
-        return "Bronze";
-    }
-}
-
-// Update the rank image dynamically
-function displayRank(rank) {
-    const rankImage = document.getElementById('rankImage');
-  
-    
-    if (rankImage ) {
-        // Update the rank image
-        rankImage.src = `./Images/${rank}.png`;
-        rankImage.alt = rank;
-        rankImage.style.visibility = "visible"
-    }
-}
-
-function updateInstagramDisplay(instagramLink) {
-    const instagramStatus = document.getElementById('instagramStatus');
-    const instaElement = document.getElementById('instagramIcon');
-  
-    if (instagramLink) {
-        instaElement.innerHTML = `<a href="${instagramLink}" target="_blank" class="text-sm">${instagramLink}</a>`;
-        // Update status to Connected
-        if (instagramStatus) {
-            instagramStatus.textContent = 'Connected';
-            instagramStatus.classList.remove('text-red-500', 'text-base');
-            instagramStatus.classList.add('text-green-500', 'text-sm');
-        }
-    } else {
-        instaElement.textContent = 'Instagram link not set';
-        instaElement.classList.add('text-sm');
-        // Update status to Not Connected
-        if (instagramStatus) {
-            instagramStatus.textContent = 'Not Connected';
-            instagramStatus.classList.remove('text-green-500', 'text-base');
-            instagramStatus.classList.add('text-red-500', 'text-sm');
-        }
-    }
-}
-  

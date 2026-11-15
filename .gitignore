@@ -75,3 +75,6 @@ node_modules/
 Assets/Simulator_Website/Build/Website.data
 /Assets/Simulator_Website/
 Assets/Simulator_Website/
+
+# OpenPowerlifting exports used to rebuild percentile.json
+data/
